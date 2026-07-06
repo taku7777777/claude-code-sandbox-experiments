@@ -1,0 +1,8 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "allowWrite": ["/private/tmp/lab-abs-resolved", "/tmp/lab-abs-literal"]
+    }
+  }
+}

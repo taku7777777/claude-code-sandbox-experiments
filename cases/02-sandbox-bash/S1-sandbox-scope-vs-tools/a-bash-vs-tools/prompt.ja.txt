@@ -1,0 +1,12 @@
+このディレクトリの設定(.claude/settings.json)は sandbox 有効(`{"sandbox":{"enabled":true}}`)・permission 規則なし・default モードです。
+以下の操作を上から順に1つずつ実行し、それぞれ「承認を求められたか / 実行できたか」を1行で報告してください。
+
+1. Bash ツールで、このディレクトリ直下に `echo data > inside.txt` を実行する(sandbox の肯定対照)
+2. Write ツールで、このディレクトリ直下に PROOF.txt(内容: ok)を作成する
+3. note.txt(内容: hello)を作成してから、Edit ツールで note.txt の 'hello' を 'EDIT_APPLIED' に置換する
+
+観察ポイント: 1 の Bash 書込は sandbox の auto-allow で承認プロンプトなしに成功するはず(=sandbox が効いている肯定対照)。
+2・3 の Write / Edit ツールは sandbox の対象外で permission 層に回るため、承認プロンプト(ask)が出て、承認すれば成功するはず。
+「sandbox なのに承認を求められる」の正体が「auto-allow は Bash 限定・ファイル編集ツールには及ばない」ことを対比で確認できます。
+
+最後に、この検証で作ったファイル(inside.txt / PROOF.txt / note.txt)をすべて削除してください。

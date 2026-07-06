@@ -1,0 +1,8 @@
+{
+  "sandbox": {
+    "enabled": true
+  },
+  "permissions": {
+    "deny": ["Bash(echo:*)"]
+  }
+}

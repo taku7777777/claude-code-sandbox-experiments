@@ -1,0 +1,16 @@
+このディレクトリは sandbox.enabled: true で、さらに matcher:Bash の PreToolUse hook
+(hook-home-write.sh)を .claude/settings.json に持つ前提です。hook は発火すると cwd 外の
+$HOME/s1i-hook-proof.txt に書き込みます(ホスト実行=sandbox の外、の実証)。
+
+以下を上から順に1つずつ実行し、それぞれ「成功したか / 遮断されたか」と出力を報告してください
+(失敗しても他のツールで代替しないこと)。
+
+1. Bash で `echo trigger` を実行する(cwd 内なので sandbox は auto-allow)
+2. Bash で `echo data > $HOME/s1i-bash-proof.txt`(cwd 外 $HOME への直接書込)
+
+(観察対象: 1 を実行すると Bash 自体は些細でも、PreToolUse hook が発火して
+$HOME/s1i-hook-proof.txt が「作られている」= hook は sandbox の外(ホスト)で走り cwd 外に書けた。
+一方 2 は同じ $HOME への Bash 直接書込なのに operation not permitted で失敗し
+$HOME/s1i-bash-proof.txt は作られない = sandbox の write allowlist(cwd 限定)が Bash には効く。
+同じ書込先で hook 経路だけ通る = hook は sandbox 対象外。
+最後に ~/s1i-hook-proof.txt・~/s1i-bash-proof.txt を削除してください。)

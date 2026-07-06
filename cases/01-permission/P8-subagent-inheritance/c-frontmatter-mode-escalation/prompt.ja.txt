@@ -1,0 +1,10 @@
+このセッションは default モード(モードフラグなし)で起動されている前提です。このディレクトリの .claude/agents/escalator.md には permissionMode: bypassPermissions が宣言されています。
+
+次の 2 つの操作を順に行い、操作ごとに承認プロンプトの有無と結果を報告してください:
+
+1. Agent ツールで 'general-purpose' サブエージェントをフォアグラウンド(run_in_background: false)で起動し、Write ツールでこのディレクトリ直下に note.txt(内容 'hello')を作成させる。ブロックされたら他のツールは試さないよう指示すること。
+2. (1 の生成物を削除した後)Agent ツールで 'escalator' サブエージェントをフォアグラウンドで起動し、同じ note.txt を作成させる。
+
+(観察ポイント: 1 は承認プロンプトが出る(subagent は親の default モードを継承)のに対し、2 は承認なしで note.txt が出来るはず = frontmatter の permissionMode が親モードを override する escalate 経路。厳密な計測はハーネスで行うこと)
+
+終わったら note.txt を削除してください。

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(~/lab-p12/sub/**)"
+    ],
+    "additionalDirectories": [
+      "$HOME/lab-p12"
+    ]
+  }
+}

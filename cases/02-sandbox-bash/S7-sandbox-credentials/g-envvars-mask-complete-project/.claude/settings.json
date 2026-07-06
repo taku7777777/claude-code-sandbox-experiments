@@ -1,0 +1,14 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "network": {
+      "tlsTerminate": {},
+      "allowedDomains": ["api.github.com"]
+    },
+    "credentials": {
+      "envVars": [
+        { "name": "LAB_BUILD_VAL", "mode": "mask", "injectHosts": ["api.github.com"] }
+      ]
+    }
+  }
+}

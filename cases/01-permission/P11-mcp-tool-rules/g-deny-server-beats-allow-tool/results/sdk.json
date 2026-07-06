@@ -1,0 +1,47 @@
+{
+  "id": "P11-mcp-tool-rules/g-deny-server-beats-allow-tool",
+  "modality": "sdk",
+  "title": "サーバ deny の内側にツール allow で穴は開けられない(deny 常勝・P2-e の MCP 版)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "allowed-tool-still-removed",
+      "prompt": "Call the tool mcp__probe__read_path with argument path = \"$REPO/cases/01-permission/P11-mcp-tool-rules/g-deny-server-beats-allow-tool/note.txt\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "probe": "permission",
+      "tool": "mcp__probe__read_path",
+      "expected": "DENIED_HARD",
+      "verdict": "DENIED_HARD",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "MCP_BLOCKED",
+      "error": null
+    },
+    {
+      "probeId": "server-wide-removed",
+      "prompt": "Call the tool mcp__probe__net_get with argument url = \"https://example.com\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "probe": "permission",
+      "tool": "mcp__probe__net_get",
+      "expected": "DENIED_HARD",
+      "verdict": "DENIED_HARD",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "MCP_BLOCKED",
+      "error": null
+    }
+  ],
+  "hypothesis": "評価順 deny→ask→allow はネストを見ない。サーバごと deny したら個別ツールの再 allow は無効。例外を彫りたい向きは h(広 allow + 狭 deny)だけ。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T03:46:19Z"
+}

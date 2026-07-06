@@ -1,0 +1,48 @@
+# per-developer local settings — must never be committed
+# (contains absolute paths / OS username / local command history)
+# **/ 付き: ケース dir 配下も対象(arrange.localSettings が実行中だけ生成するファイルの取りこぼし防止)
+**/.claude/settings.local.json
+
+# python bytecode (compiled paths embed the local username)
+__pycache__/
+*.pyc
+
+# transient run artifacts (kept locally, not committed)
+cases/_*/
+# raw headless output
+**/result.json
+results/**
+**/PROOF.txt
+**/CONTROL.txt
+**/CURLED.txt
+**/inside.txt
+**/PWNED
+cases/*/sub/
+*.err
+hc.err
+
+# SDK harness deps (run `npm install` inside harness/sdk to restore)
+harness/sdk/node_modules/
+
+# interactive modality の staged 状態(prepare〜judge の間だけ存在する一時ファイル)
+**/results/.staged.json
+
+# network probe artifacts
+**/NETMARKER.txt
+**/NETMARKER2.txt
+**/nettest_*.out
+**/nettest.out
+**/nettest2.out
+# hook の実行証跡(observe.evidenceFile)。ハーネスが毎回掃除するが手動実行の残骸を拾わない
+**/hook-ran.marker
+**/OTHER.txt
+# S2-f / S2-m の witness / 対照ファイル(手動実行の残骸を拾わない)
+**/f-selfprotect-wit.txt
+**/f-selfprotect-local-wit.txt
+**/f-selfprotect-sub-wit.txt
+**/m-selfprotect-wit.txt
+**/.claude/other.txt
+# probes[].arrange.setup が作る入れ子 fixture(ハーネスが掃除するが手動実行の残骸を拾わない)
+cases/*/*/sub/
+
+.DS_Store

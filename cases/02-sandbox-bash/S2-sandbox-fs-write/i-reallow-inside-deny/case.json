@@ -1,0 +1,43 @@
+{
+  "id": "S2-sandbox-fs-write/i-reallow-inside-deny",
+  "title": "deny 領域内の明示 allowWrite は効かない -> write 側に allowRead 相当の再許可は無い (deny 常勝)",
+  "probe": "fs-write",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "w-inner-reallowed",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo x > $HOME/lab-nest/sub/inner/f.txt && echo INNER_OK || echo INNER_FAIL — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "arrange": {
+        "setup": [{ "path": "~/lab-nest/sub/inner/.keep", "content": "" }]
+      },
+      "observe": {
+        "sideEffects": ["~/lab-nest/sub/inner/f.txt"],
+        "cleanup": ["~/lab-nest"],
+        "evidenceMarker": "operation not permitted"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    },
+    {
+      "id": "w-outer",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo x > $HOME/lab-nest/f.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "arrange": {
+        "setup": [{ "path": "~/lab-nest/.keep", "content": "" }]
+      },
+      "observe": {
+        "sideEffects": ["~/lab-nest/f.txt"],
+        "cleanup": ["~/lab-nest"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "S2 GAPS G2。g への1変数差分: allowWrite に ~/lab-nest/sub/inner (deny 領域の内側を名指しで再許可する意図のエントリ) を追加。read 側には allowRead = denyRead 領域内の再許可が公式に存在する (spec §4.3, S3-b で実測) が、write 側の同型は docs 未記載だった【要裏取り→実測で決着】。scratch 探索 (2026-07-05): inner への書込は operation not permitted = 再 allow は無効。write 側は「deny 常勝」で read 側と非対称。これで g README の『deny 領域内は再 allow 不可』という(当時は未検証だった)断定が実測に昇格した。probe 2 (対照) は allow 領域の外周: 書ける = allowWrite 自体は生きている。",
+  "hypothesis": "sandbox FS の write 側では、denyWrite 領域の内側を allowWrite で名指ししても効かない (deny が常に勝つ)。read 側の allowRead (denyRead 内の再許可が効く = S3-b) とは非対称。inner = allow x ng / outer = allow x ok。"
+}

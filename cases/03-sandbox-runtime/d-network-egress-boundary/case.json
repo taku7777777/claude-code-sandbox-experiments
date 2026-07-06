@@ -1,0 +1,26 @@
+{
+  "id": "sandbox-runtime/d-network-egress-boundary",
+  "title": "srt の network 境界 — 既定全ブロック + allowedDomains(Bash 経路の単離)",
+  "axis": "environment",
+  "runner": "README 試し方(srt --settings srt-settings.json -c 'curl …'。claude 非経由で単離)",
+  "probe": "network",
+  "srtSettings": "srt-settings.json",
+  "probes": [
+    {
+      "id": "net-allowed",
+      "env": "srt",
+      "cmd": "curl -s -o /dev/null -w '%{http_code}' --max-time 8 https://api.anthropic.com",
+      "observe": {"execMarker": "HTTP コード(000 以外=到達)"},
+      "expected": {"permission": "none", "result": "ok"}
+    },
+    {
+      "id": "net-blocked",
+      "env": "srt",
+      "cmd": "curl -s -o /dev/null -w '%{http_code}' --max-time 8 https://example.com",
+      "observe": {"execMarker": "HTTP 000 = 接続不可(srt proxy が遮断)"},
+      "expected": {"permission": "none", "result": "ng"}
+    }
+  ],
+  "notes": "環境ケース: claude 非経由(srt -c で curl を直接包む)ため permission 層を経ない = expected.permission は none。permission 層・WebFetch の交絡を避けた network 境界の単離。WebFetch × srt は srt-h で実測済み(掛かる=Socket is closed)。",
+  "hypothesis": "srt の egress は既定全 deny + allowedDomains(localhost proxy 強制)で、組み込み S6 と同型・ただしプロセス全体が対象。"
+}

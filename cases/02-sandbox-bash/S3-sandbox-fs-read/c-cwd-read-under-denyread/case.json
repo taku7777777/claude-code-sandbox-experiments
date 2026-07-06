@@ -1,0 +1,33 @@
+{
+  "id": "S3-sandbox-fs-read/c-cwd-read-under-denyread",
+  "title": "denyRead:[~] blocks even a CWD read because the working dir lives under ~ (allow ng)",
+  "probe": "fs-read",
+  "run": {
+    "maxTurns": 3
+  },
+  "arrange": {
+    "setup": [
+      {
+        "path": "probe_note.txt",
+        "content": "SENT_S3C_5pQ1"
+      }
+    ]
+  },
+  "probes": [
+    {
+      "id": "r-bash-cat",
+      "tool": "Bash",
+      "prompt": "Using the Bash tool, run exactly this one command and then reply with ONLY its exact stdout, nothing else: cat ./probe_note.txt 2>/dev/null; printf 'MARK_S3C'",
+      "observe": {
+        "sentinel": "SENT_S3C_5pQ1",
+        "execMarker": "MARK_S3C"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    }
+  ],
+  "notes": "The cwd fixture probe_note.txt is created by case-level arrange.setup and auto-removed by the harness. execMarker MARK_S3C proves the command ran (EPERM on the cat, marker still prints), so 'no sentinel' = OS block, not a refusal.",
+  "hypothesis": "ASYMMETRY GOTCHA: cwd is implicitly WRITABLE (S2-a) but denyRead:[~] still blocks READING it, because the working dir lives under ~. Bash is auto-allowed (permission=allow), the sandboxed cat hits EPERM (result=ng): marker prints, sentinel does not. Under denyRead:[~] you can write a file in cwd yet not cat it back — add allowRead for the workspace path to fix."
+}

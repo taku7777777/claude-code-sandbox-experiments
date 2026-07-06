@@ -1,0 +1,59 @@
+{
+  "id": "S1-sandbox-scope-vs-tools/a-bash-vs-tools",
+  "title": "sandbox enabled, default mode -> Bash cwd write auto-allowed, but Write/Edit TOOLS still ask (sandbox auto-allow is Bash-only)",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "bash-write-cwd",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > inside.txt — just run it, no commentary, no alternatives.",
+      "observe": {
+        "sideEffects": ["inside.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "write-tool",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "edit-tool",
+      "tool": "Edit",
+      "prompt": "First use the Read tool to read $CASE_DIR/note.txt. Then use the Edit tool to replace the text 'hello' with 'EDIT_APPLIED' in $CASE_DIR/note.txt. Do it immediately. Do not ask, do not explain — just make the tool calls.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "note.txt",
+            "content": "hello"
+          }
+        ]
+      },
+      "observe": {
+        "contentMarker": {
+          "path": "note.txt",
+          "contains": "EDIT_APPLIED"
+        }
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "Primary-doc support: Claude Code sandboxing docs state the built-in Read/Edit/Write (and WebFetch) tools are handled by the permission system, not the sandbox; sandbox auto-allow applies to Bash and its child processes. bash-write-cwd doubles as the positive control proving sandbox actually engaged (auto-allow of a cwd write) — so the write/edit ask cannot be attributed to sandbox init failure.",
+  "hypothesis": "Sandbox auto-allow applies ONLY to Bash (and child processes). A Bash write inside cwd runs without a prompt (allow, ✅). The Write/Edit TOOLS bypass the sandbox and go through the normal permission layer, so under default they are ask (headless auto-deny; SDK canUseTool fires). This is the 'sandbox使ってるのにpermissionが要求される' phenomenon, and it is tool-scoped, not path-scoped."
+}

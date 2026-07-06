@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Write(*)"
+    ],
+    "deny": [
+      "Write(PROOF.txt)",
+      "Write(./PROOF.txt)"
+    ]
+  }
+}

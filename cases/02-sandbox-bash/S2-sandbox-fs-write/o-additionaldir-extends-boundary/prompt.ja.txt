@@ -1,0 +1,8 @@
+このセッションは sandbox 有効(sandbox.enabled=true, allowUnsandboxedCommands:false)で、permissions.additionalDirectories に ~/lab-f4-addir が登録されている前提です。
+
+以下の Bash コマンドを1つずつ実行し「承認要求/実行できたか(ファイルができたか)」を1行で報告してください。他ツールでの代替はしないでください。
+1. echo hi > $HOME/lab-f4-addir/probe.txt   （additionalDirectories 内・cwd 外）
+2. echo hi > $HOME/lab-f4-ctrl/probe.txt    （additionalDirectories 外・cwd 外＝対照）
+
+(観察対象: additionalDirectories は sandbox の Bash 書込境界も広げるか。1 は書けて(allow ✅)、2 は OS 層 EPERM でブロック(allow ❌)になるはず=cwd 境界を動かす設定は OS 層も動かす。
+最後に ~/lab-f4-addir と ~/lab-f4-ctrl を削除してください。)

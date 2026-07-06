@@ -1,0 +1,6 @@
+{
+  "permissions": {
+    "allow": ["Write(*)"],
+    "deny": ["Edit(PROOF.txt)"]
+  }
+}

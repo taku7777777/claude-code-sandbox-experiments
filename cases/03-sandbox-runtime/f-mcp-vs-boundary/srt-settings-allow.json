@@ -1,0 +1,12 @@
+{
+  "_comment": "許可側の対照: allowedDomains に example.com を追加(anthropic 系は claude 自身の API 用に残す)。srt-settings.json(非許可側)との1変数差 = example.com が allowedDomains に居るか否か。これで『srt 配下でも許可ドメインへは MCP net_get が通る』を実測し、対立仮説(srt 配下では MCP 経路の egress が全滅)を棄却する。denyRead は net プローブに無関係だが非許可側と揃える。runner が __CASE_DIR__/__HOME__ を実値へ置換。config dir は runner が allowWrite へ自動追加。",
+  "filesystem": {
+    "denyRead": ["__CASE_DIR__/lab-mcp-note"],
+    "allowWrite": [".", "/tmp", "/private/tmp", "__HOME__/.claude", "__HOME__/.claude.json"],
+    "denyWrite": []
+  },
+  "network": {
+    "allowedDomains": ["api.anthropic.com", "*.anthropic.com", "example.com", "*.example.com"],
+    "deniedDomains": []
+  }
+}

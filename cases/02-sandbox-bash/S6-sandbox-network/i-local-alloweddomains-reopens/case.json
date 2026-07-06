@@ -1,0 +1,52 @@
+{
+  "id": "S6-sandbox-network/i-local-alloweddomains-reopens",
+  "title": "local settings の allowedDomains は project の全遮断([])に配列マージされ egress を開く -> local ドリフトで外部通信が通る。対照の未登録ドメインは遮断のまま",
+  "probe": "network",
+  "tool": "Bash",
+  "arrange": {
+    "localSettings": {
+      "sandbox": {
+        "network": {
+          "allowedDomains": ["example.com"]
+        }
+      }
+    }
+  },
+  "probes": [
+    {
+      "id": "net-local-opened",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: curl -sS --max-time 15 https://example.com -o nettest.out && echo OK > NETMARKER.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["NETMARKER.txt"],
+        "cleanup": ["nettest.out"],
+        "preflight": "https://example.com"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "net-unlisted-ctrl",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: curl -sS --max-time 15 https://www.wikipedia.org -o nettest2.out && echo OK > NETMARKER2.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["NETMARKER2.txt"],
+        "cleanup": ["nettest2.out"],
+        "preflight": "https://www.wikipedia.org"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    }
+  ],
+  "modalities": {
+    "sdk": {
+      "options": { "settingSources": ["project", "local"] }
+    }
+  },
+  "notes": "発案: multi-repo-workspace の残存リスク『開発者が settings.local.json で緩める』の network 側(S2-n=write / S3-n=read と同クラス)。worker は allowedDomains:[](全遮断)で egress を封じているが、local settings に allowedDomains を足されたら開くかを実測する。docs(sandboxing): 『When the same filesystem array is defined in multiple settings scopes, the arrays are merged』= network 配列も同様にスコープ間マージ(和集合)されるはず → project の [] に local の [example.com] が合流して example.com だけ開く。probe 1(本命): local に足した example.com へ curl 到達(NETMARKER.txt 生成)= egress が開いた。probe 2(対照): local allowedDomains に無い wikipedia.org は遮断のまま(NETMARKER2 なし)= 開いたのは local が足したドメインだけ。network キーは sandbox.filesystem 同様 workspace trust の非ゲート対象なので未 trust でも開く。preflight(非 sandbox 素 curl の到達性)必須 = オフライン時は INCONCLUSIVE に落として真の遮断と誤判定しない。SDK は settingSources:[project,local] 明示。allowManagedDomainsOnly(managed 設定)を立てれば非管理スコープの allowedDomains を無視できる = local ドリフトを止める唯一の公式ロックダウンだが managed 設定対応のハーネス拡張が要るため本ケースは非管理の素の挙動を測る。",
+  "hypothesis": "sandbox.network.allowedDomains はスコープ間で配列マージ(和集合)される: project が [](全遮断)でも local settings が [example.com] を足すと example.com への egress が開く(allow x ok, NETMARKER 生成)。= 開発者の local 編集(または将来 allowedDomains へ永続化する承認)で worker の全遮断が破れる。対照の未登録ドメイン(wikipedia.org)は遮断のまま(allow x ng)。運用含意: egress を死守するには managed 設定の allowManagedDomainsOnly で非管理スコープの allowedDomains を無視させる(project settings だけでは local から開けられる)。"
+}

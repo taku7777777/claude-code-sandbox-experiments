@@ -1,0 +1,27 @@
+{
+  "id": "P6-ask-rules/d-ask-with-bypass",
+  "title": "ask Write(*) + bypassPermissions mode -> explicit ask survives bypass, Write stays ask",
+  "probe": "permission",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "bypassPermissions"
+    ]
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "bypassPermissions はプロンプトを省略するが、明示 ask 規則だけは残る（spec §1.3 の『残るもの』）。分類ギャップ T3（mode×規則の交差 ask×bypass）も兼ねる。bypass でも承認要求になれば『ask はモードに負けない』が確定。",
+  "notes": "MEASURED 2026-07-05: headless=DENIED, SDK=ASK (askFired=Write) under bypassPermissions -> explicit ask survives bypass (pairs with P5-e where bypass skips protected-path writes). spec §1.3."
+}

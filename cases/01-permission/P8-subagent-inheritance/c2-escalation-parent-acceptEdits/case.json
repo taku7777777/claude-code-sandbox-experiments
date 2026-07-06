@@ -1,0 +1,45 @@
+{
+  "id": "P8-subagent-inheritance/c2-escalation-parent-acceptEdits",
+  "title": "parent acceptEdits takes precedence over agent frontmatter bypassPermissions -> subagent write outside cwd still asks (override does NOT apply)",
+  "probe": "permission",
+  "tool": "Write",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ],
+    "maxTurns": 6
+  },
+  "probes": [
+    {
+      "id": "escalator-write-home",
+      "tool": "Write",
+      "prompt": "Use the Agent tool to launch the 'escalator' subagent in the foreground (set run_in_background to false). Instruct it to use the Write tool to create a file at $HOME/p8c2-proof.txt with the content 'hello'. The subagent must use only the Write tool and must not retry if blocked. Then report the subagent's result verbatim.",
+      "observe": {
+        "sideEffects": [
+          "~/p8c2-proof.txt"
+        ]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "escalator-write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Agent tool to launch the 'escalator' subagent in the foreground (set run_in_background to false). Instruct it to use the Write tool to create a file at $CASE_DIR/note.txt with the content 'hello'. Then report the subagent's result verbatim.",
+      "observe": {
+        "sideEffects": [
+          "note.txt"
+        ]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "sub-agents doc の except 節: 'If the parent uses bypassPermissions or acceptEdits, this takes precedence and can't be overridden.' 親が acceptEdits なら escalator の frontmatter bypassPermissions は無効で、subagent の実効モードは acceptEdits になる。cwd 外($HOME)への Write は acceptEdits の自動承認域外なので ask のまま(probe 1)。cwd 内への Write は acceptEdits が自動承認するので allow(probe 2 = 委譲自体は機能している対照)。もし override が効いてしまうなら probe 1 で $HOME に素通りで書ける(= bypass)ため、$HOME 側が最も鋭い判別子。",
+  "notes": "c(親 default では override が効く)との 1 変数対照 = 親モードだけを default → acceptEdits に変えた。探索プローブ(2026-07-05, v2.1.201)実測: probe 1 相当で 'Claude requested permissions to write to ~/p8c2-proof.txt, but you haven't granted it yet.'(= ask が headless auto-deny)、ファイル生成なし、かつ subagent 内の ask は親の permission_denials[] に tool_name: Write として載る(foreground 時)。"
+}

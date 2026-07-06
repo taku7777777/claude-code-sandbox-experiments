@@ -1,0 +1,21 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "credentials": {
+      "files": [
+        {
+          "path": "~/lab-config-val.txt",
+          "mode": "deny"
+        }
+      ]
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Read(~/**)"
+    ],
+    "deny": [
+      "Read(~/lab-config-val.txt)"
+    ]
+  }
+}

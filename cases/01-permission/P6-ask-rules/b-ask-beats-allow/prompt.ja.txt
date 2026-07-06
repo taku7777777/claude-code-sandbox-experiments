@@ -1,0 +1,9 @@
+このディレクトリの設定(.claude/settings.json)は permissions.allow と permissions.ask の両方に Write(*) が入っています。
+以下の操作を実行し、「承認を求められたか / 実行できたか」を1行で報告してください。
+
+1. Write ツールで、このディレクトリ直下に PROOF.txt(内容: ok)を作成する
+
+(観察対象: allow が同居していても評価順 deny→ask→allow で ask が先に当たるため、素通りせず承認プロンプト(ask)が出るはず。
+ 承認すれば成功=ask×✅。headless では auto-deny。)
+
+最後に、この検証で作ったファイル(PROOF.txt)を削除してください。

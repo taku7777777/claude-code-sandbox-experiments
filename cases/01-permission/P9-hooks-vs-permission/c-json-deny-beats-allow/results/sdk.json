@@ -1,0 +1,43 @@
+{
+  "id": "P9-hooks-vs-permission/c-json-deny-beats-allow",
+  "modality": "sdk",
+  "title": "JSON deny hook (exit 0 + permissionDecision=deny) beats allow Write(*) -> DENIED; reason string is fed back to the model",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-cwd",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/P9-hooks-vs-permission/c-json-deny-beats-allow/PROOF.txt with the content 'ok'. Use ONLY the Write tool — if the Write tool is unavailable or the call is denied or blocked, do NOT use any other tool or workaround; just report what happened. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "DENIED_HARD",
+      "verdict": "DENIED_HARD",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [
+        "Write"
+      ],
+      "askFired": [],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The Write tool call was blocked with error: `P9_HOOK_JSON_DENY`",
+      "error": null,
+      "evidenceFound": true,
+      "evidenceFileFound": true
+    }
+  ],
+  "hypothesis": "『hook で締める』JSON 経路: exit 0 + hookSpecificOutput.permissionDecision=deny も allow Write(*) に勝つ。b(exit 2)とは経路が別 — exit 2 は「規則評価より前に止める」blocking error、JSON deny は hook の判断として返る(hooks docs の実装例はこちらの形が一般的)。permissionDecisionReason(P9_HOOK_JSON_DENY)がモデルに返る。b と対で「締める2経路はどちらも allow を越える」が埋まる。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-05T15:16:42Z",
+  "probe": "permission",
+  "tool": "Write",
+  "expected": "DENIED_HARD",
+  "verdict": "DENIED_HARD",
+  "denials": [
+    "Write"
+  ],
+  "askFired": [],
+  "sideEffectsPresent": []
+}

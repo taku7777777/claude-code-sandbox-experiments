@@ -1,0 +1,25 @@
+{
+  "id": "S8-sandbox-git-interop/a-git-init-in-sandbox",
+  "title": "`git init` fails inside the sandbox -> {allow, ng} (Bash auto-allowed, OS blocks; git prints fatal:)",
+  "probe": "fs-write",
+  "run": {
+    "maxTurns": 3
+  },
+  "probes": [
+    {
+      "id": "git-init",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool, then report its output verbatim (do not summarize, do not run anything else): git init newrepo 2>err.txt && echo INITOK > INITMARK.txt; echo \"exit=$?\"; cat err.txt",
+      "observe": {
+        "sideEffects": ["INITMARK.txt"],
+        "cleanup": ["newrepo", "err.txt", "INITMARK.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    }
+  ],
+  "notes": "Bash(*) auto-allows the command at the permission layer; the failure is at the OS/sandbox layer -> 2-axis {allow, ng} = display 'allow ❌'. The success marker INITMARK.txt is only written on `git init` exit 0, so its absence = block; err.txt captures the real git `fatal:` line so the block is evidenced by first-party stderr, not file-absence alone. IMPORTANT: the failure MECHANISM (which path git could not access) is NOT doc-backed and must be read off the captured fatal: line, not asserted. Official docs (sandboxing.md) say the sandbox default is read=ALL except explicit deny, so a 'system template read is blocked' story would contradict the docs -- establish the mechanism from the measured stderr only.",
+  "hypothesis": "`git init` inside the sandbox does not complete: the success marker is never written. The captured `fatal:` stderr shows what git could not do (the reason multi-repo-workspace open-task.sh runs init/clone in the prep phase OUTSIDE the sandbox)."
+}

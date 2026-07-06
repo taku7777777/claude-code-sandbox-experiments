@@ -1,0 +1,10 @@
+このセッションは bypassPermissions モード(permission プロンプトを省略)で起動されている前提です(claude --permission-mode bypassPermissions)。
+⚠️ 危険なモードです。隔離された環境でのみ試してください。
+以下の操作を上から順に1つずつ実行し、それぞれ「承認を求められたか / 実行できたか」を1行で報告してください。
+
+1. Write ツールで、このディレクトリ直下に PROOF.txt(内容: ok)を作成する
+2. Write ツールで、ホームディレクトリに p1e-proof.txt(内容: ok)を作成する
+3. Write ツールで、このディレクトリの sub/proof.txt(内容: ok)を作成する
+4. note.txt(内容: hello)を作成してから、Edit ツールで note.txt の 'hello' を 'EDIT_APPLIED' に置換する
+
+最後に、この検証で作ったファイル(PROOF.txt / ~/p1e-proof.txt / sub/ / note.txt)をすべて削除してください。

@@ -1,0 +1,34 @@
+{
+  "id": "P4-bash-command-matching/a-direct",
+  "title": "allow Bash(*) + deny Bash(curl:*) -> the narrow deny carves an exception only for the matched form (curl denied, echo still allowed)",
+  "probe": "permission",
+  "tool": "Bash",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "curl-denied",
+      "prompt": "Use the Bash tool to run exactly this command: curl -sS https://example.com -o $CASE_DIR/CURLED.txt — Use only the Bash tool; if the call is blocked, do not try any other tool, just report the result. Do it immediately. Do not ask, do not explain.",
+      "observe": {
+        "sideEffects": ["CURLED.txt"]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    },
+    {
+      "id": "echo-allowed",
+      "prompt": "Use the Bash tool to run exactly this command: echo ok > $CASE_DIR/ECHOED.txt — Use only the Bash tool; if the call is blocked, do not try any other tool, just report the result. Do it immediately. Do not ask, do not explain.",
+      "observe": {
+        "sideEffects": ["ECHOED.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "A broad allow Bash(*) with a narrow deny Bash(curl:*) carves an exception ONLY for the matched form. curl matches the deny and is blocked (deny > allow, canUseTool never fires = DENIED_HARD). echo does not match the deny, stays covered by Bash(*), and runs. This is the permission-layer counterpart to P2-e: exceptions can be carved only by a narrow deny inside a broad allow, never the reverse (broad deny + narrow allow cannot reopen a hole -> P2-e). Bash rules are used because path-scoping cannot be expressed for Write (P3-d). The curl probe forbids tool fallback to keep the deny observation clean."
+}

@@ -1,0 +1,17 @@
+このセッションは「未 trust の workspace」+ sandbox.enabled: true +
+filesystem.allowWrite:["~/lab-untrust-allowed"] の前提です(trust ダイアログを承認していない状態)。
+※対話で試すには、このリポジトリを一度 trust 解除するか、分離した CLAUDE_CONFIG_DIR で
+hasTrustDialogAccepted を立てずに起動する必要があります(手軽な再現はハーネス推奨)。
+
+以下の Bash コマンドを上から順に1つずつ実行し、それぞれ「承認を求められたか / 実行できたか /
+OS エラーで失敗したか」を1行で報告してください(失敗しても他のツールで代替しないこと)。
+事前に: mkdir -p ~/lab-untrust-probe ~/lab-untrust-allowed
+
+1. echo data > inside.txt                          (cwd 直下)
+2. echo data > $HOME/lab-untrust-probe/probe.txt   (cwd 外・allowWrite 未登録)
+3. echo data > $HOME/lab-untrust-allowed/probe.txt (allowWrite 登録先)
+
+(観察対象: 未 trust でも 1 が承認なしで書ける = sandbox の autoAllow が生きている = sandbox は
+trust に依存しない。2 だけ operation not permitted = OS 境界も生きている。3 が書ける =
+sandbox.filesystem.allowWrite も未 trust で有効。もし 1 が拒否/承認要求になるなら sandbox が
+off になっている疑い。最後に inside.txt・~/lab-untrust-probe・~/lab-untrust-allowed を削除してください。)

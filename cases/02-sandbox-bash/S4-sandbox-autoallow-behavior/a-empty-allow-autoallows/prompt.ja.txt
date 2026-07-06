@@ -1,0 +1,7 @@
+このセッションは sandbox 有効(autoAllowBashIfSandboxed は既定の true)で動いている前提です。規則を書かなくても sandboxed Bash が無プロンプトで通ることを確かめます。
+以下の Bash コマンドを実行し、「承認を求められたか / 実行できたか」を1行で報告してください。ブロックされたら他のツールで代替せず、結果だけ報告してください。
+
+1. echo data > inside.txt        （cwd 直下への書込）
+
+(承認プロンプトなしで即実行され inside.txt が出来るはず＝sandbox の自動許可(autoAllowBashIfSandboxed=true)が効いている、が観察対象です。worker が allow:[] + sandbox で回る根拠。d では同じコマンドが承認要求に変わります。
+最後に、作った inside.txt を削除してください。)

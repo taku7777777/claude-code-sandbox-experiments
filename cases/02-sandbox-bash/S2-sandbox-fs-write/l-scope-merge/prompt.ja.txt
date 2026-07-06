@@ -1,0 +1,15 @@
+このケースは 2 スコープの合成を見ます: user スコープ(分離 CLAUDE_CONFIG_DIR)に
+denyWrite: ["~/lab-merge/sub"]、project スコープ(このディレクトリの settings.json)に
+allowWrite: ["~/lab-merge"] + sandbox on。
+※ user スコープの再現が必要なため、お手軽対話ではなくハーネスの interactive prepare を使ってください:
+  python3 harness/run.py -m interactive --step prepare S2-sandbox-fs-write/l-scope-merge
+
+以下を上から順に1つずつ Bash ツールで実行し、「実行できたか / OS エラーで失敗したか」を報告してください
+(失敗しても他のツールで代替しないこと)。
+
+1. echo x > $HOME/lab-merge/sub/f.txt(user の denyWrite 対象。project の allowWrite の内側)
+2. echo x > $HOME/lab-merge/f.txt(deny 対象外・project の allowWrite 内)
+
+(観察対象: 1 が operation not permitted =「project の allow では user の deny を外せない」、
+2 が書ける = allowWrite はスコープ間で和集合(マージは置換ではない)。
+最後に、作成したファイルと ~/lab-merge を削除してください。)

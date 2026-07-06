@@ -1,0 +1,60 @@
+{
+  "id": "P11-mcp-tool-rules/d-allow-tool-glob",
+  "title": "allow mcp__server__*(サーバ後の glob)は有効=同サーバ全ツール事前承認",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "arrange": {
+    "mcpServers": {
+      "probe": {
+        "type": "stdio",
+        "command": "node",
+        "args": [
+          "$CASE_DIR/../mcp-probe-server.mjs"
+        ]
+      }
+    }
+  },
+  "probes": [
+    {
+      "id": "read-allowed",
+      "tool": "mcp__probe__read_path",
+      "prompt": "Call the tool mcp__probe__read_path with argument path = \"$CASE_DIR/note.txt\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "note.txt",
+            "content": "SENT_P11D_read_p9c"
+          }
+        ]
+      },
+      "observe": {
+        "cleanup": [
+          "note.txt"
+        ],
+        "sentinel": "SENT_P11D_read_p9c"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      },
+      "probe": "fs-read"
+    },
+    {
+      "id": "net-allowed",
+      "tool": "mcp__probe__net_get",
+      "prompt": "Call the tool mcp__probe__net_get with argument url = \"https://example.com\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "observe": {
+        "sentinel": "NET_OK status=200"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      },
+      "probe": "fs-read"
+    }
+  ],
+  "notes": "docs: Allow rules accept tool-name globs only after a literal mcp__<server>__ prefix / mcp__puppeteer__* matches every tool from the puppeteer server(CONFIRMED)。scratch 2026-07-06 で両ツールとも成功。c(サーバ形)と等価な効き。",
+  "hypothesis": "リテラルなサーバ接頭辞の後ろに限り glob が効く(mcp__github__get_* のような部分 glob も docs 上は可)。c と同じ範囲を開けるが、部分 glob で「参照系ツール名だけ」を開ける書き方の土台になる。"
+}

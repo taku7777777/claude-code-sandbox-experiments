@@ -1,0 +1,71 @@
+{
+  "id": "P2-allow-deny-precedence/b-deny-beats-allow",
+  "title": "allow Write(*) + deny Write(*) -> deny wins wherever it matches; Edit is covered by neither (stays ask)",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    },
+    {
+      "id": "write-home",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $HOME/p2b-proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["~/p2b-proof.txt"]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    },
+    {
+      "id": "write-subdir",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/sub/proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["sub/proof.txt"],
+        "cleanup": ["sub"]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    },
+    {
+      "id": "edit-cwd",
+      "tool": "Edit",
+      "prompt": "First use the Read tool to read $CASE_DIR/note.txt. Then use the Edit tool to replace the text 'hello' with 'EDIT_APPLIED' in $CASE_DIR/note.txt. Do it immediately. Do not ask, do not explain — just make the tool calls.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "note.txt",
+            "content": "hello"
+          }
+        ]
+      },
+      "observe": {
+        "contentMarker": {
+          "path": "note.txt",
+          "contains": "EDIT_APPLIED"
+        }
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "deny is evaluated before allow; deny wins wherever it matches, and the match scope of Write(*) is measured across cwd / $HOME / subdir. Rules are tool-scoped: Edit is covered by neither allow nor deny, so it falls back to default ask. Uses the WORKING Write(*) form (Write(**) and path-specific forms silently fail to match -- see P3)."
+}

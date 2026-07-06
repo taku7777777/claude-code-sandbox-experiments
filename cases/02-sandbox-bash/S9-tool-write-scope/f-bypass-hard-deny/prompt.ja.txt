@@ -1,0 +1,9 @@
+このディレクトリの設定は permissions.deny: ["Edit(assets/**)"] だけです(a3 と同一)。
+このセッションは bypassPermissions モードで起動されている前提です(claude --permission-mode bypassPermissions)。
+以下の操作を Write ツールだけで実行し、「承認を求められたか / 拒否されたか / 実行できたか」を1行で報告してください。拒否されても他のツールで代替しないでください(bypass では Bash 代替が通ってしまい観察が濁るため)。
+
+1. Write ツールで、assets/data.txt(内容: v=1)を作成する
+
+(観察対象: 承認プロンプトが出ないモードなのに Write はブロックされるはず=deny 規則は bypass でも残る。
+もし旧仮説どおり「ASK ゲート」なら bypass が自動承認して作成されるはずで、その反証になる。
+もし作成された場合のみ、最後に assets/ を削除してください。)

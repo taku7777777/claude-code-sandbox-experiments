@@ -1,0 +1,11 @@
+このセッションは sandbox 有効・Bash(*) 許可・allowWrite 指定なしの前提で起動されています(.claude/settings.json)。
+メイン repo `mainrepo` と linked worktree `wt` は事前に(sandbox の外で)用意済みです。
+次の2つの bash コマンドを Bash ツールで順に1回ずつ実行し、それぞれ出力(標準エラーを含む)をそのまま報告してください。他のコマンドや代替手段は使わないでください。
+
+1) ( echo x >> mainrepo/.git/config ) 2>err_cfg.txt && echo CFGOK > CFGMARK.txt; echo "exit=$?"; cat err_cfg.txt
+2) ( echo x > mainrepo/.git/hooks/pre-commit ) 2>err_hk.txt && echo HKOK > HKMARK.txt; echo "exit=$?"; cat err_hk.txt
+
+(worktree からの commit(S8-d)では共有 `.git` に書けるのに、その共有 `.git` の中でも
+ `config` と `hooks/` への書込だけは `Operation not permitted` で拒否され、CFGMARK/HKMARK は出ないはず
+ =どちらも allow ❌(許諾は通るが OS 層で遮断)、が観察対象です。docs が言う「hooks/ と config のみ deny」の対照。
+最後に、この検証で作った err_cfg.txt / err_hk.txt / CFGMARK.txt / HKMARK.txt を削除してください。mainrepo / wt は自動で片付けられます。)

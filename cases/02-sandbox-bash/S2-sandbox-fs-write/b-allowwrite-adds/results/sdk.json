@@ -1,0 +1,71 @@
+{
+  "id": "S2-sandbox-fs-write/b-allowwrite-adds",
+  "modality": "sdk",
+  "title": "allowWrite:[~/lab-fs-write] -> その1パスだけ cwd 外に穴が開く。他の cwd 外は依然 allow x ng",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "w-cwd",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > inside.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "fs-write",
+      "tool": "Bash",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [
+        "inside.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "Done.",
+      "error": null
+    },
+    {
+      "probeId": "w-allowlisted",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > $HOME/lab-fs-write/probe.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "fs-write",
+      "tool": "Bash",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [
+        "~/lab-fs-write/probe.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "Command executed successfully.",
+      "error": null
+    },
+    {
+      "probeId": "w-glob",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > $HOME/lab-glob-XYZ/probe.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "fs-write",
+      "tool": "Bash",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "**Blocked**: Operation not permitted for `$HOME/lab-glob-XYZ/probe.txt`",
+      "error": null
+    }
+  ],
+  "hypothesis": "allowWrite:[~/lab-fs-write] opens exactly that directory for sandboxed Bash writes; the write there succeeds (allow x ok) while cwd stays writable and any other outside-cwd path (~/lab-glob-XYZ) is still EPERM (allow x ng).",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T13:30:37Z"
+}

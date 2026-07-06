@@ -1,0 +1,38 @@
+{
+  "id": "P3-write-glob-asymmetry-DANGER/e-deny-edit-path",
+  "title": "deny Edit(PROOF.txt) vs the Write tool -> does the docs' 'Edit rules apply to all built-in editing tools' cover Write? (the CORRECT per-file guard, measured)",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-guarded-file",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Use ONLY the Write tool — if the Write tool is unavailable or the call is denied, do NOT use any other tool or workaround; just report what happened. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-",
+        "byModality": {
+          "headless": "INCONCLUSIVE"
+        }
+      }
+    },
+    {
+      "id": "write-other-file",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/OTHER.txt with the content 'ok'. Use ONLY the Write tool — if the Write tool is unavailable or the call is denied, do NOT use any other tool or workaround; just report what happened. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["OTHER.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "Docs define path-based edit control on Read/Edit rules and state that Edit rules apply to the built-in editing tools (so the Write tool should be in scope). If true, the correct way to guard a single file is deny Edit(PROOF.txt) (gitignore semantics: equivalent to Edit(**/PROOF.txt)) — NOT deny Write(PROOF.txt), which P3-c proved is a silent no-op. Probe 1: Write to the guarded name -> expected DENIED (scoped deny: tool stays visible, denial recorded). Probe 2: Write to a different name under the same settings -> ALLOWED via allow Write(*) (the deny is file-scoped, not tool-wide). If probe 1 turns out ALLOWED instead, that contradicts the docs and P3-c's advice ('個別ファイル保護は別手段を検討') stays as-is — either outcome settles G2."
+}

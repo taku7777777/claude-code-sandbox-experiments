@@ -1,0 +1,24 @@
+{
+  "id": "S6-sandbox-network/a-default-blocked",
+  "title": "sandbox network 既定 = 全ブロック。Bash curl は permission を通っても OS 層 egress で遮断 (allow ❌)",
+  "probe": "network",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "net-reach",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: curl -sS --max-time 15 https://example.com -o nettest.out && echo OK > NETMARKER.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["NETMARKER.txt"],
+        "cleanup": ["nettest.out"],
+        "preflight": "https://example.com"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    }
+  ],
+  "notes": "S6 対比マトリクスのベースライン(target=example.com への到達可否)。sandbox が Bash を auto-allow(autoAllowBashIfSandboxed 既定 true, cf S4-a)するので permission は allow。allowUnsandboxedCommands:false で非 sandbox フォールバックが無く、allowedDomains:[] のため OS 層の egress が curl を止める → 成功マーカー(NETMARKER.txt)が出来ず allow × ng。preflight(非 sandbox の素 curl で example.com 到達)必須 = オフライン時は INCONCLUSIVE(再測)に落とし、真の遮断と誤判定しない。",
+  "hypothesis": "sandbox 有効 + allowedDomains:[] では network egress が既定で全ブロック。permission は allow だが OS 層で curl が遮断され、到達マーカーは出来ない(allow × ng)。"
+}

@@ -1,0 +1,52 @@
+{
+  "id": "sandbox-runtime/h-webfetch-vs-network",
+  "axis": "environment",
+  "modality": "headless",
+  "measuredAt": "2026-07-06T10:58:18Z",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "envVersions": {
+    "srt": "0.0.63",
+    "sandbox": "Seatbelt (macOS)"
+  },
+  "probes": [
+    {
+      "probeId": "webfetch-builtin",
+      "env": "builtin~",
+      "op": "WebFetch tool -> WF_MARKER.txt",
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      },
+      "observed": "effect:sideEffect",
+      "verdict": "ALLOWED",
+      "match": true
+    },
+    {
+      "probeId": "webfetch-srt",
+      "env": "srt",
+      "op": "WebFetch tool -> WF_MARKER.txt",
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      },
+      "observed": "blocked (OS/network layer: 'socket is closed', permission_denials empty)",
+      "verdict": "DENIED_OS",
+      "match": true
+    },
+    {
+      "probeId": "webfetch-srt-allowed",
+      "env": "srt",
+      "op": "WebFetch tool -> WF_MARKER.txt",
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      },
+      "observed": "effect:sideEffect",
+      "verdict": "ALLOWED",
+      "match": true
+    }
+  ],
+  "note": "builtin~ = srt 無し(sandbox 無効 + permission のみ)で組み込みのツール迂回を近似。verdict は ALLOWED / DENIED(permission 層) / DENIED_OS(denials 空 + OS 層 EPERM)。再現: python3 harness/srt/run_srt_cases.py h-webfetch-vs-network"
+}

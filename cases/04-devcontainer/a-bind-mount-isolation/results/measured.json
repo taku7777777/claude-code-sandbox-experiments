@@ -1,0 +1,14 @@
+{
+  "id": "devcontainer/a-bind-mount-isolation",
+  "axis": "environment",
+  "measuredAt": "2026-07-06",
+  "model": null,
+  "claudeCodeVersion": null,
+  "platform": "darwin",
+  "envVersions": {"colima": "0.10.3", "docker": "29.5.2", "container": "alpine", "vm": "Ubuntu 24.04"},
+  "probes": [
+    {"probeId": "write-reflects-host", "env": "container", "op": "container writes /workspace/from-container.txt (bind mount under $HOME)", "expected": {"permission": "none", "result": "ok"}, "observed": "written-in-container (visible on host)", "verdict": "ALLOWED", "match": true},
+    {"probeId": "unmounted-invisible", "env": "container", "op": "container reads /host-only.txt (NOT mounted)", "expected": {"permission": "none", "result": "ng"}, "observed": "not visible (file absent in container)", "verdict": "DENIED_OS", "match": true}
+  ],
+  "note": "claude 非経由(docker CLI + alpine で機構を単離)のため model/claudeCodeVersion は null。colima の virtiofs 共有は $HOME 配下のみ。/private/tmp 配下を -v しても VM 内にこもりホスト非反映(実測)。FS はマウント式=fail-closed(組み込み denyRead の fail-open と対照)。"
+}

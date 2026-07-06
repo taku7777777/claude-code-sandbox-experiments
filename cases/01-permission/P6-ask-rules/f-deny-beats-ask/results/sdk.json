@@ -1,0 +1,38 @@
+{
+  "id": "P6-ask-rules/f-deny-beats-ask",
+  "modality": "sdk",
+  "title": "deny Write(*) + ask Write(*) -> deny wins over ask (evaluation order deny -> ask -> allow, upper boundary)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-cwd",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/P6-ask-rules/f-deny-beats-ask/PROOF.txt with the content 'ok'. Do it immediately. Use only the Write tool — if the call is blocked, do not try any other tool; just report the result.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "DENIED_HARD",
+      "verdict": "DENIED_HARD",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The Write tool call was blocked — it exists but is not enabled in this context. I cannot create the file using any other tool per your instructions.",
+      "error": null
+    }
+  ],
+  "hypothesis": "Official permissions doc (verified 2026-07-05): 'Rules are evaluated in order: deny, then ask, then allow. The first match in that order determines the outcome.' The repo has measured two of the three edges — deny>allow (P2-b) and ask>allow (P6-b) — but never deny>ask. This case co-locates deny and ask on the same specifier Write(*): expected DENY, i.e. SDK canUseTool must NOT fire (in P6-b, with allow co-present instead of deny, it DID fire). Secondary observation to record: which deny form manifests — deny Write(*) is a bare-equivalent form that removes the tool from context (P2-c/d: no denials, detected via init-tools gap), vs call-time denial (P2-b with allow co-present). Whether the co-present ASK rule keeps the tool in context (like allow does in P2-b) or the tool is removed anyway is itself an open sub-question this measurement settles.",
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T12:21:01Z",
+  "probe": "permission",
+  "tool": "Write",
+  "expected": "DENIED_HARD",
+  "verdict": "DENIED_HARD",
+  "denials": [],
+  "askFired": [],
+  "sideEffectsPresent": [],
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

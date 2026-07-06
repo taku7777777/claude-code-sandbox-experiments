@@ -1,0 +1,48 @@
+{
+  "id": "P7-settings-scope-precedence/e-project-deny-vs-user-allow",
+  "title": "project-scope deny Write(*) vs user-scope allow Write(*) -> DENY (a の鏡像: deny はどちらのスコープにあっても勝つ)",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "arrange": {
+    "configDir": {
+      "trusted": true,
+      "userSettings": {
+        "permissions": {
+          "allow": [
+            "Write(*)"
+          ]
+        }
+      }
+    }
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Use only the Write tool — if the call is blocked, do not try any other tool; just report the result. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": [
+          "PROOF.txt"
+        ]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    }
+  ],
+  "modalities": {
+    "sdk": {
+      "options": {
+        "settingSources": [
+          "user",
+          "project"
+        ]
+      }
+    }
+  },
+  "hypothesis": "a(deny@user × allow@project → deny)の鏡像: deny を project、allow を user に入れ替えても deny が勝つ ❌。a と対で「deny はスコープに依らず allow に勝つ(deny-first)」の対称性を確定する。",
+  "notes": "⚠️ 帰属の注意: precedence は managed>CLI>local>project>user なので、本ケースは deny が project(user より上位)にあり、precedence でも deny-first でも同じく deny になる=**単独では deny-first を分離できない**。deny-first を分離した強い実測は a(deny を最下位 user に置いても上位 project の allow に勝つ)側にある。本ケースの価値は a との**対称ペア**として「user-scope 特有の deny 権能ではなく、どちらのスコープの deny も allow に勝つ」ことを示す点。SDK は settingSources:[user,project] を明示しないと user allow を読まず交絡する(P7-a と同じ)。"
+}

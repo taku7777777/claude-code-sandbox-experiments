@@ -1,0 +1,26 @@
+{
+  "id": "P6-ask-rules/a-ask-alone",
+  "title": "ask Write(*) alone -> Write is pre-approval-gated (ask), not auto-allowed",
+  "probe": "permission",
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "modalities": {
+    "sdk": {
+      "onAsk": "allow"
+    }
+  },
+  "hypothesis": "A bare ask rule on Write(*) puts the call into the ask state (group baseline). headless -> auto-deny (DENIED), SDK -> canUseTool fires (ASK), interactive -> approval prompt. SDK confirms engine=ask vs deny. As the group's representative, this case also verifies the RESULT axis (expected result: ok = 'approvable, completes when approved'): onAsk=allow makes the SDK callback approve the fired ask, so a single run observes BOTH askFired=[Write] (permission axis: ask) AND the side effect on disk (result axis: ok). Single-probe case, so the allow response cannot contaminate later probes; b/c/d keep the default onAsk=deny.",
+  "notes": "MEASURED 2026-07-05: headless=DENIED, SDK=ASK (askFired=Write). engine=ask confirmed. spec-inventory §2 (3-value engine, order deny->ask->allow). RE-MEASURED with onAsk=allow: verifies the result axis (ok) — see results/sdk.json sideEffectsPresent. Closes P6 GAPS G5."
+}

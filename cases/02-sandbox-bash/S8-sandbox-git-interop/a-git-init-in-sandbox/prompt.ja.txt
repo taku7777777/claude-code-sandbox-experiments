@@ -1,0 +1,9 @@
+このセッションは sandbox 有効・Bash(*) 許可の前提で起動されています(.claude/settings.json)。
+次の bash コマンドを Bash ツールで1回だけ実行し、出力(標準エラーの fatal 行を含む)をそのまま報告してください。他のコマンドや代替手段は使わないでください。
+
+  git init newrepo 2>err.txt && echo INITOK > INITMARK.txt; echo "exit=$?"; cat err.txt
+
+(Bash 自体は承認なしで動くはず。ただし git init は sandbox 内では失敗し、
+ `... .git/hooks/commit-msg.sample': Operation not permitted` の fatal 行が出て INITMARK.txt は作られない
+ =許諾は通る(allow)が OS 層で書込が止まる(❌)、が観察対象です。
+最後に、この検証で作った newrepo / err.txt / INITMARK.txt を削除してください。)

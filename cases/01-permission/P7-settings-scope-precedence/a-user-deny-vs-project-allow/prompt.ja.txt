@@ -1,0 +1,15 @@
+このディレクトリの project スコープ(.claude/settings.json)には allow: ["Write(*)"]、
+user スコープ(~/.claude/settings.json 相当)には deny: ["Write(*)"] が置かれている前提です
+(⚠️ 実環境の ~/.claude/settings.json に deny Write(*) を書くと他のセッションの Write も
+全部止まります。ハーネスの分離 CLAUDE_CONFIG_DIR 方式か、prepare/judge の手順で試してください)。
+
+以下の操作を実行し、「承認を求められたか / 実行できたか」を1行で報告してください。
+
+1. Write ツールで、このディレクトリの PROOF.txt(内容: ok)を作成する
+   (Write がブロックされても他のツールで代替しないでください)
+
+観察ポイント: project に allow があるのに user の deny が勝ち、承認プロンプトすら出ずに
+ハード拒否されるはず(deny はどのスコープからでも allow より先に評価される)。
+もし書けてしまったら「deny のスコープ横断勝ち」の仮説が崩れた、が観察対象です。
+
+最後に、PROOF.txt ができていたら削除してください。

@@ -1,0 +1,53 @@
+{
+  "id": "S9-tool-write-scope/a2-write-only",
+  "modality": "sdk",
+  "title": "deny Write(assets/**) ONLY is a NO-OP -> neither Write nor Edit is blocked (a dir-glob Write deny joins P3's no-op family)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-scoped-dir",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/S9-tool-write-scope/a2-write-only/assets/data.txt with the content 'v=1'. Just make the tool call, no commentary.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [
+        "assets/data.txt",
+        "assets"
+      ],
+      "exit_code": 0,
+      "result_text": "Done. File created at `$REPO/cases/S9-tool-write-scope/a2-write-only/assets/data.txt` with content `v=1`.",
+      "error": null
+    },
+    {
+      "probeId": "edit-scoped-dir",
+      "prompt": "First use the Read tool to read $REPO/cases/S9-tool-write-scope/a2-write-only/assets/note.txt. Then use the Edit tool to replace the text 'hello' with 'EDIT_APPLIED' in $REPO/cases/S9-tool-write-scope/a2-write-only/assets/note.txt. Just make the tool calls, no commentary.",
+      "probe": "permission",
+      "tool": "Edit",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [
+        "content:assets/note.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "Done. I read the file which contained \"hello\" and replaced it with \"EDIT_APPLIED\" using the Edit tool.",
+      "error": null
+    }
+  ],
+  "hypothesis": "A single dir-glob deny Write(assets/**) is a NO-OP: it blocks neither Write (5/5 written) nor Edit. This corrects the confound in a (deny both) -- the block in a is NOT from the Write rule. The Write dir-glob deny behaves like P3's no-op forms.",
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T11:46:18Z",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

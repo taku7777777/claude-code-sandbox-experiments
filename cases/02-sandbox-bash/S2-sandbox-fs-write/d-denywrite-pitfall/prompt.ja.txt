@@ -1,0 +1,9 @@
+⚠️ これはアンチパターンの確認です。このセッションは sandbox 有効 + allowWrite:["~/lab-fs-write"] + denyWrite:["~"] で動いている前提です。
+以下の Bash コマンドを上から順に1つずつ実行し、それぞれ「承認を求められたか / 実行できたか」を1行で報告してください。ブロックされたら他のツールで代替せず、結果だけ報告してください。
+
+1. echo data > inside.txt                       （cwd 直下）
+2. echo data > $HOME/lab-fs-write/probe.txt      （allowWrite で開けたはずのパス）
+3. echo data > $HOME/lab-glob-XYZ/probe.txt      （別パス）
+
+(3つとも "operation not permitted" で失敗するはず。denyWrite:["~"] は deny が勝つため、allowWrite:["~/lab-fs-write"] の例外(2)も、cwd(~ 配下なので)の暗黙許可(1)も、両方潰す＝自分の作業ディレクトリにすら書けなくなる、が観察対象です。denyWrite:["~"] は使ってはいけません。
+最後に、もし出来ていれば inside.txt・~/lab-fs-write・~/lab-glob-XYZ を削除してください。)

@@ -1,0 +1,11 @@
+このディレクトリの settings.json は sandbox.enabled: true と permissions.allow: ["Edit(~/lab-permrule/**)"] のみで、
+sandbox.filesystem.allowWrite は設定されていません。事前に ~/lab-permrule と ~/lab-permrule-ctrl を作成した上で、
+以下の操作を上から順に1つずつ Bash ツールで実行し、「実行できたか / OS エラーで失敗したか」を報告してください
+(失敗しても他のツールで代替しないこと)。
+
+1. echo data > $HOME/lab-permrule/probe.txt(Edit 規則の対象パス)
+2. echo data > $HOME/lab-permrule-ctrl/probe.txt(規則の無い隣接ディレクトリ)
+
+(観察対象: どちらも cwd 外なのに 1 だけ書ける = permissions の Edit 規則が sandbox の OS 書込境界に
+マージされている。2 は operation not permitted = 境界を広げたのは Edit 規則そのもの。
+最後に、作成したファイルとディレクトリ ~/lab-permrule ~/lab-permrule-ctrl を削除してください。)

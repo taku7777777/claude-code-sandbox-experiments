@@ -1,0 +1,66 @@
+{
+  "id": "S9-tool-write-scope/a-subdir-file-write",
+  "modality": "control",
+  "title": "control/attribution: which rule blocks the Write tool? (neutral /tmp, headless -p, Write tool, acceptEdits, file-creation counting)",
+  "method": "For each settings condition, run `claude -p` with the Write prompt in a fresh neutral /tmp cwd (assets/ pre-created), 5 trials, count how many created assets/data.txt. Neutral cwd avoids the in-repo self-refusal. This isolates WHICH deny rule actually blocks the Write tool (the G3 attribution the old control could not do because it tested Write+Edit together).",
+  "prompt": "Use the Write tool to create a file at assets/data.txt with content 'v=1'. Just make the tool call, no commentary.",
+  "flags": [
+    "--permission-mode",
+    "acceptEdits"
+  ],
+  "conditions": [
+    {
+      "label": "WITHOUT any deny (baseline)",
+      "settings": {},
+      "created": 5,
+      "trials": 5,
+      "note": "acceptEdits auto-approves the nested Write -> file created every run"
+    },
+    {
+      "label": "deny Write(assets/**) ONLY",
+      "settings": {
+        "permissions": {
+          "deny": [
+            "Write(assets/**)"
+          ]
+        }
+      },
+      "created": 5,
+      "trials": 5,
+      "note": "NO-OP. The dir-glob Write deny does NOT block the Write tool (5/5 created, same as baseline). Joins P3's family of no-op Write-deny forms (Write(**), exact path). The Write does succeed."
+    },
+    {
+      "label": "deny Edit(assets/**) ONLY",
+      "settings": {
+        "permissions": {
+          "deny": [
+            "Edit(assets/**)"
+          ]
+        }
+      },
+      "created": 0,
+      "trials": 5,
+      "note": "HARD BLOCK. The Edit-scoped deny blocks the WRITE tool (0/5) because Edit rules apply to the whole edit-family incl. Write (docs). acceptEdits does NOT lift it -> a real deny, not an ask."
+    },
+    {
+      "label": "deny BOTH Write(assets/**)+Edit(assets/**) (the W1 config)",
+      "settings": {
+        "permissions": {
+          "deny": [
+            "Write(assets/**)",
+            "Edit(assets/**)"
+          ]
+        }
+      },
+      "created": 0,
+      "trials": 5,
+      "note": "0/5 blocked -- but the block is entirely from the Edit(assets/**) component. The Write(assets/**) rule contributes nothing (see the two rows above). This corrects the old control which attributed 0/5 to 'Write(assets/**) works'."
+    }
+  ],
+  "verdict": "ATTRIBUTION: deny Write(assets/**) is a NO-OP (5/5 written); deny Edit(assets/**) HARD-blocks the Write tool (0/5). The W1 tool-layer protection that works is the Edit rule, not the Write rule. This overturns the prior S9-a claim that 'Write(dir/**) blocks as an ASK gate'.",
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T00:00:00Z",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

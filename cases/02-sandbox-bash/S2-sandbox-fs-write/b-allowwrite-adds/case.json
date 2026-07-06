@@ -1,0 +1,54 @@
+{
+  "id": "S2-sandbox-fs-write/b-allowwrite-adds",
+  "title": "allowWrite:[~/lab-fs-write] -> その1パスだけ cwd 外に穴が開く。他の cwd 外は依然 allow x ng",
+  "probe": "fs-write",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "w-cwd",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > inside.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["inside.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "w-allowlisted",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > $HOME/lab-fs-write/probe.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "arrange": {
+        "setup": [{ "path": "~/lab-fs-write/.keep", "content": "" }]
+      },
+      "observe": {
+        "sideEffects": ["~/lab-fs-write/probe.txt"],
+        "cleanup": ["~/lab-fs-write"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "w-glob",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > $HOME/lab-glob-XYZ/probe.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "arrange": {
+        "setup": [{ "path": "~/lab-glob-XYZ/.keep", "content": "" }]
+      },
+      "observe": {
+        "sideEffects": ["~/lab-glob-XYZ/probe.txt"],
+        "cleanup": ["~/lab-glob-XYZ"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    }
+  ],
+  "notes": "1-variable diff from a: + allowWrite:[~/lab-fs-write]. Write is an allowlist: the default boundary is cwd(+tmp), so allowWrite opens EXACTLY the listed dir. w-allowlisted flips a->b from ng to ok; w-cwd stays ok; w-glob stays ng (a different ~ path, not listed). The exact-path nature is the point -- allowWrite:[~/lab-fs-write] does not open ~/lab-glob-XYZ.",
+  "hypothesis": "allowWrite:[~/lab-fs-write] opens exactly that directory for sandboxed Bash writes; the write there succeeds (allow x ok) while cwd stays writable and any other outside-cwd path (~/lab-glob-XYZ) is still EPERM (allow x ng)."
+}

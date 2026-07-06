@@ -1,0 +1,31 @@
+{
+  "id": "S8-sandbox-git-interop/b-gitconfig-denied-within-allowed",
+  "title": "`.git/config` write denied even though allowWrite covers the repo -> {allow, ng} (Denied within allowed)",
+  "probe": "fs-write",
+  "run": {
+    "maxTurns": 3
+  },
+  "arrange": {
+    "prep": "rm -rf wr && git init -q wr",
+    "setup": [
+      { "path": "wr" }
+    ]
+  },
+  "probes": [
+    {
+      "id": "gitconfig-write",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool, then report its output verbatim (do not summarize, do not run anything else): ( echo x >> wr/.git/config ) 2>err.txt && echo DONE > W5MARK.txt; echo \"exit=$?\"; cat err.txt",
+      "observe": {
+        "sideEffects": ["W5MARK.txt"],
+        "cleanup": ["W5MARK.txt", "err.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    }
+  ],
+  "notes": "The repo `wr` is created OUTSIDE the sandbox (prep, because git init fails inside it -- S8-a) and allowWrite covers `wr`, so ordinary writes into wr succeed. The write to `.git/config` is nonetheless blocked -> {allow, ng} = 'allow ❌'. The subshell `( ... ) 2>err.txt` captures the redirection-open EPERM into err.txt so the OS-layer error string is evidenced; the W5MARK marker after `&&` is never written when the first write fails. `wr` is registered in arrange.setup so the harness removes it in the finally phase (the per-probe clean would otherwise delete the prep-created repo before the probe runs). 【要裏取り: sandboxing.md documents the .git config/hooks deny ONLY for the linked-worktree shared .git; a general 'plain-repo .git/config is denied within allowWrite' rule is NOT in the docs -- the fact is measured (EPERM), the layer is not doc-asserted】",
+  "hypothesis": "The write to `wr/.git/config` fails and the `&&`-guarded W5MARK is never written; the captured stderr shows the OS-layer denial (Operation not permitted). If W5MARK appears -> ALLOWED (the protection does NOT hold at the sandbox/Bash layer)."
+}

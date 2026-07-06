@@ -1,0 +1,31 @@
+{
+  "id": "P5-protected-paths/b-nested-ok",
+  "title": "acceptEdits auto-approves an ORDINARY nested in-project write -> allow (control isolating that a/c/d's denial is protected-path, not nesting)",
+  "probe": "permission",
+  "tool": "Write",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ],
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-nested",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/sub/deep/OK.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": [
+          "sub/deep/OK.txt",
+          "sub"
+        ]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "acceptEdits auto-approves ordinary nested in-project writes with no prompt (creating intermediate dirs as needed): engine=allow, canUseTool does NOT fire. This is the control proving a/c/d's protected-path denials are a protected-path rule, not a nesting/depth limitation. Only the leading path segment being a protected dir (.git/.claude/.vscode) flips allow -> ask."
+}

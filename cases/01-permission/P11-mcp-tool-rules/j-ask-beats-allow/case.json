@@ -1,0 +1,57 @@
+{
+  "id": "P11-mcp-tool-rules/j-ask-beats-allow",
+  "title": "ask mcp__server__tool は同居する広い allow に勝つ(確認ゲートとして成立・ツールは残存)",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "arrange": {
+    "mcpServers": {
+      "probe": {
+        "type": "stdio",
+        "command": "node",
+        "args": [
+          "$CASE_DIR/../mcp-probe-server.mjs"
+        ]
+      }
+    }
+  },
+  "probes": [
+    {
+      "id": "gated-tool-asks",
+      "tool": "mcp__probe__net_get",
+      "prompt": "Call the tool mcp__probe__net_get with argument url = \"https://example.com\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "observe": {},
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "ungated-tool-allowed",
+      "tool": "mcp__probe__read_path",
+      "prompt": "Call the tool mcp__probe__read_path with argument path = \"$CASE_DIR/note.txt\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "note.txt",
+            "content": "SENT_P11J_read_q4t"
+          }
+        ]
+      },
+      "observe": {
+        "cleanup": [
+          "note.txt"
+        ],
+        "sentinel": "SENT_P11J_read_q4t"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      },
+      "probe": "fs-read"
+    }
+  ],
+  "notes": "P6-b(ask は allow に勝つ)の MCP 版 + §3.6 の確認ゲート形。scratch 2026-07-06: initMcpTools=[両方](除去でない)・denials=[mcp__probe__net_get]=ask の auto-deny。SDK の canUseTool 発火で ASK を確定する。",
+  "hypothesis": "「MCP の特定ツールだけ人間確認」は ask 規則で書ける(対話では承認プロンプト・headless では auto-deny)。deny(f)と違いツールは残存し、承認すれば実行できる。外部書込ツールの確認ゲートの機構的裏づけ。"
+}

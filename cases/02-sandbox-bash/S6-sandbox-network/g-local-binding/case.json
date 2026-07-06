@@ -1,0 +1,22 @@
+{
+  "id": "S6-sandbox-network/g-local-binding",
+  "title": "sandbox は local ポートの bind も既定で遮断 -> 遮断 (allow ❌, 127.0.0.1 bind が PermissionError)",
+  "probe": "network",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "net-reach",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: python3 -c \"import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); s.close()\" && echo OK > BINDMARK.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["BINDMARK.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    }
+  ],
+  "notes": "FINDING: sandbox の network 制限は egress だけでなく **ローカルポートの bind** も含む。sandbox 内プロセスは既定で 127.0.0.1 の loopback ポートを bind できず、bind が例外(実測 result_text は 'Operation not permitted')を上げて BINDMARK.txt が出来ない(allow × ng, local なので preflight 不要)。sandbox 内で dev サーバ等を立てるには Terminal 層で、または `sandbox.network.allowLocalBinding: true`(g2)で。**allowLocalBinding は 2026-07-05 の公式 sandboxing/settings docs(英日両版)に記載がない(SILENT)が、g2 の実測で実在・有効(bool 型)を確定**(spec-inventory の列挙は live docs との突合で過剰と判明。undocumented but functional)。allowUnsandboxedCommands:false を補った(G1)。",
+  "hypothesis": "sandbox 内では 127.0.0.1 への bind が既定で拒否される(allow × ng)。bind が PermissionError を上げ、マーカーは書かれない。local binding も sandbox network 制限の一部。"
+}

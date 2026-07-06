@@ -1,0 +1,13 @@
+{
+  "sandbox": {
+    "enabled": false
+  },
+  "permissions": {
+    "allow": [
+      "Bash(*)"
+    ],
+    "deny": [
+      "Read(~/**)"
+    ]
+  }
+}

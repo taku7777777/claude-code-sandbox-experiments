@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "deny": [
+      "Write(assets/**)",
+      "Edit(assets/**)"
+    ]
+  }
+}

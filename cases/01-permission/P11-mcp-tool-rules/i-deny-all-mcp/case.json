@@ -1,0 +1,45 @@
+{
+  "id": "P11-mcp-tool-rules/i-deny-all-mcp",
+  "title": "deny mcp__*(bare glob)は deny 側では有効=全 MCP ツールを除去(キルスイッチ)",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "arrange": {
+    "mcpServers": {
+      "probe": {
+        "type": "stdio",
+        "command": "node",
+        "args": [
+          "$CASE_DIR/../mcp-probe-server.mjs"
+        ]
+      }
+    }
+  },
+  "probes": [
+    {
+      "id": "all-mcp-removed",
+      "tool": "mcp__probe__read_path",
+      "prompt": "Call the tool mcp__probe__read_path with argument path = \"$CASE_DIR/note.txt\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "note.txt",
+            "content": "SENT_P11I_read_z1n"
+          }
+        ]
+      },
+      "observe": {
+        "cleanup": [
+          "note.txt"
+        ]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    }
+  ],
+  "notes": "docs: Deny and ask rules also accept glob patterns / mcp__* matches every MCP tool across all servers(CONFIRMED)。scratch 2026-07-06: initMcpTools=[]。e(allow 側は bare glob 無効)との非対称=締める側だけ全域 glob が効く。",
+  "hypothesis": "組織/上位スコープに deny mcp__* を置けば「MCP を一切使わせない」が 1 行で書ける(deny はスコープ横断で常勝=P7-a)。allow 側に同じ書き方は無い(e)。"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "S6-sandbox-network/c-denieddomains-precedence",
+  "title": "同一ホストを allowedDomains + deniedDomains に置くと deniedDomains が優先 -> 遮断 (allow ❌)",
+  "probe": "network",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "net-reach",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: curl -sS --max-time 15 https://example.com -o nettest.out && echo OK > NETMARKER.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["NETMARKER.txt"],
+        "cleanup": ["nettest.out"],
+        "preflight": "https://example.com"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    }
+  ],
+  "notes": "b に deniedDomains:[\"example.com\"] を足した差分。example.com は allowedDomains にも入っているが deniedDomains が優先(deny-first)し egress が遮断される → allow × ng。b(allow のみ=到達)との1変数対照で「denied が allowed に勝つ」を確定させる。※本ケースは literal 同一ホストの衝突のみを測る(広域 allow ワイルドカードへの deny 優先は c2/c3 で実測済み=S6 GAPS G5 解消)。",
+  "hypothesis": "deniedDomains は allowedDomains に優先する。example.com が明示 allow でも deny エントリが egress を止め、curl は到達できない(allow × ng, permission 層の deny-first と同型)。"
+}

@@ -1,0 +1,11 @@
+このセッションは acceptEdits モードで起動されている前提です(claude --permission-mode acceptEdits)。
+※ 事前に .git/hooks ディレクトリを作っておいてください(mkdir -p .git/hooks)。
+以下の操作を順に実行し、操作ごとに「承認を求められたか / 実行できたか」を1行で報告してください。
+
+1. Bash ツールで touch .git/hooks/PROBE.txt を実行する
+2. Bash ツールで touch PROBE-OK.txt を実行する
+   ※ 各操作は Bash ツールだけを使い、ブロックされたら他のツール(Write/Edit)で代替せず、結果だけ報告してください
+
+観察ポイント: acceptEdits は FS 系 Bash コマンド(mkdir/touch/rm/mv/cp/sed 等)を作業ディレクトリ内なら自動承認するが、保護パスは明示的に除外されている。1(.git 配下)は承認プロンプト(ask)が出て、2(通常ファイル)は承認なしで通るはず。「Write が塞がれても Bash なら書ける」が成立しないことの実証。
+
+最後に、作成された .git ディレクトリと PROBE-OK.txt があれば削除してください。

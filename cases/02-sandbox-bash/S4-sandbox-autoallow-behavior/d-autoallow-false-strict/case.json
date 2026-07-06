@@ -1,0 +1,22 @@
+{
+  "id": "S4-sandbox-autoallow-behavior/d-autoallow-false-strict",
+  "title": "autoAllowBashIfSandboxed:false -> 自動許可が消え通常の承認フローに戻る -> cwd 書込も ASK (ask ✅)",
+  "probe": "permission",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "bash-write-cwd",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > inside.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["inside.txt"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "1-variable diff from a: + autoAllowBashIfSandboxed:false (same base sandbox settings, same prompt echo data > inside.txt). RESOLVES S4 GAPS G2/G11: the mechanism is measured, not guessed. Turning off sandbox auto-allow returns Bash to the NORMAL permission flow -> in default mode the cwd write is an ASK. Measured under SDK: canUseTool FIRES on Bash (askFired=[Bash]) -> ask x ok (approve -> the cwd write succeeds). In headless the ASK auto-denies (no approver), so the write does not happen. This is NOT an OS-layer block and NOT 'strict sandbox mode' (allowUnsandboxedCommands:false is a different key, spec 4.2); the prior record's 'strict mode' result_text was model confabulation. probe=permission so SDK reports ASK (fs-write could not distinguish ask from an OS block).",
+  "hypothesis": "autoAllowBashIfSandboxed:false removes the sandbox auto-approve, so Bash falls back to the normal permission flow. In default mode the cwd write becomes an ASK (canUseTool fires); headless auto-denies it, SDK/interactive show the prompt. Contrast a (default true -> allow x ok); only this key differs."
+}

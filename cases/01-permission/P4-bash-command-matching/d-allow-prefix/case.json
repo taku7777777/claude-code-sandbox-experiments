@@ -1,0 +1,23 @@
+{
+  "id": "P4-bash-command-matching/d-allow-prefix",
+  "title": "allow only Bash(echo:*), run `echo hi && touch scratch.txt` -> the allow-prefix does NOT extend to the chained sibling (touch), so the compound asks",
+  "probe": "permission",
+  "tool": "Bash",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "chain-unallowed-sibling",
+      "prompt": "Use the Bash tool to run exactly this command: echo hi && touch $CASE_DIR/scratch.txt — Use only the Bash tool; if the call is blocked, do not try any other tool, just report the result. Do it immediately. Do not ask, do not explain.",
+      "observe": {
+        "sideEffects": ["scratch.txt"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "The compound is matched subcommand-by-subcommand. echo is covered by allow Bash(echo:*), but touch is not covered by any allow and there is no deny rule, so the whole compound is NOT auto-approved: canUseTool fires (ask), and if approved the touch completes (result ok). An allow-prefix does NOT extend to chained sibling commands. Same subcommand-independent matching as b, but here the un-covered sibling produces ask (no deny rule) rather than a hard deny. Neutral prompt/filename to avoid model self-refusal (the prior PWNED probe self-refused before reaching the engine -> INCONCLUSIVE; see GAPS G1). If in-repo headless still self-refuses, the SDK canUseTool verdict is authoritative."
+}

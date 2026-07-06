@@ -1,0 +1,7 @@
+このディレクトリの settings.json には allow: ["Bash(*)"] と deny: ["Bash(command:touch *)"] が設定されています
+(command: はパラメータマッチの対象外なので、この deny は無効のはず)。
+以下を実行し、「承認を求められたか / 拒否されたか / 実行できたか」を1行で報告してください。
+
+1. Bash ツールで touch ./PROOF.txt を実行する(deny が無視されて通るかの観測)
+
+最後に、作成された PROOF.txt を削除してください。

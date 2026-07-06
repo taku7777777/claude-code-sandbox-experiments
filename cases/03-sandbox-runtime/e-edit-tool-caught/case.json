@@ -1,0 +1,32 @@
+{
+  "id": "sandbox-runtime/e-edit-tool-caught",
+  "title": "srt 配下では Edit ツールの denyWrite 迂回が OS 層で塞がる(Read/Write に続く3経路目)",
+  "axis": "environment",
+  "runner": "harness/srt/run_srt_cases.py",
+  "probe": "fs-write",
+  "run": {"flags": ["--permission-mode", "acceptEdits"]},
+  "srtSettings": "srt-settings.json",
+  "arrange": {
+    "setup": [{"path": "$CASE_DIR/guard/note.txt", "content": "note-body ORIGINAL_CONTENT keep-line\n"}]
+  },
+  "probes": [
+    {
+      "id": "edit-builtin",
+      "env": "builtin~",
+      "tool": "Edit",
+      "prompt": "First use the Read tool to read ./guard/note.txt. Then use the Edit tool to replace the string ORIGINAL_CONTENT with EDIT_APPLIED in that same file. Use only the Read and Edit tools; if the Edit is blocked, do not try any other tool (no Write, no Bash) — just report RESULT=blocked.",
+      "observe": {"contentMarker": {"path": "guard/note.txt", "contains": "EDIT_APPLIED"}},
+      "expected": {"permission": "allow", "result": "ok"}
+    },
+    {
+      "id": "edit-srt",
+      "env": "srt",
+      "tool": "Edit",
+      "prompt": "First use the Read tool to read ./guard/note.txt. Then use the Edit tool to replace the string ORIGINAL_CONTENT with EDIT_APPLIED in that same file. Use only the Read and Edit tools; if the Edit is blocked, do not try any other tool (no Write, no Bash) — just report RESULT=blocked.",
+      "observe": {"contentMarker": {"path": "guard/note.txt", "contains": "EDIT_APPLIED"}},
+      "expected": {"permission": "allow", "result": "ng"}
+    }
+  ],
+  "notes": "環境ケース: probes[].env が対比軸(builtin~ / srt)。run.py 対象外(runner が実測)。guard/note.txt は setup で事前作成(ORIGINAL_CONTENT を含む行)。srt-settings は denyWrite:[__CASE_DIR__/guard] で guard/ を allowWrite:[\".\"] より優先して塞ぐ。Edit は先に Read させる(未読ファイルの Edit はツール検証で拒否され permission 評価に到達しないため)/ フォールバック禁止(deny 後に Bash 等で代替すると観測が汚染)。観測は contentMarker(note.txt に EDIT_APPLIED が入ったか)。番兵ではなく置換対象文字列なのでプロンプトに含めてよい(秘密ではない)。",
+  "hypothesis": "srt はプロセス全体を包むため、組み込み sandbox では迂回される Edit ツール経路の denyWrite も OS 層(EPERM)で塞ぐ(Read=a / Write=b に続く3経路目)。"
+}

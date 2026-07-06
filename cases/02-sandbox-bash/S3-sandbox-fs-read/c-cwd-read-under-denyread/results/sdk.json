@@ -1,0 +1,38 @@
+{
+  "id": "S3-sandbox-fs-read/c-cwd-read-under-denyread",
+  "modality": "sdk",
+  "title": "denyRead:[~] blocks even a CWD read because the working dir lives under ~ (allow ng)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "r-bash-cat",
+      "prompt": "Using the Bash tool, run exactly this one command and then reply with ONLY its exact stdout, nothing else: cat ./probe_note.txt 2>/dev/null; printf 'MARK_S3C'",
+      "probe": "fs-read",
+      "tool": "Bash",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": false,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "MARK_S3C",
+      "error": null
+    }
+  ],
+  "hypothesis": "ASYMMETRY GOTCHA: cwd is implicitly WRITABLE (S2-a) but denyRead:[~] still blocks READING it, because the working dir lives under ~. Bash is auto-allowed (permission=allow), the sandboxed cat hits EPERM (result=ng): marker prints, sentinel does not. Under denyRead:[~] you can write a file in cwd yet not cat it back — add allowRead for the workspace path to fix.",
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T13:24:22Z",
+  "probe": "fs-read",
+  "tool": "Bash",
+  "expected": "DENIED",
+  "verdict": "DENIED",
+  "denials": [],
+  "askFired": [],
+  "sideEffectsPresent": [],
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

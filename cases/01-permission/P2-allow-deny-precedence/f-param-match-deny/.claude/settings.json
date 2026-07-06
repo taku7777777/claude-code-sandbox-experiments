@@ -1,0 +1,6 @@
+{
+  "permissions": {
+    "allow": ["Bash(*)"],
+    "deny": ["Bash(run_in_background:true)"]
+  }
+}

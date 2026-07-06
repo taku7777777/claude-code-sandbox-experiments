@@ -1,0 +1,49 @@
+{
+  "id": "P7-settings-scope-precedence/b-local-over-project",
+  "modality": "headless",
+  "title": "local defaultMode acceptEdits vs project defaultMode plan -> local wins (Write to cwd auto-approved)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-cwd",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/P7-settings-scope-precedence/b-local-over-project/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [
+        "PROOF.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "Done.",
+      "error": null,
+      "engine_decision": {
+        "decision": "ALLOW",
+        "source": "side-effect"
+      }
+    }
+  ],
+  "hypothesis": "local と project が defaultMode で衝突すると local が勝つ(precedence managed>CLI>local>project>user)。local=acceptEdits が効けば cwd への Write は自動承認され ✅。byModality.sdk=ASK は P1-i 実測(SDK は settings の defaultMode を適用しない: 規則は settings から、モードは options から)による。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-05T15:10:29Z",
+  "probe": "permission",
+  "tool": "Write",
+  "expected": "ALLOWED",
+  "verdict": "ALLOWED",
+  "denials": [],
+  "askFired": null,
+  "sideEffectsPresent": [
+    "PROOF.txt"
+  ],
+  "engine_decision": {
+    "decision": "ALLOW",
+    "source": "side-effect"
+  }
+}

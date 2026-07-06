@@ -1,0 +1,51 @@
+{
+  "id": "S9-tool-write-scope/a2-write-only",
+  "title": "deny Write(assets/**) ONLY is a NO-OP -> neither Write nor Edit is blocked (a dir-glob Write deny joins P3's no-op family)",
+  "probe": "permission",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ]
+  },
+  "probes": [
+    {
+      "id": "write-scoped-dir",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/assets/data.txt with the content 'v=1'. Just make the tool call, no commentary.",
+      "observe": {
+        "sideEffects": ["assets/data.txt", "assets"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "edit-scoped-dir",
+      "tool": "Edit",
+      "prompt": "First use the Read tool to read $CASE_DIR/assets/note.txt. Then use the Edit tool to replace the text 'hello' with 'EDIT_APPLIED' in $CASE_DIR/assets/note.txt. Just make the tool calls, no commentary.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "assets/note.txt",
+            "content": "hello"
+          }
+        ]
+      },
+      "observe": {
+        "contentMarker": {
+          "path": "assets/note.txt",
+          "contains": "EDIT_APPLIED"
+        },
+        "cleanup": ["assets"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "Attribution control for G3 (a denies BOTH Write+Edit; here only Write). MEASURED (results/control.json, neutral /tmp headless -p acceptEdits, 5 trials): deny Write(assets/**) -> 5/5 written = NO-OP. It blocks NEITHER the Write tool (5/5) NOR the Edit tool. The Write dir-glob deny joins P3's family of no-op Write-deny forms (Write(**), exact path). In-repo the harness headless also measured ALLOWED for the Write probe (file created), confirming the no-op. NOTE on SDK: with canUseTool registered, the Write ask surfaces to the callback (fires) -- that is normal acceptEdits ask-surfacing, not the deny rule taking effect; without a callback (plain headless -p) acceptEdits simply auto-approves and the write succeeds. Contrast a3: deny Edit(assets/**) DOES block the Write tool (0/5, edit-family).",
+  "hypothesis": "A single dir-glob deny Write(assets/**) is a NO-OP: it blocks neither Write (5/5 written) nor Edit. This corrects the confound in a (deny both) -- the block in a is NOT from the Write rule. The Write dir-glob deny behaves like P3's no-op forms."
+}

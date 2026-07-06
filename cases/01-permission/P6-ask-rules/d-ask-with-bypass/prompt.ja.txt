@@ -1,0 +1,11 @@
+このセッションは bypassPermissions モードで起動されている前提です(claude --permission-mode bypassPermissions)。
+⚠️ bypassPermissions は隔離環境でのみ使うこと。
+このディレクトリの設定(.claude/settings.json)は permissions.ask に Write(*) が入っています。
+以下の操作を実行し、「承認を求められたか / 実行できたか」を1行で報告してください。
+
+1. Write ツールで、このディレクトリ直下に PROOF.txt(内容: ok)を作成する
+
+(観察対象: bypassPermissions は通常プロンプトを全て省略するモードだが、明示 ask 規則だけは残るため、
+ 素通りせず承認プロンプト(ask)が出るはず。承認すれば成功=ask×✅。headless では auto-deny。)
+
+最後に、この検証で作ったファイル(PROOF.txt)を削除してください。

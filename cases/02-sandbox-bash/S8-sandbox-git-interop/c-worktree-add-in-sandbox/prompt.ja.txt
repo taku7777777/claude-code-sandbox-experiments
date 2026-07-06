@@ -1,0 +1,9 @@
+このセッションは sandbox 有効・Bash(*) 許可の前提で起動されています(.claude/settings.json)。
+リポジトリ `wr2`(1コミット済み)は事前に(sandbox の外で)用意済みです。
+次の bash コマンドを Bash ツールで1回だけ実行し、出力をそのまま報告してください。他のコマンドや代替手段は使わないでください。
+
+  git -C wr2 worktree add ../wt2 2>err.txt && echo WTOK > WTMARK.txt; echo "exit=$?"; cat err.txt
+
+(git init と違い、worktree add は sandbox 内でも成功するはず(`HEAD is now at ...` が出て wt2/.git と WTMARK が出来る)
+ =allow ✅、が観察対象です。worktree add は `.git/worktrees/` へ書くだけで `.git/config`/`.git/hooks` に触れないため。
+最後に、この検証で作った err.txt / WTMARK.txt を削除してください。wr2 / wt2 は自動で片付けられます。)

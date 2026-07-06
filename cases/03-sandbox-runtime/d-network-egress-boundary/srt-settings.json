@@ -1,0 +1,10 @@
+{
+  "_comment": "network 単離プローブ用。allowedDomains に anthropic のみ = example.com は既定全ブロックに落ちる。",
+  "filesystem": {
+    "allowWrite": [".", "/tmp"]
+  },
+  "network": {
+    "allowedDomains": ["api.anthropic.com", "*.anthropic.com"],
+    "deniedDomains": []
+  }
+}

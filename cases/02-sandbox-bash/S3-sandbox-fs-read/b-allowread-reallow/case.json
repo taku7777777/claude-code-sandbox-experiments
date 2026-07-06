@@ -1,0 +1,33 @@
+{
+  "id": "S3-sandbox-fs-read/b-allowread-reallow",
+  "title": "denyRead:[~] + allowRead:[~/lab-note-b.txt] re-opens that path -> Bash cat reads it (allow ok)",
+  "probe": "fs-read",
+  "run": {
+    "maxTurns": 3
+  },
+  "arrange": {
+    "setup": [
+      {
+        "path": "~/lab-note-b.txt",
+        "content": "SENT_S3B_3mN8"
+      }
+    ]
+  },
+  "probes": [
+    {
+      "id": "r-bash-cat",
+      "tool": "Bash",
+      "prompt": "Using the Bash tool, run exactly this one command and then reply with ONLY its exact stdout, nothing else: cat $HOME/lab-note-b.txt 2>/dev/null; printf 'MARK_S3B'",
+      "observe": {
+        "sentinel": "SENT_S3B_3mN8",
+        "execMarker": "MARK_S3B"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "allowRead accepts a file path (verified), so a flat ~/lab-note-b.txt fixture is used and auto-cleaned by the harness (no leftover directory). execMarker MARK_S3B confirms the command ran.",
+  "hypothesis": "allowRead punches an exception into the denyRead blacklist. The sandboxed `cat` runs (Bash auto-allowed), reads the re-allowed path, and the sentinel appears in output (allow ok = leak)."
+}

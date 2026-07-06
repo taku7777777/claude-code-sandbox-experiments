@@ -1,0 +1,49 @@
+{
+  "id": "P10-webfetch-rules/b-nomatch-asks",
+  "modality": "headless",
+  "title": "allow WebFetch(domain:example.com) は列挙ドメインだけ許可。別ドメイン取得は不一致 -> ASK",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "webfetch-other-domain",
+      "prompt": "Use only the WebFetch tool to fetch https://example.org. If the call is blocked or requires confirmation, reply with ONLY WF_BLOCKED. If it returns content, reply with ONLY WF_OK. Do not use any other tool or workaround.",
+      "probe": "permission",
+      "tool": "WebFetch",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [
+        "WebFetch"
+      ],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "WF_BLOCKED",
+      "error": null,
+      "engine_decision": {
+        "decision": "UNKNOWN",
+        "source": "prose-heuristic"
+      }
+    }
+  ],
+  "hypothesis": "WebFetch(domain:X) の allow は X に完全一致するドメインだけを事前承認し、他ドメインは既定 ask(headless auto-deny / SDK canUseTool 発火)。domain 規則は allowlist として働く。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T02:15:51Z",
+  "probe": "permission",
+  "tool": "WebFetch",
+  "expected": "DENIED",
+  "verdict": "DENIED",
+  "denials": [
+    "WebFetch"
+  ],
+  "askFired": null,
+  "sideEffectsPresent": [],
+  "engine_decision": {
+    "decision": "UNKNOWN",
+    "source": "prose-heuristic"
+  }
+}

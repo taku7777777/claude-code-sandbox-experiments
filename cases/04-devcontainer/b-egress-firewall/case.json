@@ -1,0 +1,32 @@
+{
+  "id": "devcontainer/b-egress-firewall",
+  "title": "egress firewall — iptables default-deny + allowlist(init-firewall.sh の機構)",
+  "axis": "environment",
+  "runner": "README 試し方(docker run --cap-add=NET_ADMIN --cap-add=NET_RAW + alpine + iptables)",
+  "probe": "network",
+  "probes": [
+    {
+      "id": "pre-firewall",
+      "env": "container",
+      "cmd": "curl -s -o /dev/null -w '%{http_code}' --max-time 8 https://example.com",
+      "observe": {"execMarker": "HTTP 200 = 到達(対照)"},
+      "expected": {"permission": "none", "result": "ok"}
+    },
+    {
+      "id": "post-firewall-blocked",
+      "env": "container",
+      "cmd": "iptables -P OUTPUT DROP 適用後: curl https://example.com(非許可)",
+      "observe": {"execMarker": "HTTP 000 = 遮断"},
+      "expected": {"permission": "none", "result": "ng"}
+    },
+    {
+      "id": "post-firewall-allowed",
+      "env": "container",
+      "cmd": "同適用後: curl https://1.1.1.1(allowlist)",
+      "observe": {"execMarker": "HTTP 応答 = 到達"},
+      "expected": {"permission": "none", "result": "ok"}
+    }
+  ],
+  "notes": "環境ケース: claude 非経由(docker CLI + alpine)で iptables 機構を単離するため expected.permission は none。default-deny OUTPUT はコンテナ netns 全体に効く=全プロセスの egress を allowlist に縛る(組み込み S6 の Bash 限定より広い)。公式 init-firewall.sh を丸ごと動かす end-to-end は未実施(→ DEVCONTAINER-FINDINGS §5)。",
+  "hypothesis": "iptables default-deny + allowlist で、コンテナ内どのプロセスの egress も許可リストに限定できる。"
+}

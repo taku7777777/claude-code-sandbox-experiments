@@ -1,0 +1,33 @@
+{
+  "id": "P5-protected-paths/f-allow-no-preapprove",
+  "title": "permissions.allow cannot pre-approve protected-path writes -> Write(.claude/**) in allow still asks (safety check runs before allow evaluation)",
+  "probe": "permission",
+  "tool": "Write",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ],
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-claude-with-allow",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/.claude/PROBE.txt with the content 'x'. Do it immediately. Use only the Write tool — if the call is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": [
+          ".claude/PROBE.txt"
+        ],
+        "cleanup": [
+          ".claude/PROBE.txt"
+        ]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "Official permission-modes doc (Protected paths; verified 2026-07-05): 'permissions.allow rules in settings files do not pre-approve protected-path writes. The safety check runs before Claude Code evaluates allow rules from settings, so an entry such as Edit(.claude/**) ... does not change the per-mode outcome.' This case is P5-c plus ONE variable: allow rules in settings. If any allow rule were effective on protected paths, verdict would flip to ALLOWED; docs predict it stays ask (headless auto-deny / SDK canUseTool fires). This is the empirical backing for the FINDINGS.md Q1 note ('allow があっても常に承認要求') which until now cited only P5-a (no allow rule present). Adding allow on top of acceptEdits also refutes 'allow + acceptEdits combined can open protected paths'. CONFOUND CONTROL: the allow list includes Write(*) — the form empirically proven to pre-approve writes (P1-g under dontAsk, P2-a under default) — alongside the docs-cited path-scoped forms Write(.claude/**) / Edit(.claude/**). Without Write(*), an ask result would be ambiguous: path-scoped Write allow globs are known silent no-ops (P3 write-glob-asymmetry), so the ask could come from rule non-match rather than protected-path supremacy. With Write(*) present and the write still asking, the protected-path check demonstrably runs upstream of a matching, effective allow rule."
+}

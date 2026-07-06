@@ -1,0 +1,22 @@
+{
+  "id": "S4-sandbox-autoallow-behavior/a-empty-allow-autoallows",
+  "title": "sandbox on (autoAllowBashIfSandboxed 既定 true) -> cwd 書込は無プロンプトで自動許可 (allow ✅)",
+  "probe": "permission",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "bash-write-cwd",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > inside.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["inside.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "Baseline for the S4 a<->d contrast, sharing S2-a's exact prompt (echo data > inside.txt) and base settings so a and d differ by ONE variable only: autoAllowBashIfSandboxed. Here it is the default (true): sandbox auto-allows the Bash cwd write with no permission prompt (canUseTool does NOT fire; measured askFired empty) -> allow x ok. probe=permission (not fs-write) so the contrast with d is measured on the SAME axis: d flips this to an ASK, which only a permission probe can represent under SDK. The old case ran a compound `mkdir && echo` with permissions.allow:[]; both were dropped to make a<->d a clean single-variable pair (S4 GAPS G9).",
+  "hypothesis": "With sandbox on and autoAllowBashIfSandboxed at its default true, a sandboxed Bash cwd write is auto-allowed with no prompt (allow x ok). This is why worker configs run on sandbox + no allow rules."
+}

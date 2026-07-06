@@ -1,0 +1,41 @@
+{
+  "id": "P7-settings-scope-precedence/d-cli-over-project",
+  "modality": "sdk",
+  "title": "CLI --permission-mode acceptEdits vs project defaultMode plan -> CLI wins (Write to cwd auto-approved)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-cwd",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/P7-settings-scope-precedence/d-cli-over-project/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [
+        "PROOF.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "Done. File created at `$REPO/cases/P7-settings-scope-precedence/d-cli-over-project/PROOF.txt` with content `ok`.",
+      "error": null
+    }
+  ],
+  "hypothesis": "CLI 引数は project settings に勝つ(precedence managed>CLI>local>project>user)。--permission-mode acceptEdits が project の defaultMode: plan を上書きし、cwd への Write は自動承認され ✅。対照: settings の plan 単独なら Write は ask(P1-c/P1-i)、CLI acceptEdits 単独なら allow(P1-b)— 併置して allow になれば CLI > project が立つ。SDK は flags→options 機械変換(permissionMode=acceptEdits)で options のモードが適用されるため byModality 不要(P1-i: モードは options から)。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-05T15:16:19Z",
+  "probe": "permission",
+  "tool": "Write",
+  "expected": "ALLOWED",
+  "verdict": "ALLOWED",
+  "denials": [],
+  "askFired": [],
+  "sideEffectsPresent": [
+    "PROOF.txt"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "id": "devcontainer/h-env-secret-boundary",
+  "title": "手段3 × env 秘密の境界 — 注入した env はコンテナ内で読める(マスクなし)が、注入しなければ存在しない(fail-closed)",
+  "axis": "environment",
+  "runner": "harness/devcontainer/run_devc_e2e.sh",
+  "probe": "credential-leak",
+  "arrange": {
+    "env": {"LAB_ENV_SENTINEL": "__SENTINEL__"}
+  },
+  "probes": [
+    {
+      "id": "env-injected-readable",
+      "env": "container",
+      "cmd": "printf 'RESULT=%s\\n' \"$LAB_ENV_SENTINEL\"",
+      "observe": {"sentinel": "__SENTINEL__", "evidenceMarker": "RESULT= に番兵が出る = env は素通り"},
+      "expected": {"permission": "none", "result": "ok"}
+    },
+    {
+      "id": "env-absent-when-not-injected",
+      "env": "container",
+      "cmd": "printf 'RESULT=%s\\n' \"${LAB_ENV_SENTINEL:-__ABSENT__}\"",
+      "observe": {"evidenceMarker": "__ABSENT__ = 注入していない番兵は存在しない"},
+      "expected": {"permission": "none", "result": "ng"}
+    }
+  ],
+  "notes": "環境ケース(境界条件・claude 非経由・cmd 型): probes[].env は両方 container で、対比軸は『-e で env を注入したか否か』。手段3(コンテナ)版の env 秘密境界で、srt-j(手段2)に対応する。b1(env-injected-readable): docker run -e LAB_ENV_SENTINEL=<乱数> で注入したコンテナ内で番兵が読める(env はマスクされない=srt-j と同型の『倒せない面』・none×ok=leak=ALLOWED)。b2(env-absent-when-not-injected): 注入しないコンテナでは同じ番兵が存在しない(__ABSENT__。手段3の fail-closed=none×ng=DENIED_OS)。srt との違い: srt は親プロセスの env をそのまま継承するため、ホスト環境に置いた秘密が srt 配下へ素通りしうる(srt-j)。手段3は明示注入(-e / containerEnv)しない限り env が空=fail-closed。含意: env の秘密は『注入しない』ことで手段3では消せる(srt では親 env 継承のため別対策が要る)が、注入した env は読めるので、注入するなら egress allowlist(d)と合わせる。番兵の実値はプロンプト/番兵ファイルに置かず env のみに置く。",
+  "hypothesis": "コンテナに -e で注入した env 秘密はコンテナ内のどのプロセスからも読める(env はマスクされない=srt-j と同型)。一方、注入しなければ env は空で番兵は存在しない(手段3は fail-closed)。srt は親プロセスの env を継承するため素通りしうるのと対比され、手段3固有の env 境界特性(明示注入しない限り空)を示す。"
+}

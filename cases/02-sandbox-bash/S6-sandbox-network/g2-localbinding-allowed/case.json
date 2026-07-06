@@ -1,0 +1,22 @@
+{
+  "id": "S6-sandbox-network/g2-localbinding-allowed",
+  "title": "sandbox.network.allowLocalBinding:true で 127.0.0.1 bind が通る (allow ✅) — g の肯定対照",
+  "probe": "network",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "net-reach",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: python3 -c \"import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); s.close()\" && echo OK > BINDMARK.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["BINDMARK.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "S6 GAPS G2 の箱: g(明示許可なし=bind 拒否)の肯定対照。`sandbox.network.allowLocalBinding: true` を足した1変数差分で、キーの実在と効果(bind が通るか)・値の型(bool)を実測で確定する。bind が通れば ❌→✅ の反転で f(allowUnixSockets)と対称になる。型エラーや無効(bind 依然拒否)ならそれ自体が発見として記録する。local なので preflight 不要。",
+  "hypothesis": "allowLocalBinding: true(bool)で sandbox 内プロセスが 127.0.0.1 に bind できるようになる(allow × ok)。g の ❌ と1変数対照。"
+}

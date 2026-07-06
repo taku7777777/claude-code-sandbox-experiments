@@ -1,0 +1,59 @@
+{
+  "id": "P9-hooks-vs-permission/a-hook-allow-cannot-override-deny",
+  "modality": "headless",
+  "title": "PreToolUse allow hook cannot loosen deny Edit(PROOF.txt) -> DENIED without the hook even firing; the same hook auto-approves an unguarded name",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-guarded-file",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/P9-hooks-vs-permission/a-hook-allow-cannot-override-deny/PROOF.txt with the content 'ok'. Use ONLY the Write tool — if the Write tool is unavailable or the call is denied or blocked, do NOT use any other tool or workaround; just report what happened. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "INCONCLUSIVE",
+      "verdict": "INCONCLUSIVE",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "Write tool was denied: \"File is in a directory that is denied by your permission settings.\"",
+      "error": null,
+      "evidenceFileFound": false,
+      "engine_decision": {
+        "decision": "UNKNOWN",
+        "source": "n/a"
+      }
+    },
+    {
+      "probeId": "write-other-file",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/P9-hooks-vs-permission/a-hook-allow-cannot-override-deny/OTHER.txt with the content 'ok'. Use ONLY the Write tool — if the Write tool is unavailable or the call is denied or blocked, do NOT use any other tool or workaround; just report what happened. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [
+        "OTHER.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "Done.",
+      "error": null,
+      "evidenceFileFound": true,
+      "engine_decision": {
+        "decision": "ALLOW",
+        "source": "side-effect"
+      }
+    }
+  ],
+  "hypothesis": "『hook で緩める』方向は deny 規則を越えられない(permissions docs: \"Hook decisions don't bypass permission rules. Deny and ask rules are evaluated regardless of what a PreToolUse hook returns\")。probe 1: deny Edit(PROOF.txt) にマッチする Write は、allow を返す PreToolUse hook があっても DENIED — scratch 探索(2026-07-05)では deny 規則マッチ時に hook がそもそも発火しない(marker なし)= deny は hook より前段で評価される。probe 2(対照): 同じ hook が未ガード名 OTHER.txt への Write を承認プロンプトなしで通す(規則なし=本来 ask)— hook の allow が機能していること自体の証明。1 と 2 で『hook は生きているが deny だけは緩められない』が1ケース内で閉じる。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-05T15:12:59Z"
+}

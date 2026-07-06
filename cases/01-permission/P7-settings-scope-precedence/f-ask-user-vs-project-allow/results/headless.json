@@ -1,0 +1,49 @@
+{
+  "id": "P7-settings-scope-precedence/f-ask-user-vs-project-allow",
+  "modality": "headless",
+  "title": "user-scope ask Write(*) vs project-scope allow Write(*) -> ASK (ask もスコープ横断で allow に勝つ)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-cwd",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/P7-settings-scope-precedence/f-ask-user-vs-project-allow/PROOF.txt with the content 'ok'. Use only the Write tool — if the call is blocked, do not try any other tool; just report the result. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [
+        "Write"
+      ],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "Write tool call blocked — permission not granted.",
+      "error": null,
+      "engine_decision": {
+        "decision": "UNKNOWN",
+        "source": "prose-heuristic"
+      }
+    }
+  ],
+  "hypothesis": "評価順 deny→ask→allow はスコープ横断でも成立: user の ask Write(*) が project の allow Write(*) に勝ち ASK になる(P6-b の『ask は allow に勝つ』の同一スコープ版を、スコープ横断へ拡張)。SDK onAsk=allow で ASK 発火 + 承認して書込完遂を確認(ask ✅)。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T00:04:05Z",
+  "probe": "permission",
+  "tool": "Write",
+  "expected": "DENIED",
+  "verdict": "DENIED",
+  "denials": [
+    "Write"
+  ],
+  "askFired": null,
+  "sideEffectsPresent": [],
+  "engine_decision": {
+    "decision": "UNKNOWN",
+    "source": "prose-heuristic"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "id": "S1-sandbox-scope-vs-tools/g-untrusted-sandbox-enforced",
+  "title": "未 trust の workspace でも sandbox.enabled は生きる -> cwd 内 Bash 書込は auto-allow ✅ / cwd 外は EPERM ❌。sandbox は trust ゲート対象外(allowWrite は要検証)",
+  "probe": "fs-write",
+  "tool": "Bash",
+  "arrange": {
+    "configDir": { "trusted": false }
+  },
+  "probes": [
+    {
+      "id": "w-cwd",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > inside.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["inside.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "w-outside-unlisted",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > $HOME/lab-untrust-probe/probe.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "arrange": {
+        "setup": [{ "path": "~/lab-untrust-probe/.keep", "content": "" }]
+      },
+      "observe": {
+        "sideEffects": ["~/lab-untrust-probe/probe.txt"],
+        "cleanup": ["~/lab-untrust-probe"],
+        "evidenceMarker": "operation not permitted"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    },
+    {
+      "id": "w-allowlisted",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > $HOME/lab-untrust-allowed/probe.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "arrange": {
+        "setup": [{ "path": "~/lab-untrust-allowed/.keep", "content": "" }]
+      },
+      "observe": {
+        "sideEffects": ["~/lab-untrust-allowed/probe.txt"],
+        "cleanup": ["~/lab-untrust-allowed"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "運用観点(発案: multi-repo-workspace の open-task.sh は Phase1 で hasTrustDialogAccepted=true を注入 = 安全モデル全体が『trust 設定が成功していること』を前提にしている)。P7-c は『未 trust → project の permissions.allow が無視・deny/ask は有効』を確定したが、sandbox.enabled 自体が未 trust の project settings で有効化されるかは未実測だった。もし未 trust で sandbox が off になるなら、trust 注入が失敗した worker は OS 境界ごと消えて全開になる(最悪の失敗モード)。公式 docs(permissions: workspace trust)は trust が縛るのは permissions.allow と additionalDirectories とだけ明記し、sandbox.filesystem/enabled は列挙しない → sandbox は trust ゲート対象外と読める。本ケースはそれを実測で確定する。probe 1(cwd 書込)が ALLOWED なら autoAllowBashIfSandboxed が発火 = sandbox 有効の一次シグナル(sandbox off なら Bash は permission 層に落ち headless default で ask→auto-deny ❌ になるはず)。probe 2(cwd 外・非 allowlist)= EPERM で境界が生きていることの対照。probe 3(allowWrite 列挙先)= sandbox.filesystem.allowWrite が未 trust でも効くかの検証(allowWrite は permissions.allow ではないので trust 非ゲートの予想)。未 trust 状態は arrange.configDir(trusted:false)で作る(P7-c と同型)。SDK は既定でも同結果のはず(canUseTool は sandbox 境界を見ない)。",
+  "hypothesis": "sandbox.enabled と sandbox.filesystem.allowWrite は workspace trust のゲート対象外(trust が縛るのは permissions.allow と additionalDirectories のみ)。ゆえに未 trust の workspace でも sandbox は有効なまま: cwd 内 Bash 書込は auto-allow で ✅、cwd 外の非 allowlist は EPERM で ❌、allowWrite 列挙先は ✅。= worker の trust 注入が失敗しても OS 境界は落ちない(defense-in-depth)。もし probe 1 が ❌(sandbox off)なら仮説を棄却し『sandbox は trust に依存する』という重大リスクとして記録する。"
+}

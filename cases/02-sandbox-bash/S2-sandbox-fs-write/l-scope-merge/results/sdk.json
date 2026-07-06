@@ -1,0 +1,52 @@
+{
+  "id": "S2-sandbox-fs-write/l-scope-merge",
+  "modality": "sdk",
+  "title": "sandbox.filesystem はスコープ間で配列マージ (置換ではない) -> project の allowWrite で user の denyWrite は外せない",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "w-user-denied-sub",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo x > $HOME/lab-merge/sub/f.txt && echo SUB_OK || echo SUB_FAIL — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "fs-write",
+      "tool": "Bash",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The command was blocked by sandbox restrictions. Output:\n```\n(eval):1: operation not permitted: $HOME/lab-merge/sub/f.txt\nSUB_FAIL\n```",
+      "error": null,
+      "evidenceFound": true
+    },
+    {
+      "probeId": "w-project-allowed-outer",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo x > $HOME/lab-merge/f.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "fs-write",
+      "tool": "Bash",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [
+        "~/lab-merge/f.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "Command executed successfully.",
+      "error": null
+    }
+  ],
+  "hypothesis": "スコープ間の sandbox.filesystem は配列マージ: user denyWrite + project allowWrite の合成で、sub への書込は deny 勝ちの EPERM (allow x ng)、deny 対象外の ~/lab-merge 直下は project の allowWrite で書ける (allow x ok)。project 側の設定では user の deny を外せない。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T13:33:26Z"
+}

@@ -1,0 +1,51 @@
+{
+  "id": "P9-hooks-vs-permission/e-hook-ask-over-allow",
+  "modality": "headless",
+  "title": "JSON ask hook (permissionDecision=ask) escalates an allow-listed Write to a confirmation -> ASK wins over allow Write(*)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-cwd",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/P9-hooks-vs-permission/e-hook-ask-over-allow/PROOF.txt with the content 'ok'. Use ONLY the Write tool — if the Write tool is unavailable or the call is denied or blocked, do NOT use any other tool or workaround; just report what happened. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [
+        "Write"
+      ],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The Write tool call was blocked with error `P9_HOOK_ASK`.",
+      "error": null,
+      "evidenceFound": true,
+      "evidenceFileFound": true,
+      "engine_decision": {
+        "decision": "ASK",
+        "source": "sdk"
+      }
+    }
+  ],
+  "hypothesis": "『hook で確認制に格上げ』: allow Write(*) で自動許諾のはずの操作を、hook の permissionDecision=ask がユーザ確認へエスカレートできる(hooks docs: ask = Escalate to user)。運用価値が高い形(広い allow + 特定操作だけ確認)の実装可否を測る。allow 規則単独なら ALLOWED になるはずなので、ASK が観測されれば hook の ask が allow を上書きした証拠。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-05T15:13:27Z",
+  "probe": "permission",
+  "tool": "Write",
+  "expected": "DENIED",
+  "verdict": "DENIED",
+  "denials": [
+    "Write"
+  ],
+  "askFired": null,
+  "sideEffectsPresent": [],
+  "engine_decision": {
+    "decision": "ASK",
+    "source": "sdk"
+  }
+}

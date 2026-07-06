@@ -1,0 +1,48 @@
+{
+  "id": "P1-permission-mode/g-dontAsk-with-allow",
+  "title": "dontAsk mode + allow Write(*) -> pre-approved writes go through; read-only tools are unaffected",
+  "probe": "permission",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "dontAsk"
+    ],
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "read-cwd",
+      "tool": "Read",
+      "probe": "fs-read",
+      "prompt": "Use the Read tool to read the file $CASE_DIR/sentinel.txt and output its exact contents. Do it immediately. Do not ask, do not explain.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "sentinel.txt",
+            "content": "P1G_SENT_x3t8"
+          }
+        ]
+      },
+      "observe": {
+        "sentinel": "P1G_SENT_x3t8"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "dontAsk auto-denies only what would otherwise ASK. (1) A pre-approved tool (allow Write(*)) never reaches ask, so it goes through even in dontAsk — this is the positive control for the CI recipe 'enumerate allow + dontAsk' (P1-d is the negative half). (2) Read-only tools (Read) sit in the no-approval tier, never ask, and are therefore unaffected by dontAsk — 'Auto-denies tools unless pre-approved' in the docs scopes to tools that would prompt."
+}

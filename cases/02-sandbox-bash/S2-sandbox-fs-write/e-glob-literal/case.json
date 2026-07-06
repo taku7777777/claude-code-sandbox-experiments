@@ -1,0 +1,54 @@
+{
+  "id": "S2-sandbox-fs-write/e-glob-literal",
+  "title": "allowWrite:[~/lab-glob-*] の * はリテラル -> lab-glob-XYZ に不一致。挙動はベースライン a と同一",
+  "probe": "fs-write",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "w-cwd",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > inside.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["inside.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "w-allowlisted",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > $HOME/lab-fs-write/probe.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "arrange": {
+        "setup": [{ "path": "~/lab-fs-write/.keep", "content": "" }]
+      },
+      "observe": {
+        "sideEffects": ["~/lab-fs-write/probe.txt"],
+        "cleanup": ["~/lab-fs-write"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    },
+    {
+      "id": "w-glob",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > $HOME/lab-glob-XYZ/probe.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "arrange": {
+        "setup": [{ "path": "~/lab-glob-XYZ/.keep", "content": "" }]
+      },
+      "observe": {
+        "sideEffects": ["~/lab-glob-XYZ/probe.txt"],
+        "cleanup": ["~/lab-glob-XYZ"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    }
+  ],
+  "notes": "DECIDES refactor-plan.md 2.3 / multi-repo-workspace.md: is sandbox.filesystem.allowWrite a glob or a literal path? allowWrite:[~/lab-glob-*] with w-glob writing to ~/lab-glob-XYZ. Measured DENIED (allow x ng): the * is LITERAL, so allowWrite only opens a directory literally named 'lab-glob-*', and lab-glob-XYZ does not match. Consequence: e's whole column equals baseline a's column (glob allowWrite is a no-op). Scope sandbox writes with full literal paths, not globs.",
+  "hypothesis": "sandbox.filesystem paths are literal (no glob expansion). allowWrite:[~/lab-glob-*] does NOT open ~/lab-glob-XYZ, so w-glob EPERMs (allow x ng) and the column matches baseline a."
+}

@@ -1,0 +1,46 @@
+{
+  "id": "S6-sandbox-network/c3-wildcard-deny-precedence",
+  "modality": "headless",
+  "title": "deniedDomains の特定ホストが広域 allow ワイルドカード(*.example.com)に勝つ -> 遮断 (allow ❌)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "net-reach",
+      "prompt": "Run exactly this one bash command using the Bash tool: curl -sS --max-time 15 https://www.example.com -o nettest.out && echo OK > NETMARKER.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "network",
+      "tool": "Bash",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": true,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "**Result:** Command blocked with exit code 56 (CONNECT tunnel failed, response 403). Files were not created.",
+      "error": null,
+      "engine_decision": {
+        "decision": "UNKNOWN",
+        "source": "prose-heuristic"
+      }
+    }
+  ],
+  "hypothesis": "deniedDomains の特定ホスト(www.example.com)は広域 allow ワイルドカード(*.example.com)に優先し、curl は遮断される(allow × ng)。運用上「広い allow の穴を特定ホストで塞ぐ」が成立する。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T13:24:08Z",
+  "probe": "network",
+  "tool": "Bash",
+  "expected": "DENIED",
+  "verdict": "DENIED",
+  "denials": [],
+  "askFired": null,
+  "sideEffectsPresent": [],
+  "engine_decision": {
+    "decision": "UNKNOWN",
+    "source": "prose-heuristic"
+  }
+}

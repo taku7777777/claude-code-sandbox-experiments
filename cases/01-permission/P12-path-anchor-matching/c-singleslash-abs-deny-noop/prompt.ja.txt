@@ -1,0 +1,3 @@
+このセッションは acceptEdits 前提です。設定は `deny Edit(/絶対パス/sub/**)`(単一スラッシュ絶対)。
+1. Read で $CASE_DIR/sub/note.txt を読み、Edit で 'hello' を 'EDIT_APPLIED' に置換してください(⚠️ 編集が**通ってしまう**はず=単一スラッシュ絶対 deny は no-op)。
+結果を報告し、変更したファイルを元に戻してください。

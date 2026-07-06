@@ -1,0 +1,75 @@
+{
+  "id": "P1-permission-mode/b-acceptEdits",
+  "title": "acceptEdits mode -> file edits are auto-approved without any allow rule",
+  "probe": "permission",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ],
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "write-home",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $HOME/p1b-proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["~/p1b-proof.txt"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "write-subdir",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/sub/proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["sub/proof.txt"],
+        "cleanup": ["sub"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "edit-cwd",
+      "tool": "Edit",
+      "prompt": "First use the Read tool to read $CASE_DIR/note.txt. Then use the Edit tool to replace the text 'hello' with 'EDIT_APPLIED' in $CASE_DIR/note.txt. Do it immediately. Do not ask, do not explain — just make the tool calls.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "note.txt",
+            "content": "hello"
+          }
+        ]
+      },
+      "observe": {
+        "contentMarker": {
+          "path": "note.txt",
+          "contains": "EDIT_APPLIED"
+        }
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "acceptEdits auto-approves file edits without any allow rule. Whether the auto-approval extends outside the working directory (write-home) is the non-obvious cell this case measures."
+}

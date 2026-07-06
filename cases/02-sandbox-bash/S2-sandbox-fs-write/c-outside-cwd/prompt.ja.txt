@@ -1,0 +1,9 @@
+このセッションは sandbox 有効(allowWrite なし)で動いている前提です。cwd の外に書けるかを確かめます。
+以下の Bash コマンドを上から順に1つずつ実行し、それぞれ「承認を求められたか / 実行できたか」を1行で報告してください。ブロックされたら他のツールで代替せず、結果だけ報告してください。
+
+1. echo data > inside.txt                       （cwd 直下＝対照）
+2. echo data > $HOME/lab-fs-write/probe.txt      （cwd 外）
+3. echo data > $HOME/lab-glob-XYZ/probe.txt      （cwd 外・別パス）
+
+(1 だけ成功、2 と 3 は "operation not permitted" で失敗するはず。ここで重要なのは「承認プロンプトが出て拒否された」のではなく「プロンプトなしで OS 層が EPERM した」点＝allow ❌ であって ask ではない、が観察対象です。
+最後に、作った inside.txt と、もし出来ていれば ~/lab-fs-write ~/lab-glob-XYZ を削除してください。)

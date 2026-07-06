@@ -1,0 +1,38 @@
+{
+  "id": "P1-permission-mode/i-defaultMode-in-settings",
+  "title": "permissions.defaultMode: acceptEdits in settings.json -> same behavior as the CLI flag (route equivalence, incl. the cwd boundary)",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok",
+        "byModality": {
+          "sdk": "ASK"
+        }
+      }
+    },
+    {
+      "id": "write-home",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $HOME/p1i-proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["~/p1i-proof.txt"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "The mode can be set via settings.json (permissions.defaultMode) as well as via the CLI flag. With defaultMode: acceptEdits and NO --permission-mode flag, behavior must equal P1-b: write-cwd auto-approved, write-home still ask (the cwd boundary comes with the mode, not with the route). This closes the gap that P1's banner says 'settings 差分でモードを変える' while b-f actually vary a CLI flag. MODALITY DIFFERENCE (measured 2026-07-05): the CLI honors defaultMode (headless write-cwd=ALLOWED), but the Agent SDK does NOT — even with settingSources:['project'] (which DOES load allow/deny rules, cf. P2 SDK results), the session mode stays 'default' because the SDK's permissionMode option (default value 'default') is what decides the mode. write-cwd is therefore ASK in SDK (byModality). To change mode in the SDK, pass options.permissionMode explicitly."
+}

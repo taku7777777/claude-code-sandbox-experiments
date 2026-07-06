@@ -1,0 +1,60 @@
+{
+  "id": "P4-bash-command-matching/a-direct",
+  "modality": "headless",
+  "title": "allow Bash(*) + deny Bash(curl:*) -> the narrow deny carves an exception only for the matched form (curl denied, echo still allowed)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "curl-denied",
+      "prompt": "Use the Bash tool to run exactly this command: curl -sS https://example.com -o $REPO/cases/P4-bash-command-matching/a-direct/CURLED.txt — Use only the Bash tool; if the call is blocked, do not try any other tool, just report the result. Do it immediately. Do not ask, do not explain.",
+      "probe": "permission",
+      "tool": "Bash",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [
+        "Bash"
+      ],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "Permission denied. The Bash command was blocked.",
+      "error": null,
+      "engine_decision": {
+        "decision": "DENY",
+        "source": "sdk"
+      }
+    },
+    {
+      "probeId": "echo-allowed",
+      "prompt": "Use the Bash tool to run exactly this command: echo ok > $REPO/cases/P4-bash-command-matching/a-direct/ECHOED.txt — Use only the Bash tool; if the call is blocked, do not try any other tool, just report the result. Do it immediately. Do not ask, do not explain.",
+      "probe": "permission",
+      "tool": "Bash",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [
+        "ECHOED.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "Done.",
+      "error": null,
+      "engine_decision": {
+        "decision": "ALLOW",
+        "source": "side-effect"
+      }
+    }
+  ],
+  "hypothesis": "A broad allow Bash(*) with a narrow deny Bash(curl:*) carves an exception ONLY for the matched form. curl matches the deny and is blocked (deny > allow, canUseTool never fires = DENIED_HARD). echo does not match the deny, stays covered by Bash(*), and runs. This is the permission-layer counterpart to P2-e: exceptions can be carved only by a narrow deny inside a broad allow, never the reverse (broad deny + narrow allow cannot reopen a hole -> P2-e). Bash rules are used because path-scoping cannot be expressed for Write (P3-d). The curl probe forbids tool fallback to keep the deny observation clean.",
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T11:32:39Z",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

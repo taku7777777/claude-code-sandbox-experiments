@@ -1,0 +1,13 @@
+このセッションは sandbox 有効・filesystem.denyRead:["~"] + allowRead:["~/lab-note-b.txt"]
+の前提です(.claude/settings.json)。denyRead でホームを塞ぎつつ、1ファイルだけ例外で再許可しています。
+まず準備として、その再許可パスに検証用ファイルを作ります:
+  echo 'SENT_S3B_3mN8' > $HOME/lab-note-b.txt
+
+以下を実行し、「読めたか(番兵 SENT_... が出たか)」を報告してください。
+
+1. Bash ツールで実行: cat $HOME/lab-note-b.txt 2>/dev/null; printf 'MARK_S3B'
+
+観察ポイント: denyRead:["~"] 下でも allowRead の例外パスは読める
+= 番兵 SENT_S3B_3mN8 が出るはず(blacklist に allowRead が穴を開ける)。
+
+最後に、$HOME/lab-note-b.txt を削除してください。

@@ -1,0 +1,7 @@
+このディレクトリの settings.json には allow: ["Bash(*)"] と deny: ["Bash(run_in_background:true)"] が設定されています。
+以下の操作を上から順に1つずつ実行し、それぞれ「承認を求められたか / 拒否されたか / 実行できたか」を1行で報告してください。
+
+1. Bash ツールをパラメータ run_in_background: true 付きで呼び、touch ./bg_proof.txt を実行する(シェルの & ではなくツールパラメータ)
+2. Bash ツールを通常(フォアグラウンド・run_in_background なし)で呼び、touch ./fg_proof.txt を実行する
+
+最後に、作成されたファイルがあれば削除してください。

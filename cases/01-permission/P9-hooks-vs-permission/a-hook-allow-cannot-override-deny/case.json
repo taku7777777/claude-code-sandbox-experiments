@@ -1,0 +1,46 @@
+{
+  "id": "P9-hooks-vs-permission/a-hook-allow-cannot-override-deny",
+  "title": "PreToolUse allow hook cannot loosen deny Edit(PROOF.txt) -> DENIED without the hook even firing; the same hook auto-approves an unguarded name",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-guarded-file",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Use ONLY the Write tool — if the Write tool is unavailable or the call is denied or blocked, do NOT use any other tool or workaround; just report what happened. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"],
+        "evidenceFile": "hook-ran.marker"
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-",
+        "byModality": {
+          "headless": "INCONCLUSIVE"
+        }
+      }
+    },
+    {
+      "id": "write-other-file",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/OTHER.txt with the content 'ok'. Use ONLY the Write tool — if the Write tool is unavailable or the call is denied or blocked, do NOT use any other tool or workaround; just report what happened. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["OTHER.txt"],
+        "evidenceFile": "hook-ran.marker"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "modalities": {
+    "interactive": {
+      "notes": "プローブは必ず 1(PROOF.txt)→ 2(OTHER.txt)の順で独立セッション実行。2 が hook-ran.marker を残すため、逆順だと 1 の『hook 不発火』観察が汚染される。"
+    }
+  },
+  "hypothesis": "『hook で緩める』方向は deny 規則を越えられない(permissions docs: \"Hook decisions don't bypass permission rules. Deny and ask rules are evaluated regardless of what a PreToolUse hook returns\")。probe 1: deny Edit(PROOF.txt) にマッチする Write は、allow を返す PreToolUse hook があっても DENIED — scratch 探索(2026-07-05)では deny 規則マッチ時に hook がそもそも発火しない(marker なし)= deny は hook より前段で評価される。probe 2(対照): 同じ hook が未ガード名 OTHER.txt への Write を承認プロンプトなしで通す(規則なし=本来 ask)— hook の allow が機能していること自体の証明。1 と 2 で『hook は生きているが deny だけは緩められない』が1ケース内で閉じる。",
+  "notes": "MEASURED-DESIGN 2026-07-05: 旧設計 deny Write(*) は bare 形でツール除去(P2-c/d)となり hook が発火する余地なく vacuous — P9 GAPS G1 で scoped deny Edit(PROOF.txt) 形(P3-e で Write ツールにも効くと実測済み)へ再設計。headless では scoped deny の拒否が permission_denials に載らない(P3-e と同型)ため byModality headless=INCONCLUSIVE(SDK が正: toolUses ありで DENIED_HARD)。hooks スキーマ/出力契約は hooks docs で裏取り済み(exit 0 + hookSpecificOutput.permissionDecision)。$CLAUDE_PROJECT_DIR はセッション cwd(=ケース dir)に解決されると実測(git repo root ではない)。"
+}

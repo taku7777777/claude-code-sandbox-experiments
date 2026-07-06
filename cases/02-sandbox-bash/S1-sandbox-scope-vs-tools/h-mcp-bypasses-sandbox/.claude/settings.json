@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": ["mcp__probe__read_path", "mcp__probe__net_get"]
+  },
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "denyRead": ["~/lab-mcp-note"]
+    },
+    "network": {
+      "allowedDomains": []
+    }
+  }
+}

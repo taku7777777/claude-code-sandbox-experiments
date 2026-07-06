@@ -1,0 +1,49 @@
+{
+  "id": "P10-webfetch-rules/a-deny-domain",
+  "modality": "headless",
+  "title": "deny WebFetch(domain:example.com) は WebFetch ツールの当該ドメイン取得を permission 層でブロック -> DENY",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "webfetch-denied",
+      "prompt": "Use only the WebFetch tool to fetch https://example.com. If the call is blocked or denied, reply with ONLY WF_BLOCKED. If it returns content, reply with ONLY WF_OK. Do not use any other tool or workaround.",
+      "probe": "permission",
+      "tool": "WebFetch",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [
+        "WebFetch"
+      ],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "WF_BLOCKED",
+      "error": null,
+      "engine_decision": {
+        "decision": "UNKNOWN",
+        "source": "prose-heuristic"
+      }
+    }
+  ],
+  "hypothesis": "WebFetch は sandbox network を迂回する(S6-h)が、permission 層の `WebFetch(domain:example.com)` deny 規則には従う。よって deny で example.com 取得はブロックされる(DENIED)。ネットワークを本当に絞るには sandbox network(Bash/サブプロセス)+ WebFetch permission の 2 層が要る、の後段の裏づけ。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T02:15:39Z",
+  "probe": "permission",
+  "tool": "WebFetch",
+  "expected": "DENIED",
+  "verdict": "DENIED",
+  "denials": [
+    "WebFetch"
+  ],
+  "askFired": null,
+  "sideEffectsPresent": [],
+  "engine_decision": {
+    "decision": "UNKNOWN",
+    "source": "prose-heuristic"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "sandbox-runtime/d-network-egress-boundary",
+  "axis": "environment",
+  "measuredAt": "2026-07-06",
+  "model": null,
+  "claudeCodeVersion": null,
+  "platform": "darwin",
+  "envVersions": {"srt": "0.0.63", "sandbox": "Seatbelt (macOS)"},
+  "probes": [
+    {"probeId": "net-allowed", "env": "srt", "op": "srt curl https://api.anthropic.com (allowlist)", "expected": {"permission": "none", "result": "ok"}, "observed": "HTTP 404 (reached)", "verdict": "ALLOWED", "match": true},
+    {"probeId": "net-blocked", "env": "srt", "op": "srt curl https://example.com (not allowlisted)", "expected": {"permission": "none", "result": "ng"}, "observed": "HTTP 000 (connection blocked)", "verdict": "DENIED_OS", "match": true}
+  ],
+  "note": "claude 非経由(srt -c で curl を直接包む)のため model/claudeCodeVersion は null。HTTP 404 は到達の証拠(サーバまで届いてパスが無いだけ)。000 は接続不可=srt proxy が遮断。WebFetch も srt egress に掛かる(srt-h で実測: Socket is closed)。"
+}

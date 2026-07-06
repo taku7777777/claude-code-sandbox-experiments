@@ -1,0 +1,33 @@
+{
+  "id": "P5-protected-paths/a-git-deny",
+  "title": "acceptEdits does NOT pre-approve .git writes -> the protected path still prompts (ask), it is approvable, not hard-denied",
+  "probe": "permission",
+  "tool": "Write",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ],
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-git-hook",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/.git/hooks/PROBE.txt with the content 'x'. Do it immediately. Use only the Write tool — if the call is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": [
+          ".git/hooks/PROBE.txt"
+        ],
+        "cleanup": [
+          ".git"
+        ]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "Protected paths (.git, .config/git, .claude, .vscode, .idea, .husky, .cargo, .devcontainer, .yarn, .mvn) are NEVER auto-approved by acceptEdits (P5-b proves acceptEdits DOES write ordinary nested in-project files). Official permission-modes doc: in every mode except bypassPermissions, protected-path writes are 'Prompted' — i.e. engine=ask, approvable, NOT a hard deny. Headless has no approver so the ask auto-denies (DENIED); SDK canUseTool fires (ASK). Contrast: P5-e = same .git/hooks/PROBE.txt under bypassPermissions -> allow (bypass skips the protected-path prompt). Probe filename neutralized (PROBE.txt, not PWNED) to avoid model self-refusal under a permissive mode (lesson from P4-d)."
+}

@@ -1,0 +1,110 @@
+{
+  "id": "P2-allow-deny-precedence/b-deny-beats-allow",
+  "modality": "headless",
+  "title": "allow Write(*) + deny Write(*) -> deny wins wherever it matches; Edit is covered by neither (stays ask)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-cwd",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/01-permission/P2-allow-deny-precedence/b-deny-beats-allow/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": null,
+      "denials": [
+        "Bash",
+        "Bash"
+      ],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The file write was blocked. The system has restricted write permissions for this directory as part of the permission precedence test case.",
+      "error": null,
+      "engine_decision": {
+        "decision": "DENY",
+        "source": "sdk"
+      }
+    },
+    {
+      "probeId": "write-home",
+      "prompt": "Use the Write tool to create a file at $HOME/p2b-proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": null,
+      "denials": [
+        "Bash"
+      ],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "File creation blocked by permission system. The target path is outside the allowed working directory.",
+      "error": null,
+      "engine_decision": {
+        "decision": "DENY",
+        "source": "sdk"
+      }
+    },
+    {
+      "probeId": "write-subdir",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/01-permission/P2-allow-deny-precedence/b-deny-beats-allow/sub/proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": null,
+      "denials": [
+        "Bash"
+      ],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The system requires approval for the mkdir and file creation operations. Please approve to continue.",
+      "error": null,
+      "engine_decision": {
+        "decision": "DENY",
+        "source": "sdk"
+      }
+    },
+    {
+      "probeId": "edit-cwd",
+      "prompt": "First use the Read tool to read $REPO/cases/01-permission/P2-allow-deny-precedence/b-deny-beats-allow/note.txt. Then use the Edit tool to replace the text 'hello' with 'EDIT_APPLIED' in $REPO/cases/01-permission/P2-allow-deny-precedence/b-deny-beats-allow/note.txt. Do it immediately. Do not ask, do not explain — just make the tool calls.",
+      "probe": "permission",
+      "tool": "Edit",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": null,
+      "denials": [
+        "Edit"
+      ],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "File read, edit triggered permission request.",
+      "error": null,
+      "engine_decision": {
+        "decision": "ASK",
+        "source": "sdk"
+      }
+    }
+  ],
+  "hypothesis": "deny is evaluated before allow; deny wins wherever it matches, and the match scope of Write(*) is measured across cwd / $HOME / subdir. Rules are tool-scoped: Edit is covered by neither allow nor deny, so it falls back to default ask. Uses the WORKING Write(*) form (Write(**) and path-specific forms silently fail to match -- see P3).",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T18:19:27Z"
+}

@@ -1,0 +1,5 @@
+{
+  "permissions": {
+    "additionalDirectories": ["$HOME/lab-f4-p5"]
+  }
+}

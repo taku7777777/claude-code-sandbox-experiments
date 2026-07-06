@@ -1,0 +1,66 @@
+{
+  "id": "P1-permission-mode/a-default-deny",
+  "modality": "interactive",
+  "recordedBy": "human",
+  "title": "default mode, no rules -> every write-type tool call is ask, regardless of path or tool",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-cwd",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ASK",
+      "verdict": "ASK",
+      "match": true,
+      "humanObservations": {
+        "prompted": true,
+        "humanDecision": "allow"
+      },
+      "sideEffectsPresent": []
+    },
+    {
+      "probeId": "write-home",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ASK",
+      "verdict": "ASK",
+      "match": true,
+      "humanObservations": {
+        "prompted": true,
+        "humanDecision": "allow"
+      },
+      "sideEffectsPresent": []
+    },
+    {
+      "probeId": "write-subdir",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ASK",
+      "verdict": "ASK",
+      "match": true,
+      "humanObservations": {
+        "prompted": true,
+        "humanDecision": "allow"
+      },
+      "sideEffectsPresent": []
+    },
+    {
+      "probeId": "edit-cwd",
+      "probe": "permission",
+      "tool": "Edit",
+      "expected": "ASK",
+      "verdict": "ASK",
+      "match": true,
+      "humanObservations": {
+        "prompted": true,
+        "humanDecision": "allow"
+      },
+      "sideEffectsPresent": []
+    }
+  ],
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T07:47:38Z",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

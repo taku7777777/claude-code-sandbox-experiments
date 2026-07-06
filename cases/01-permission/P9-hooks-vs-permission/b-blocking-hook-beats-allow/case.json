@@ -1,0 +1,26 @@
+{
+  "id": "P9-hooks-vs-permission/b-blocking-hook-beats-allow",
+  "title": "blocking hook (exit 2) beats allow Write(*) -> DENIED, recorded in permission_denials; stderr message is fed back to the model",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Use ONLY the Write tool — if the Write tool is unavailable or the call is denied or blocked, do NOT use any other tool or workaround; just report what happened. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"],
+        "evidenceFile": "hook-ran.marker",
+        "evidenceMarker": "P9_HOOK_BLOCKED"
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    }
+  ],
+  "hypothesis": "『hook で締める』exit-code 経路: allow Write(*) で許諾済みでも、exit 2 の blocking hook が勝って Write は実行されない(permissions docs: \"A blocking hook also takes precedence over allow rules. A hook that exits with code 2 stops the tool call before permission rules are evaluated\")。hook は発火し(marker)、stderr の文言がモデルに返る(hooks docs: exit 2 = blocking error, stderr is fed back to the model)。",
+  "notes": "MEASURED-DESIGN 2026-07-05: scratch 探索で hook block は permission_denials に記録されると確認(P9 GAPS G4 の懸念は解消)— probe=permission の denials 判定がそのまま使える。expected.permission は観測面の deny(headless DENIED / sdk DENIED_HARD)だが、遮断の機構は規則 deny ではなく hook block(exit 2)。JSON deny 経路(exit 0 + permissionDecision=deny)は c で対にする。"
+}

@@ -1,0 +1,12 @@
+{
+  "_comment": "claude 非経由の cmd 単離用。最小の allow のみ(env はそもそも srt の対象外なので設定に関係なく素通りする)。runner が __HOME__ を実値へ置換。",
+  "filesystem": {
+    "denyRead": [],
+    "allowWrite": [".", "/tmp", "/private/tmp"],
+    "denyWrite": []
+  },
+  "network": {
+    "allowedDomains": ["api.anthropic.com", "*.anthropic.com"],
+    "deniedDomains": []
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "P6-ask-rules/b-ask-beats-allow",
+  "title": "allow Write(*) + ask Write(*) -> ask wins over allow, Write stays pre-approval-gated (ask)",
+  "probe": "permission",
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "allow と ask が同じ Write(*) にマッチしても、評価順 deny->ask->allow により ask が先に当たり承認要求になる。P2-a（allow 単独で✅）との対照。SDK で canUseTool 発火を確認して engine=ask を確定する。",
+  "notes": "MEASURED 2026-07-05: headless=DENIED, SDK=ASK (askFired=Write) despite allow Write(*) co-present -> ask beats allow. spec §2: order deny->ask->allow."
+}

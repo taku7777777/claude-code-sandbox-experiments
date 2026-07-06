@@ -1,0 +1,50 @@
+{
+  "id": "S4-sandbox-autoallow-behavior/d-autoallow-false-strict",
+  "modality": "headless",
+  "title": "autoAllowBashIfSandboxed:false -> 自動許可が消え通常の承認フローに戻る -> cwd 書込も ASK (ask ✅)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "bash-write-cwd",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > inside.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "permission",
+      "tool": "Bash",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [
+        "Bash"
+      ],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The command was blocked by the sandbox. Error: \"Output redirection to '$REPO/cases/S4-sandbox-autoallow-behavior/d-autoallow-false-strict/inside.txt' was blocked.\"",
+      "error": null,
+      "engine_decision": {
+        "decision": "ASK",
+        "source": "sdk"
+      }
+    }
+  ],
+  "hypothesis": "autoAllowBashIfSandboxed:false removes the sandbox auto-approve, so Bash falls back to the normal permission flow. In default mode the cwd write becomes an ASK (canUseTool fires); headless auto-denies it, SDK/interactive show the prompt. Contrast a (default true -> allow x ok); only this key differs.",
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T12:56:27Z",
+  "probe": "permission",
+  "tool": "Bash",
+  "expected": "DENIED",
+  "verdict": "DENIED",
+  "denials": [
+    "Bash"
+  ],
+  "askFired": null,
+  "sideEffectsPresent": [],
+  "engine_decision": {
+    "decision": "ASK",
+    "source": "sdk"
+  },
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

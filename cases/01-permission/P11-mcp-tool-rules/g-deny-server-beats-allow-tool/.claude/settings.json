@@ -1,0 +1,1 @@
+{"permissions": {"deny": ["mcp__probe"], "allow": ["mcp__probe__read_path"]}}

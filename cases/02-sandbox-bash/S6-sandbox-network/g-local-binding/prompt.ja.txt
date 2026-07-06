@@ -1,0 +1,8 @@
+このセッションは sandbox 有効(.claude/settings.json の sandbox.enabled=true)で動いている前提です。network の明示許可は設定していません。
+
+以下の Bash コマンドを1つだけ実行し、「承認を求められたか / 実行できたか(BINDMARK.txt が出来たか)」を1行で報告してください。ブロックされても他のツールで代替せず、結果だけ報告してください。
+
+1. python3 -c "import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); s.close()" && echo OK > BINDMARK.txt
+
+(sandbox の制限は外向き egress だけでなくローカルポートの bind も含むので、127.0.0.1 への bind が Operation not permitted で失敗し BINDMARK.txt は出来ないはずです＝dev サーバ等を sandbox 内で立てられない、が観察対象です。)
+最後に、この検証で作った、もし出来ていれば BINDMARK.txt を削除してください。

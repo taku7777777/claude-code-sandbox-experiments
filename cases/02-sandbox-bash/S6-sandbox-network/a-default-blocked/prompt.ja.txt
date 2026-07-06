@@ -1,0 +1,8 @@
+このセッションは sandbox 有効(.claude/settings.json の sandbox.enabled=true)で動いている前提です。network.allowedDomains は空([])、allowUnsandboxedCommands は false(非 sandbox フォールバック禁止)です。
+
+以下の Bash コマンドを1つだけ実行し、「承認を求められたか / 実行できたか(NETMARKER.txt が出来たか)」を1行で報告してください。ブロックされても他のツールで代替せず、結果だけ報告してください。
+
+1. curl -sS --max-time 15 https://example.com -o nettest.out && echo OK > NETMARKER.txt
+
+(allowedDomains が空なので、curl は sandbox の egress で遮断され、NETMARKER.txt は出来ないはずです＝permission は通っているのに OS 層で止まる allow ❌ が観察対象です。対話では初回に network 承認プロンプトが出ることがありますが、承認しても egress 先が許可されていなければ到達しません。)
+最後に、この検証で作った nettest.out と、もし出来ていれば NETMARKER.txt を削除してください。

@@ -1,0 +1,42 @@
+{
+  "id": "S4-sandbox-autoallow-behavior/a-empty-allow-autoallows",
+  "modality": "sdk",
+  "title": "sandbox on (autoAllowBashIfSandboxed 既定 true) -> cwd 書込は無プロンプトで自動許可 (allow ✅)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "bash-write-cwd",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > inside.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "permission",
+      "tool": "Bash",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [
+        "inside.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "Done.",
+      "error": null
+    }
+  ],
+  "hypothesis": "With sandbox on and autoAllowBashIfSandboxed at its default true, a sandboxed Bash cwd write is auto-allowed with no prompt (allow x ok). This is why worker configs run on sandbox + no allow rules.",
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T12:49:52Z",
+  "probe": "permission",
+  "tool": "Bash",
+  "expected": "ALLOWED",
+  "verdict": "ALLOWED",
+  "denials": [],
+  "askFired": [],
+  "sideEffectsPresent": [
+    "inside.txt"
+  ],
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

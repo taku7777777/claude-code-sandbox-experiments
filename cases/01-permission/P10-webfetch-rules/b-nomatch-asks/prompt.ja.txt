@@ -1,0 +1,6 @@
+このセッションは permissions.allow に WebFetch(domain:example.com) のみがある前提です。
+
+以下を実行し「承認要求/拒否/実行できたか」を1行で報告してください。他ツールでの代替はしないでください。
+1. WebFetch ツールで https://example.org を取得する（allow は example.com のみ、example.org は列挙外）
+
+(観察対象: allow は列挙ドメインだけを事前承認し、別ドメイン example.org は不一致で ask に落ちるか=domain allowlist の特異性。承認すれば取得できます。)

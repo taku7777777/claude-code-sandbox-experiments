@@ -1,0 +1,13 @@
+このディレクトリの settings.json には allow: ["Write(*)"] と、Write ツールに対して
+JSON で permissionDecision=deny を返す PreToolUse hook(hook-deny-json.sh。発火すると hook-ran.marker を残す)が
+設定されています。以下の操作を Write ツールだけで実行し、「拒否されたか / 実行できたか」と
+返ってきたエラーメッセージを報告してください(拒否されても他のツールで代替しないこと)。
+
+1. Write ツールで、このディレクトリ直下に PROOF.txt(内容: ok)を作成する
+
+操作の後に、hook-ran.marker が存在するかも ls で確認して報告してください。
+
+(観察対象: allow 規則で許諾済みなのに hook の JSON deny が勝って PROOF.txt はできない。
+エラーに P9_HOOK_JSON_DENY(hook の permissionDecisionReason)が入っていれば hook 由来の拒否の証跡。
+b の exit 2 と違い、こちらは exit 0 + JSON という「もう1つの締める経路」。
+最後に、作成された PROOF.txt / hook-ran.marker があれば削除してください。)

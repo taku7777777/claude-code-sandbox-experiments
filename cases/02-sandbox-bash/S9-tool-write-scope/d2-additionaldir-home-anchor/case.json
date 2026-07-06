@@ -1,0 +1,74 @@
+{
+  "id": "S9-tool-write-scope/d2-additionaldir-home-anchor",
+  "title": "Fix form for d: a home-anchored deny Edit(~/s9d-extra/scripts/**) DOES hard-block writes into the additional directory's scripts/ (while the rest of the extra root stays auto-approved)",
+  "probe": "permission",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ]
+  },
+  "arrange": {
+    "configDir": {
+      "trusted": true
+    }
+  },
+  "probes": [
+    {
+      "id": "write-addir-scripts",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $HOME/s9d-extra/scripts/x.txt with the content 'v=1'. Use only the Write tool - if the call is blocked, do not try any other tool; just report the result. Just make the tool call, no commentary.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "~/s9d-extra/.keep",
+            "content": ""
+          }
+        ]
+      },
+      "observe": {
+        "sideEffects": [
+          "~/s9d-extra/scripts/x.txt"
+        ],
+        "cleanup": [
+          "~/s9d-extra"
+        ],
+        "evidenceMarker": "Ignoring 1 permissions.additionalDirectories"
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-",
+        "byModality": {
+          "headless": "INCONCLUSIVE"
+        }
+      }
+    },
+    {
+      "id": "write-addir-other",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $HOME/s9d-extra/other/x.txt with the content 'v=1'. Use only the Write tool - if the call is blocked, do not try any other tool; just report the result. Just make the tool call, no commentary.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "~/s9d-extra/.keep",
+            "content": ""
+          }
+        ]
+      },
+      "observe": {
+        "sideEffects": [
+          "~/s9d-extra/other/x.txt"
+        ],
+        "cleanup": [
+          "~/s9d-extra"
+        ]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "Single-variable change from d: the deny rule anchor moves from cwd-relative Edit(scripts/**) to home-anchored Edit(~/s9d-extra/scripts/**); additionalDirectories unchanged. SCRATCH EXPLORATION (2026-07-05, v2.1.201, trusted in-repo scratch): write to <extra>/scripts/x.txt -> BLOCKED ('File is in a directory that is denied by your permission settings', permission_denials=[] = hard deny, same shape as a3). Docs (permissions): rules starting with ~/ are anchored to the home directory; Edit rules apply to all built-in tools that edit files; deny applies in every mode. Probe 2 is the scope control: other/ under the same extra root stays acceptEdits-auto-approved, so the anchored deny protects exactly the scripts subtree, not the whole additional directory. TRUST GATE as in d (configDir trusted:true, evidenceMarker records the absence of the Ignoring warning). Probe 1 headless is structurally INCONCLUSIVE (hard deny: no permission_denials, tool not removed from toolset); sdk gives DENIED_HARD.",
+  "hypothesis": "W1 remediation: in a multi-root workspace, each root needs its own anchored deny. deny Edit(~/s9d-extra/scripts/**) hard-blocks the edit-family inside the additional directory's scripts/ (which the cwd-relative form in d silently missed), while leaving the rest of the extra root writable under acceptEdits."
+}

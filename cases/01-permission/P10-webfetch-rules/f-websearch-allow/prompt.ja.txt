@@ -1,0 +1,3 @@
+このケースは WebSearch の bare allow の確認です(allow: WebSearch)。
+1. WebSearch ツールで「example domain reserved documentation」を検索してください(プロンプトなしで通るはず)。
+承認の有無と結果を報告してください。生成したファイルがあれば削除してください。

@@ -1,0 +1,36 @@
+{
+  "id": "P3-write-glob-asymmetry-DANGER/a-allow-starstar-noop",
+  "title": "allow Write(**) is a silent no-op -> the write is never pre-approved and stays ask",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "write-subdir",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/sub/proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["sub/proof.txt"],
+        "cleanup": ["sub"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "allow Write(**) does NOT pre-approve the Write tool: the gitignore-style ** used for Read/Edit path rules is a silent no-op for the Write specifier (v2.1.201). With no allow matching, the write falls back to default ask — uniformly for a cwd-level file and a subdir file (the ** that 'should' cover everything covers nothing). Contrast the WORKING form: Write(*) / bare Write (P2-a, pre-approved). ALL path-scoped Write forms are no-ops — bare Write(**), exact/full path, single-star dir Write(dir/*), absolute-path, ~ forms, AND relative directory-doublestar Write(<dir>/**) (P3-b/c/d; S9-a's block came from a co-present Edit(assets/**) rule, not the Write rule). To scope a directory at the tool layer use Edit(<dir>/**), which hard-covers the Write tool (S9)."
+}

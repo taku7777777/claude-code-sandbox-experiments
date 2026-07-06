@@ -1,0 +1,8 @@
+このセッションは sandbox 有効(.claude/settings.json の sandbox.enabled=true)で動いている前提です。network.allowedDomains は ["*.example.com"](ワイルドカード)です。
+
+以下の Bash コマンドを1つだけ実行し、「承認を求められたか / 実行できたか(NETMARKER.txt が出来たか)」を1行で報告してください。ブロックされても他のツールで代替せず、結果だけ報告してください。
+
+1. curl -sS --max-time 15 https://www.example.com -o nettest.out && echo OK > NETMARKER.txt
+
+(ワイルドカード allow がサブドメイン www.example.com にマッチして curl が到達し、NETMARKER.txt が出来るはずです＝sandbox 側でワイルドカード表記が機能するか、が観察対象です。)
+最後に、この検証で作った nettest.out と、もし出来ていれば NETMARKER.txt を削除してください。

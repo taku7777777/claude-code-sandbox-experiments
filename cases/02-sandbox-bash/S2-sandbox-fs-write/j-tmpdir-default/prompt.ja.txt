@@ -1,0 +1,12 @@
+このディレクトリの settings.json は sandbox.enabled: true のみです(既定境界 = cwd + $TMPDIR)。
+以下の操作を上から順に1つずつ Bash ツールで実行し、出力をそのまま報告してください
+(失敗しても他のツールで代替しないこと)。
+
+1. echo $((1234*5678)) > "$TMPDIR/lab-tmp-probe.txt" && cat "$TMPDIR/lab-tmp-probe.txt"; echo "TMPDIR=$TMPDIR"
+   ($TMPDIR への書込と読み戻し。TMPDIR の実パスも表示)
+2. echo data > /tmp/lab-tmp-literal.txt(リテラル /tmp 直下)
+
+(観察対象: 1 は成功して 7006652 が出る+TMPDIR がホストの /var/folders/... ではなく付け替え先
+(例: /tmp/claude-501)になっている。2 は operation not permitted = tmp 側の暗黙許可は
+「/tmp というパス」ではなく「付け替えられた $TMPDIR」に付いている。
+最後に、作成されたファイルがあれば削除してください。)

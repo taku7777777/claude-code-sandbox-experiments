@@ -1,0 +1,12 @@
+{
+  "_comment": "runner が __HOME__ を実値へ置換。allowWrite は cwd / tmp / .claude のみ($HOME 直下は含めない = hook の $HOME 書込を EPERM で塞ぐ)。/private/tmp は macOS の /tmp 実体(Bash の shell snapshot 用)。config dir は runner が allowWrite へ自動追加。",
+  "filesystem": {
+    "denyRead": [],
+    "allowWrite": [".", "/tmp", "/private/tmp", "__HOME__/.claude", "__HOME__/.claude.json"],
+    "denyWrite": []
+  },
+  "network": {
+    "allowedDomains": ["api.anthropic.com", "*.anthropic.com"],
+    "deniedDomains": []
+  }
+}

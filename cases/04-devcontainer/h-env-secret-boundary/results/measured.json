@@ -1,0 +1,41 @@
+{
+  "id": "devcontainer/h-env-secret-boundary",
+  "axis": "environment",
+  "measuredAt": "2026-07-06T12:16:57Z",
+  "model": null,
+  "claudeCodeVersion": null,
+  "platform": "darwin",
+  "envVersions": {
+    "colima": "0.10.3",
+    "docker": "29.5.2",
+    "image": "node:22-bookworm + @anthropic-ai/claude-code",
+    "vm": "Ubuntu 24.04"
+  },
+  "probes": [
+    {
+      "probeId": "env-injected-readable",
+      "env": "container",
+      "op": "read $LAB_ENV_SENTINEL in container started with -e (injected)",
+      "expected": {
+        "permission": "none",
+        "result": "ok"
+      },
+      "observed": "leak: 注入した env 番兵がコンテナ内で読める(env はマスクされない=srt-j と同型)",
+      "verdict": "ALLOWED",
+      "match": true
+    },
+    {
+      "probeId": "env-absent-when-not-injected",
+      "env": "container",
+      "op": "read $LAB_ENV_SENTINEL in container started WITHOUT -e",
+      "expected": {
+        "permission": "none",
+        "result": "ng"
+      },
+      "observed": "absent: 注入しなければ番兵は存在しない(手段3の fail-closed。srt は親 env を継承しうるのと対比)",
+      "verdict": "DENIED_OS",
+      "match": true
+    }
+  ],
+  "note": "手段3 × env 秘密の境界(claude 非経由・cmd 型)。コンテナに -e で注入した env 番兵は コンテナ内で読める(env はマスクされない=srt-j と同型の倒せない面)が、注入しなければ存在しない (手段3は fail-closed。srt は親プロセスの env を継承するため素通りしうるのと対比)。再現: bash harness/devcontainer/run_devc_e2e.sh"
+}

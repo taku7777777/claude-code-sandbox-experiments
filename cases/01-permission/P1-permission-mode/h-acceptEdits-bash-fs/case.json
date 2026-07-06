@@ -1,0 +1,51 @@
+{
+  "id": "P1-permission-mode/h-acceptEdits-bash-fs",
+  "title": "acceptEdits mode -> common filesystem Bash commands (mkdir/touch) are auto-approved too, but only inside cwd",
+  "probe": "permission",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ],
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "bash-mkdir",
+      "tool": "Bash",
+      "prompt": "Use the Bash tool to run exactly this command: mkdir -p $CASE_DIR/mkd_proof . Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["mkd_proof"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "bash-touch",
+      "tool": "Bash",
+      "prompt": "Use the Bash tool to run exactly this command: touch $CASE_DIR/touched_proof.txt . Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["touched_proof.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "bash-mkdir-home",
+      "tool": "Bash",
+      "prompt": "Use the Bash tool to run exactly this command: mkdir -p $HOME/p1h-proof-dir . Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["~/p1h-proof-dir"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "Docs (spec-inventory §1.1): acceptEdits auto-approves not only file-edit tools but also common filesystem Bash commands (mkdir, touch, rm, rmdir, mv, cp, sed) for paths in the working directory or additionalDirectories. This case extends the P1 matrix beyond edit tools: (1)(2) mkdir/touch inside cwd -> allow without any rule; (3) the same mkdir targeting $HOME stays ask — the cwd boundary seen for Write (P1-b write-home) applies to the Bash auto-approval as well."
+}

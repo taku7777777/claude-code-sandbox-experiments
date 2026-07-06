@@ -1,0 +1,23 @@
+【前提】このセッションは srt 配下で起動されている前提です。このケースディレクトリで:
+  1) hook-srt-g.sh を workspace に置く(このケース dir のものをコピー・chmod +x)。
+     hook は cwd の srt-g-hook-ran.marker(発火証跡)と $HOME/srt-g-hook-proof.txt(境界テスト)を書く。
+  2) .claude/settings.json に PreToolUse(matcher:Bash)hook と allow:["Bash"] を書く:
+     {"permissions":{"allow":["Bash"]},
+      "hooks":{"PreToolUse":[{"matcher":"Bash",
+        "hooks":[{"type":"command","command":"$CLAUDE_PROJECT_DIR/hook-srt-g.sh"}]}]}}
+  3) srt-settings.json の __HOME__ を実パスに置換したコピーを作る(allowWrite に $HOME 直下を含めない)。
+  4) rm -f $HOME/srt-g-hook-proof.txt してから、
+     srt --settings <そのコピー> claude --permission-mode acceptEdits で起動して貼り付け。
+
+次の操作を行い、承認プロンプトの有無と結果を報告してください。
+
+1. Bash ツールで次の1コマンドだけを実行してください: echo trigger
+   他のツールは使わず、ブロックされたら RESULT=blocked とだけ報告してください。
+
+(観察ポイント: echo trigger を撃つと PreToolUse hook が発火する。
+ - cwd の srt-g-hook-ran.marker は srt 配下でも出る(allowWrite 内)= hook は発火した証拠。
+ - $HOME/srt-g-hook-proof.txt は srt 配下では出ないはず($HOME は allowWrite 外で EPERM)。
+ 発火証跡が出て proof が出ない = hook は発火したが $HOME 書込だけ OS 層(Seatbelt)で塞がれた。
+ 対照: srt 無しの claude で同じ操作をすると proof も出る = S1-i の hook がホスト実行で sandbox 外)
+
+最後に srt-g-hook-ran.marker と $HOME/srt-g-hook-proof.txt と settings コピーを削除してください。

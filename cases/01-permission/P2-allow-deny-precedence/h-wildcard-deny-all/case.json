@@ -1,0 +1,24 @@
+{
+  "id": "P2-allow-deny-precedence/h-wildcard-deny-all",
+  "title": "deny [\"*\"] -> every tool is removed from the model's toolset (bare glob deny = context removal at scale)",
+  "probe": "permission",
+  "tool": "Write",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    }
+  ],
+  "hypothesis": "Docs (spec-inventory §2): deny/ask accept tool-name wildcards ('*', 'mcp__*'), and bare glob deny removes the matched tools from context. deny ['*'] is the maximal case: every tool disappears from the toolset, the model cannot make any tool call (no denials recorded), and the structural signal is the init-message tool list being empty — the harness detects the missing target tool there (same mechanism as P2-b's Write removal, scaled to all tools). The practical variant deny ['mcp__*'] (MCP supply-chain kill switch) needs an MCP fixture and remains an open gap."
+}

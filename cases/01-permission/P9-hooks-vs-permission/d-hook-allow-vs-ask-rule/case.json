@@ -1,0 +1,25 @@
+{
+  "id": "P9-hooks-vs-permission/d-hook-allow-vs-ask-rule",
+  "title": "PreToolUse allow hook cannot bypass ask Write(*) -> the prompt remains (hook fires, but the ask rule still gates)",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Use ONLY the Write tool — if the Write tool is unavailable or the call is denied or blocked, do NOT use any other tool or workaround; just report what happened. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"],
+        "evidenceFile": "hook-ran.marker"
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "『hook で緩める』方向は ask 規則も越えられない(permissions docs: \"a matching ask rule still prompts even when the hook returned 'allow' or 'ask'\")。a(deny 版)との違い: deny 規則は hook を発火させずに止めるが、ask 規則では hook は発火する(marker あり)— それでも hook の allow は prompt を消せない。a の probe 2(規則なし+hook allow = 承認プロンプトなしで通る)と対比すると『hook の allow が上書きできるのは既定の ask だけで、明示の ask 規則は上書きできない』が確定する。",
+  "notes": "MEASURED-DESIGN 2026-07-05: scratch 探索で headless=auto-deny(denials 記録)+ marker あり、を確認。SDK で canUseTool 発火(ASK)を観測できれば docs 命題の決定的な裏付け。P9 GAPS G5(ask 規則 × hook allow セル)を埋める新設ケース。"
+}

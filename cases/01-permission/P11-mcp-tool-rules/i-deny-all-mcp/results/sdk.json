@@ -1,0 +1,37 @@
+{
+  "id": "P11-mcp-tool-rules/i-deny-all-mcp",
+  "modality": "sdk",
+  "title": "deny mcp__*(bare glob)は deny 側では有効=全 MCP ツールを除去(キルスイッチ)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "all-mcp-removed",
+      "prompt": "Call the tool mcp__probe__read_path with argument path = \"$REPO/cases/01-permission/P11-mcp-tool-rules/i-deny-all-mcp/note.txt\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "probe": "permission",
+      "tool": "mcp__probe__read_path",
+      "expected": "DENIED_HARD",
+      "verdict": "DENIED_HARD",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "MCP_BLOCKED",
+      "error": null
+    }
+  ],
+  "hypothesis": "組織/上位スコープに deny mcp__* を置けば「MCP を一切使わせない」が 1 行で書ける(deny はスコープ横断で常勝=P7-a)。allow 側に同じ書き方は無い(e)。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T03:46:42Z",
+  "probe": "permission",
+  "tool": "mcp__probe__read_path",
+  "expected": "DENIED_HARD",
+  "verdict": "DENIED_HARD",
+  "denials": [],
+  "askFired": [],
+  "sideEffectsPresent": []
+}

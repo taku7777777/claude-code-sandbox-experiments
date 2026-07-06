@@ -1,0 +1,53 @@
+{
+  "id": "P6-ask-rules/g-ask-bash-specifier",
+  "title": "broad allow Bash(*) + narrow ask Bash(touch *): the docs-recommended pattern works — touch asks (also via a chain), everything else flows",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "bash-touch-ask",
+      "tool": "Bash",
+      "prompt": "Use the Bash tool to run exactly this command: touch $CASE_DIR/t1.txt — run it immediately. Use only the Bash tool with exactly this command — if it is blocked, do not try any other tool or any other command; just report the result.",
+      "observe": {
+        "sideEffects": [
+          "t1.txt"
+        ]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "bash-mkdir-control",
+      "tool": "Bash",
+      "prompt": "Use the Bash tool to run exactly this command: mkdir $CASE_DIR/d1 — run it immediately. Use only the Bash tool with exactly this command — if it is blocked, do not try any other tool or any other command; just report the result.",
+      "observe": {
+        "sideEffects": [
+          "d1"
+        ]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "bash-chain-touch-ask",
+      "tool": "Bash",
+      "prompt": "Use the Bash tool to run exactly this compound command: echo hi && touch $CASE_DIR/t2.txt — run it immediately. Use only the Bash tool with exactly this command — if it is blocked, do not try any other tool or any other command; just report the result.",
+      "observe": {
+        "sideEffects": [
+          "t2.txt"
+        ]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "The docs' recommended ask-rule pattern is 'broad allow + narrow ask' and its natural habitat is Bash specifiers — yet P6 a-d only ever probed Write(*). Three probes on one setting (allow Bash(*) + ask Bash(touch *)): (1) touch t1.txt matches the ask specifier -> ask beats the co-present broad allow (Bash-specifier version of P6-b; permissions doc: 'a matching ask rule prompts even when a more specific allow rule also matches', and order deny->ask->allow). (2) Control mkdir d1: mkdir is NOT in the unconditional read-only set (P4-i measured touch=ask without rules, same tier as mkdir), so its ALLOWED outcome proves the broad allow works and probe 1's ask is attributable to the ask rule, not to Bash prompting in general. (3) Chain echo hi && touch t2.txt: compound commands are matched per-subcommand (P4-b/g for deny); expected: the ask on the touch subcommand gates the whole compound (ask analog of P4-d). Probes use 'exactly this command' phrasing to prevent the model from paraphrasing the command into a form that changes rule matching."
+}

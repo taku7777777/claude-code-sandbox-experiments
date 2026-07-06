@@ -1,0 +1,50 @@
+{
+  "id": "P1-permission-mode/g-dontAsk-with-allow",
+  "modality": "sdk",
+  "title": "dontAsk mode + allow Write(*) -> pre-approved writes go through; read-only tools are unaffected",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-cwd",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/P1-permission-mode/g-dontAsk-with-allow/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [
+        "PROOF.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "Done. File created at `$REPO/cases/P1-permission-mode/g-dontAsk-with-allow/PROOF.txt` with content `ok`.",
+      "error": null
+    },
+    {
+      "probeId": "read-cwd",
+      "prompt": "Use the Read tool to read the file $REPO/cases/P1-permission-mode/g-dontAsk-with-allow/sentinel.txt and output its exact contents. Do it immediately. Do not ask, do not explain.",
+      "probe": "fs-read",
+      "tool": "Read",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": true,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "P1G_SENT_x3t8",
+      "error": null
+    }
+  ],
+  "hypothesis": "dontAsk auto-denies only what would otherwise ASK. (1) A pre-approved tool (allow Write(*)) never reaches ask, so it goes through even in dontAsk — this is the positive control for the CI recipe 'enumerate allow + dontAsk' (P1-d is the negative half). (2) Read-only tools (Read) sit in the no-approval tier, never ask, and are therefore unaffected by dontAsk — 'Auto-denies tools unless pre-approved' in the docs scopes to tools that would prompt.",
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T09:50:07Z",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

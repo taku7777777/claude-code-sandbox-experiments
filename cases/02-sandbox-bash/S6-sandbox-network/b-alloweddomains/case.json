@@ -1,0 +1,24 @@
+{
+  "id": "S6-sandbox-network/b-alloweddomains",
+  "title": "allowedDomains:[example.com] が egress を開ける -> Bash curl が到達 (allow ✅) = 陽性対照",
+  "probe": "network",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "net-reach",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: curl -sS --max-time 15 https://example.com -o nettest.out && echo OK > NETMARKER.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["NETMARKER.txt"],
+        "cleanup": ["nettest.out"],
+        "preflight": "https://example.com"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "本群の陽性対照。a に allowedDomains:[\"example.com\"] を1つ足しただけの差分。egress allowlist に example.com が入るので sandbox 内の curl が到達し NETMARKER.txt が出来る(allow × ok)。b が成立するからこそ a/c/d/e の allow × ng は「書込失敗」ではなく真のネットワーク遮断だと確定する。オフライン時はここが INCONCLUSIVE になる = 群全体がオフライン(変換扱いにしない)のシグナル。",
+  "hypothesis": "allowedDomains は example.com への egress allowlist を1本開ける。sandbox 内の curl が到達してマーカーを書く(allow × ok)。a(空 allowlist=遮断)との対照。"
+}

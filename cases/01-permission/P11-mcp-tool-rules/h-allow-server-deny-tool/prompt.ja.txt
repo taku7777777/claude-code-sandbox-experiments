@@ -1,0 +1,4 @@
+このケースは「広 allow + 狭 deny」の確認です(allow: mcp__probe + deny: mcp__probe__read_path)。
+1. mcp__probe__read_path で note.txt を読む(ツール一覧に存在しないはず)。
+2. mcp__probe__net_get で https://example.com を取得(プロンプトなしで通るはず)。
+操作ごとにツールの有無・承認の有無・結果を報告してください。

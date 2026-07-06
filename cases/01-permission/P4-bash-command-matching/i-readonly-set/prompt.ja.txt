@@ -1,0 +1,14 @@
+このディレクトリの設定は permission 規則が一切ありません(allow も deny も無し, default モード)。
+以下の操作を上から順に1つずつ実行し、それぞれ「承認を求められたか / 拒否されたか / 実行できたか」を1行で報告してください。
+Bash が拒否されても他のツールで代替しないでください。
+
+1. Bash ツールで、次のコマンドをそのまま実行する: cat existing.txt  (実行後、ファイルの中身をそのまま報告してください)
+2. Bash ツールで、次のコマンドをそのまま実行する: touch made.txt
+
+(観察対象: 規則が無いのに 1 の cat はプロンプトなしで実行される。cat は read-only コマンド集合
+(ls cat echo pwd head tail grep find wc which diff stat du cd + read-only git)に属し、全モードで
+無条件・非設定で自動承認されるため。一方 2 の touch は集合外・allow 無し・deny 無しなので自動承認されず、
+承認プロンプト(ask)が出る = read-only 集合は設定に依存せず効く、が観察対象です。
+※ この対比は d(allow prefix)の補助にもなる: d の echo は元々この read-only 集合に属するので、
+allow Bash(echo:*) の有無に関わらず通る。allow prefix の効果を厳密に見るには集合外コマンド(touch)で対比するのが正しい。
+最後に、作成された made.txt があれば削除してください。existing.txt はそのままで構いません。)

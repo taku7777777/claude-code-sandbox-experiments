@@ -1,0 +1,37 @@
+{
+  "id": "P12-path-anchor-matching/g-singleslash-allow-noop",
+  "title": "⚠️ 単一スラッシュ絶対 `Edit(/abs/sub/**)` allow も no-op(ask のまま・事前承認されない)",
+  "probe": "permission",
+  "run": {},
+  "arrange": {},
+  "probes": [
+    {
+      "id": "edit-cwd-abs",
+      "tool": "Edit",
+      "prompt": "First use the Read tool to read $CASE_DIR/sub/note.txt . Then use the Edit tool to replace the text 'hello' with 'EDIT_APPLIED' in $CASE_DIR/sub/note.txt . Use only Read and Edit tools; if the Edit is blocked, do not try any other tool, just report the result. No commentary.",
+      "observe": {
+        "contentMarker": {
+          "path": "sub/note.txt",
+          "contains": "EDIT_APPLIED"
+        },
+        "cleanup": [
+          "sub"
+        ]
+      },
+      "arrange": {
+        "setup": [
+          {
+            "path": "sub/note.txt",
+            "content": "hello"
+          }
+        ]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "⚠️ allow 側の落とし穴。単一スラッシュ絶対アンカー `Edit(/Users/.../sub/**)` の allow は**無言 no-op**で、default の ask に落ちる(headless では auto-deny)。scratch 2026-07-06: 編集不成立・denials=[Edit]。c(deny 側の単一スラッシュ no-op)と同根=単一スラッシュ絶対アンカーは allow/deny どちらでも効かない。f(相対 allow=効く)との対。",
+  "hypothesis": "単一スラッシュ絶対アンカー `Edit(/abs/sub/**)` の allow も no-op で、事前承認されず ask のまま(headless=auto-deny)。『allow を書いたのに CI で通らない』の一因。効く絶対形は `//`・`~/`。"
+}

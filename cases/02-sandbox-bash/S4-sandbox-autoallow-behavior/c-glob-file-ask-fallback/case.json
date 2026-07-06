@@ -1,0 +1,35 @@
+{
+  "id": "S4-sandbox-autoallow-behavior/c-glob-file-ask-fallback",
+  "title": "sandbox auto-allow 下でも glob->変数->ファイルの形は ASK に落ちる。ask を左右するのはコマンド形状",
+  "probe": "permission",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "simple-echo",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo hi > out.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["out.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "glob-file",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: for f in *.txt; do wc -l \"$f\"; done — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "arrange": {
+        "setup": [{ "path": "data.txt", "content": "a\nb\n" }]
+      },
+      "observe": {},
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "Materialized from the README-only S4-c (S4 GAPS G3): baseline column allow:[]. Two command shapes under sandbox auto-allow: (1) a simple `echo hi > out.txt` is auto-allowed (allow x ok, canUseTool does not fire); (2) `for f in *.txt; do wc -l \"$f\"; done` -- a glob -> loop variable -> file-access shape -- is NOT statically judged safe and falls back to ASK (measured askFired=[Bash]; headless result mentions a restricted `simple_expansion` pattern). Lesson: under sandbox auto-allow, what triggers a prompt is the COMMAND SHAPE, not the allow config. Pairs with b (same two probes + individual allow) to show the allow config does not change the outcome.",
+  "hypothesis": "Under sandbox auto-allow, a simple echo is auto-allowed while a glob->variable->file command falls back to an ASK (canUseTool fires). The ask is driven by command shape, independent of allow rules."
+}

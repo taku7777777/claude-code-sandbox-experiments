@@ -1,0 +1,23 @@
+{
+  "id": "P10-webfetch-rules/d-wildcard-domain",
+  "title": "WebFetch(domain:*.example.com) のワイルドカードはサブドメインにマッチ -> ALLOW",
+  "probe": "permission",
+  "tool": "WebFetch",
+  "probes": [
+    {
+      "id": "webfetch-wildcard-subdomain",
+      "tool": "WebFetch",
+      "prompt": "First use the WebFetch tool to fetch https://www.example.com. If (and only if) that fetch returns page content, then use the Write tool to create a file at $CASE_DIR/WF_MARKER.txt with the content 'FETCHED'. If the WebFetch call is blocked or denied, do NOT write any file — just reply WF_BLOCKED. Use only the WebFetch and Write tools.",
+      "observe": {
+        "sideEffects": ["WF_MARKER.txt"],
+        "cleanup": ["WF_MARKER.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "WebFetch(domain:...) のワイルドカード表記。`allow WebFetch(domain:*.example.com)` は www.example.com(サブドメイン)にマッチして事前承認する(scratch 2026-07-06 repo trust 下: result=WF_OK, denials=[])。判定は c と同じ Write マーカー方式。S6 の sandbox network allowedDomains の `*.example.com`(S6-c2)と対称の、permission 層のワイルドカード。apex(example.com)が `*.example.com` にマッチするかは未検証(一般に glob はラベルを要求するため apex 不一致の可能性・探索の余地。本ケースはサブドメイン一致のみ確定)。",
+  "hypothesis": "WebFetch(domain:*.example.com) の allow はサブドメイン www.example.com にマッチして事前承認する(ALLOWED)。sandbox network の allowedDomains ワイルドカード(S6-c2)と同型の表記が permission 層の WebFetch 規則でも効く。"
+}

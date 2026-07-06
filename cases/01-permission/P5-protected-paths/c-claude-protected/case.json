@@ -1,0 +1,33 @@
+{
+  "id": "P5-protected-paths/c-claude-protected",
+  "title": "acceptEdits does NOT pre-approve .claude writes -> the protected path still prompts (ask), guarding Claude's own config",
+  "probe": "permission",
+  "tool": "Write",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ],
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-claude",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/.claude/PROBE.txt with the content 'x'. Do it immediately. Use only the Write tool — if the call is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": [
+          ".claude/PROBE.txt"
+        ],
+        "cleanup": [
+          ".claude/PROBE.txt"
+        ]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "The official protected-path list includes .claude (except .claude/worktrees). Like .git (P5-a), it is NOT auto-approved by acceptEdits — permission-modes doc classifies protected-path writes as 'Prompted' (engine=ask, approvable), not a hard deny. Headless auto-denies the ask; SDK canUseTool fires (ASK). Control P5-b proves ordinary nested writes DO succeed under acceptEdits. Cleanup removes only .claude/PROBE.txt, never the .claude dir (it holds this case's settings.json)."
+}

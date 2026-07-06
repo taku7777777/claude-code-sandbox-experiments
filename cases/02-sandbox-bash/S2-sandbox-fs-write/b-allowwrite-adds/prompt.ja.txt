@@ -1,0 +1,9 @@
+このセッションは sandbox 有効 + filesystem.allowWrite:["~/lab-fs-write"] で動いている前提です。
+以下の Bash コマンドを上から順に1つずつ実行し、それぞれ「承認を求められたか / 実行できたか」を1行で報告してください。ブロックされたら他のツールで代替せず、結果だけ報告してください。
+
+1. echo data > inside.txt                       （cwd 直下）
+2. echo data > $HOME/lab-fs-write/probe.txt      （allowWrite で開けたパス）
+3. echo data > $HOME/lab-glob-XYZ/probe.txt      （allowWrite 対象外の別パス）
+
+(1 と 2 は成功、3 だけ "operation not permitted" で失敗するはず＝allowWrite は列挙したフルパスだけを開ける、が観察対象です。allowWrite:["~/lab-fs-write"] は ~/lab-glob-XYZ を開けません。
+最後に、作った inside.txt・~/lab-fs-write・(もし出来ていれば)~/lab-glob-XYZ を削除してください。)

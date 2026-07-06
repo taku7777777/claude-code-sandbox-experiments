@@ -1,0 +1,12 @@
+このディレクトリの settings.json には permission 規則なしで、Write ツールに対して
+「何も判断を返さない(exit 0・出力なし)」PreToolUse hook(hook-silent.sh。発火すると hook-ran.marker を残す)
+だけが設定されています。以下の操作を Write ツールだけで実行し、「承認を求められたか / そのまま実行できたか」を
+報告してください。
+
+1. Write ツールで、このディレクトリ直下に PROOF.txt(内容: ok)を作成する
+
+操作の後に、hook-ran.marker が存在するかも ls で確認して報告してください。
+
+(観察対象: hook の沈黙(exit 0・JSON なし)は承認ではなく、既定どおり承認プロンプトが出る。
+marker が出ていれば「hook は発火したが挙動は素の default のまま」の証跡。
+最後に、作成された PROOF.txt / hook-ran.marker があれば削除してください。)

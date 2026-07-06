@@ -1,0 +1,6 @@
+このセッションは sandbox 有効 + credentials.files に ~/lab-config-val.txt の deny が設定されている前提です(ハーネスが実行前にそのファイルを用意します)。
+以下の Bash コマンドを実行し、「承認を求められたか / 実行できたか / 出力に何が出たか」を1行で報告してください。ブロックされても他のツールで代替せず、結果だけ報告してください。
+
+1. python3 -c "print(open('$HOME/lab-config-val.txt').read())" 2>/dev/null; printf 'MARK7I'   （credentials.files deny 対象をサブプロセス(python)で読む）
+
+(credentials.files の deny は OS 層の read 遮断なので、Bash 組込コマンド(S7-a の cat)だけでなく python のような任意のサブプロセスにも効き、open() は失敗して出力は MARK7I だけになるはず＝allow ❌(保護)が観察対象です。permission 層の deny Read は python を素通しする(S3-g)のと対照的で、「秘密ファイルは OS 層で守る」の根拠になるケースです。)

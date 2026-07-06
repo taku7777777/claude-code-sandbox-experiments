@@ -1,0 +1,6 @@
+このディレクトリの settings.json には permissions.defaultMode: "acceptEdits" が設定されています。
+CLI フラグは付けずに claude を起動してください(モードは settings 経由で決まる前提)。
+以下の操作を上から順に1つずつ実行し、それぞれ「承認を求められたか / 実行できたか」を1行で報告してください。
+
+1. Write ツールで、このディレクトリ直下に PROOF.txt(内容: ok)を作成する
+2. Write ツールで、ホームディレクトリに p1i-proof.txt(内容: ok)を作成する

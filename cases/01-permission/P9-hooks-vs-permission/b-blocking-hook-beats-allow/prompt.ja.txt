@@ -1,0 +1,12 @@
+このディレクトリの settings.json には allow: ["Write(*)"] と、Write ツールを exit code 2 でブロックする
+PreToolUse hook(hook-block.sh。発火すると hook-ran.marker を残し、stderr に P9_HOOK_BLOCKED を出す)が
+設定されています。以下の操作を Write ツールだけで実行し、「拒否/ブロックされたか / 実行できたか」と
+返ってきたエラーメッセージを報告してください(ブロックされても他のツールで代替しないこと)。
+
+1. Write ツールで、このディレクトリ直下に PROOF.txt(内容: ok)を作成する
+
+操作の後に、hook-ran.marker が存在するかも ls で確認して報告してください。
+
+(観察対象: allow 規則で許諾済みなのに hook のブロックが勝って PROOF.txt はできない。
+marker があり、エラーに P9_HOOK_BLOCKED の文言が入っていれば「hook が発火して止めた」証跡。
+最後に、作成された PROOF.txt / hook-ran.marker があれば削除してください。)

@@ -1,0 +1,45 @@
+{
+  "id": "P11-mcp-tool-rules/e-allow-bare-glob-noop",
+  "title": "allow mcp__*(サーバ名なしの bare glob)は無効 -> ask のまま(docs の警告は stderr に観測されず)",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "arrange": {
+    "mcpServers": {
+      "probe": {
+        "type": "stdio",
+        "command": "node",
+        "args": [
+          "$CASE_DIR/../mcp-probe-server.mjs"
+        ]
+      }
+    }
+  },
+  "probes": [
+    {
+      "id": "read-still-asks",
+      "tool": "mcp__probe__read_path",
+      "prompt": "Call the tool mcp__probe__read_path with argument path = \"$CASE_DIR/note.txt\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "note.txt",
+            "content": "SENT_P11E_read_w5j"
+          }
+        ]
+      },
+      "observe": {
+        "cleanup": [
+          "note.txt"
+        ]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "docs: An unanchored allow glob such as \"mcp__*\" is skipped with a warning and doesn't auto-approve anything(CONFIRMED=スキップ)。scratch 2026-07-06: denials=[mcp__probe__read_path]=ask のまま。ただし headless 実行の stderr に警告は出なかった(P2-g の「起動時警告は見落とされがち」と同型の運用リスク。警告の出る面は未特定)。",
+  "hypothesis": "allow 側の glob はサーバ名リテラルが必須。bare mcp__* は無言で無視され、「全 MCP を許可したつもり」が全 ask のまま=fail-closed 側に倒れる(危険側でないのが救い)。deny/ask 側の mcp__*(i)とは非対称。"
+}

@@ -1,0 +1,8 @@
+このセッションは sandbox 有効(.claude/settings.json の sandbox.enabled=true)で動いている前提です。network.allowedDomains は空([])です。
+
+以下の Bash コマンドを1つだけ実行し、「承認を求められたか / 実行できたか(NETMARKER.txt が出来たか)」を1行で報告してください。ブロックされても他のツールで代替せず、結果だけ報告してください。
+
+1. python3 -c "import urllib.request; urllib.request.urlopen('https://example.com', timeout=15); open('NETMARKER.txt','w').write('OK')"
+
+(curl でなく python が自前で張る HTTP でも、sandbox の egress は OS 層でプロセス非依存に遮断するので、urlopen は例外を上げ NETMARKER.txt は出来ないはずです＝コマンド名でなく OS 層で止まる、が観察対象です。)
+最後に、この検証で作った、もし出来ていれば NETMARKER.txt を削除してください。

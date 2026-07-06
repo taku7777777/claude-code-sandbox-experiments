@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Write(sub/*)",
+      "Write(./sub/*)",
+      "Write($CASE_DIR/sub/*)",
+      "Write($CASE_DIR/sub/**)",
+      "Write(~/lab-p3d/*)"
+    ]
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "id": "S1-sandbox-scope-vs-tools/a-bash-vs-tools",
+  "modality": "sdk",
+  "title": "sandbox enabled, default mode -> Bash cwd write auto-allowed, but Write/Edit TOOLS still ask (sandbox auto-allow is Bash-only)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "bash-write-cwd",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > inside.txt — just run it, no commentary, no alternatives.",
+      "probe": "permission",
+      "tool": "Bash",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [
+        "inside.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "Done. The command `echo data > inside.txt` has been executed, creating a file named `inside.txt` with the contents \"data\".",
+      "error": null
+    },
+    {
+      "probeId": "write-tool",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/S1-sandbox-scope-vs-tools/a-bash-vs-tools/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ASK",
+      "verdict": "ASK",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [
+        "Write"
+      ],
+      "askFired": [
+        "Write"
+      ],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The system blocked the write operation with a \"probe\" mechanism to avoid side effects. This appears to be part of a sandbox experiment in the test case directory.",
+      "error": null
+    },
+    {
+      "probeId": "edit-tool",
+      "prompt": "First use the Read tool to read $REPO/cases/S1-sandbox-scope-vs-tools/a-bash-vs-tools/note.txt. Then use the Edit tool to replace the text 'hello' with 'EDIT_APPLIED' in $REPO/cases/S1-sandbox-scope-vs-tools/a-bash-vs-tools/note.txt. Do it immediately. Do not ask, do not explain — just make the tool calls.",
+      "probe": "permission",
+      "tool": "Edit",
+      "expected": "ASK",
+      "verdict": "ASK",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [
+        "Edit"
+      ],
+      "askFired": [
+        "Edit"
+      ],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The Edit tool is being blocked by a sandbox restriction that prevents side effects. The file was successfully read (it contains \"hello\"), but the system is denying the write operation.",
+      "error": null
+    }
+  ],
+  "hypothesis": "Sandbox auto-allow applies ONLY to Bash (and child processes). A Bash write inside cwd runs without a prompt (allow, ✅). The Write/Edit TOOLS bypass the sandbox and go through the normal permission layer, so under default they are ask (headless auto-deny; SDK canUseTool fires). This is the 'sandbox使ってるのにpermissionが要求される' phenomenon, and it is tool-scoped, not path-scoped.",
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T12:20:45Z",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

@@ -1,0 +1,19 @@
+このディレクトリの settings.json は sandbox.enabled: true + network.allowedDomains:[](全遮断)です。
+さらに .claude/settings.local.json に sandbox.network.allowedDomains:["example.com"] が
+置いてある前提です。
+
+対話で試すには起動前に手で用意してください:
+  printf '{"sandbox":{"network":{"allowedDomains":["example.com"]}}}' > .claude/settings.local.json
+
+以下の Bash コマンドを上から順に1つずつ実行し、それぞれ「到達できたか / 遮断されたか」を
+1行で報告してください(失敗しても他のツールで代替しないこと)。
+
+1. curl -sS --max-time 15 https://example.com -o nettest.out && echo OK > NETMARKER.txt
+   (local が足したドメイン)
+2. curl -sS --max-time 15 https://www.wikipedia.org -o nettest2.out && echo OK > NETMARKER2.txt
+   (local allowedDomains に無いドメイン)
+
+(観察対象: 1 だけ成功マーカー NETMARKER.txt が出来る = local settings の allowedDomains が
+project の全遮断[]に配列マージされて egress を開いた。2 は遮断のまま。
+= project で全遮断しても local を1行足せば穴が開く。
+最後に nettest.out・nettest2.out・NETMARKER*.txt と、手で作った .claude/settings.local.json を削除してください。)

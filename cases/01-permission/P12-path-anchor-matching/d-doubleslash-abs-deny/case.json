@@ -1,0 +1,45 @@
+{
+  "id": "P12-path-anchor-matching/d-doubleslash-abs-deny",
+  "title": "二重スラッシュ絶対 `Edit(//abs/sub/**)` deny は効く(c と 1 スラッシュ差)",
+  "probe": "permission",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ]
+  },
+  "arrange": {},
+  "probes": [
+    {
+      "id": "edit-cwd-abs",
+      "tool": "Edit",
+      "prompt": "First use the Read tool to read $CASE_DIR/sub/note.txt . Then use the Edit tool to replace the text 'hello' with 'EDIT_APPLIED' in $CASE_DIR/sub/note.txt . Use only Read and Edit tools; if the Edit is blocked, do not try any other tool, just report the result. No commentary.",
+      "observe": {
+        "contentMarker": {
+          "path": "sub/note.txt",
+          "contains": "EDIT_APPLIED"
+        },
+        "cleanup": [
+          "sub"
+        ]
+      },
+      "arrange": {
+        "setup": [
+          {
+            "path": "sub/note.txt",
+            "content": "hello"
+          }
+        ]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-",
+        "byModality": {
+          "headless": "INCONCLUSIVE"
+        }
+      }
+    }
+  ],
+  "notes": "c との 1 スラッシュ差の対照。二重スラッシュの絶対アンカー `Edit(//Users/.../sub/**)`(settings で `/$CASE_DIR` を展開)は Edit deny として**効く**。scratch 2026-07-06: 編集不成立=ハード deny。`//abs` が docs 由来の絶対アンカー形(FINDINGS の `Write(//<abs>/**)` 記述と整合)。効く絶対形は `//`、効かないのは単一 `/`(c)。",
+  "hypothesis": "二重スラッシュ絶対アンカー `Edit(//abs/sub/**)` は Edit deny として機能する(ハード deny)。単一スラッシュ(c)との差はスラッシュ 1 つだけ。"
+}

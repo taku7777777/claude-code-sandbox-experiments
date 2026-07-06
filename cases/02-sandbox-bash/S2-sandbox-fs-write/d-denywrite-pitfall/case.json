@@ -1,0 +1,54 @@
+{
+  "id": "S2-sandbox-fs-write/d-denywrite-pitfall",
+  "title": "denyWrite:[~] は allowWrite 例外も cwd 暗黙許可も両方潰す (アンチパターン) -> 全プローブ allow x ng",
+  "probe": "fs-write",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "w-cwd",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > inside.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["inside.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    },
+    {
+      "id": "w-allowlisted",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > $HOME/lab-fs-write/probe.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "arrange": {
+        "setup": [{ "path": "~/lab-fs-write/.keep", "content": "" }]
+      },
+      "observe": {
+        "sideEffects": ["~/lab-fs-write/probe.txt"],
+        "cleanup": ["~/lab-fs-write"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    },
+    {
+      "id": "w-glob",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > $HOME/lab-glob-XYZ/probe.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "arrange": {
+        "setup": [{ "path": "~/lab-glob-XYZ/.keep", "content": "" }]
+      },
+      "observe": {
+        "sideEffects": ["~/lab-glob-XYZ/probe.txt"],
+        "cleanup": ["~/lab-glob-XYZ"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    }
+  ],
+  "notes": "1-variable diff from b: + denyWrite:[~]. ANTIPATTERN. deny wins over allow in the sandbox FS layer, and cwd (the repo) is under ~, so denyWrite:[~] removes BOTH the allowWrite:[~/lab-fs-write] exception (w-allowlisted b->d ok->ng) AND the implicit cwd write (w-cwd a/b ok -> d ng). This addresses S2 GAPS G8: both halves of the pitfall (cwd loss + allowlist loss) are now measured, not extrapolated. Every cell is allow x ng. Lesson: never denyWrite:[~]; scope writes with allowWrite only.",
+  "hypothesis": "denyWrite:[~] does not merely cancel the allowWrite exception; because cwd is under ~, it also strips the implicit cwd write. Both w-cwd and w-allowlisted become allow x ng -- you lose the ability to write your own working directory."
+}

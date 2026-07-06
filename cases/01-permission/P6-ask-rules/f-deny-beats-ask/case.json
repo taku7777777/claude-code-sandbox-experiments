@@ -1,0 +1,22 @@
+{
+  "id": "P6-ask-rules/f-deny-beats-ask",
+  "title": "deny Write(*) + ask Write(*) -> deny wins over ask (evaluation order deny -> ask -> allow, upper boundary)",
+  "probe": "permission",
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Use only the Write tool — if the call is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": [
+          "PROOF.txt"
+        ]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    }
+  ],
+  "hypothesis": "Official permissions doc (verified 2026-07-05): 'Rules are evaluated in order: deny, then ask, then allow. The first match in that order determines the outcome.' The repo has measured two of the three edges — deny>allow (P2-b) and ask>allow (P6-b) — but never deny>ask. This case co-locates deny and ask on the same specifier Write(*): expected DENY, i.e. SDK canUseTool must NOT fire (in P6-b, with allow co-present instead of deny, it DID fire). Secondary observation to record: which deny form manifests — deny Write(*) is a bare-equivalent form that removes the tool from context (P2-c/d: no denials, detected via init-tools gap), vs call-time denial (P2-b with allow co-present). Whether the co-present ASK rule keeps the tool in context (like allow does in P2-b) or the tool is removed anyway is itself an open sub-question this measurement settles."
+}

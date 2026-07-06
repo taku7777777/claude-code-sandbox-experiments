@@ -1,0 +1,19 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "allowUnsandboxedCommands": false,
+    "network": {
+      "allowedDomains": [
+        "example.com"
+      ],
+      "deniedDomains": [
+        "example.com"
+      ]
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(*)"
+    ]
+  }
+}

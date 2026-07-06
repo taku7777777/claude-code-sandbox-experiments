@@ -1,0 +1,24 @@
+{
+  "id": "S6-sandbox-network/a0-true-default",
+  "title": "network キー省略(真の既定)でも egress は全ブロック = allowedDomains:[] と等価 (allow ❌)",
+  "probe": "network",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "net-reach",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: curl -sS --max-time 15 https://example.com -o nettest.out && echo OK > NETMARKER.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["NETMARKER.txt"],
+        "cleanup": ["nettest.out"],
+        "preflight": "https://example.com"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    }
+  ],
+  "notes": "S6 GAPS G3(a) の箱: a-default-blocked は allowedDomains:[] の**明示空リスト**で、docs のいう既定(network キー省略)とは構成が違う。本ケースは sandbox.network を一切書かず(f/g と同じ素の sandbox 構成)、a と同一の egress プローブを当てて「省略 = 空リスト」の等価性を1変数で確認する。preflight 必須(オフラインを遮断と誤判定しない)。",
+  "hypothesis": "network キー省略時も egress は既定全ブロックで、allowedDomains:[](S6-a)と観測上等価。permission は allow(sandbox auto-allow)だが OS 層で curl が遮断され allow × ng。"
+}

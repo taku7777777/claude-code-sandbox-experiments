@@ -1,0 +1,11 @@
+このディレクトリの settings.json は sandbox on + ask: ["Bash"](bare 形)+
+excludedCommands: ["touch *"](touch は sandbox 外で実行)です。
+以下の操作を上から順に1つずつ Bash ツールで実行し、「承認を求められたか / そのまま実行できたか」を
+報告してください(ブロックされても他のツールで代替しないこと)。
+
+1. echo data > inside.txt(sandbox 内で実行される)
+2. touch s4e-fallback.txt(excluded なので sandbox の外で実行される)
+
+(観察対象: 同じ bare `Bash` ask 規則の下で、1 は無プロンプトで通り(sandbox 実行分にはスキップ)、
+2 だけ承認プロンプトが出る(非 sandbox 実行分には適用)。ask を分けたのは規則ではなく実行経路。
+最後に、作成された inside.txt / s4e-fallback.txt があれば削除してください。)

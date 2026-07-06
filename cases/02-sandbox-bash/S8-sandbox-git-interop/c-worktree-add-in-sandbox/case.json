@@ -1,0 +1,32 @@
+{
+  "id": "S8-sandbox-git-interop/c-worktree-add-in-sandbox",
+  "title": "`git worktree add` SUCCEEDS inside the sandbox -> {allow, ok} (unlike git init)",
+  "probe": "fs-write",
+  "run": {
+    "maxTurns": 3
+  },
+  "arrange": {
+    "prep": "rm -rf wr2 wt2 && git init -q wr2 && git -C wr2 -c user.email=x@x.com -c user.name=x commit -q --allow-empty -m c",
+    "setup": [
+      { "path": "wr2" },
+      { "path": "wt2" }
+    ]
+  },
+  "probes": [
+    {
+      "id": "worktree-add",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool, then report its output verbatim (do not summarize, do not run anything else): git -C wr2 worktree add ../wt2 2>err.txt && echo WTOK > WTMARK.txt; echo \"exit=$?\"; cat err.txt",
+      "observe": {
+        "sideEffects": ["WTMARK.txt", "wt2/.git"],
+        "cleanup": ["WTMARK.txt", "err.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "With the repo pre-created outside the sandbox (prep), `git worktree add` SUCCEEDS in the sandbox -> {allow, ok} = 'allow ✅'. Unlike `git init` (S8-a, blocked on the .git/hooks template copy), worktree add only writes into wr2/.git/worktrees/ and the worktree's .git file (both inside the writable cwd region) and does NOT touch .git/config or .git/hooks (so S8-b / S8-e denies do not apply). This REFUTES multi-repo-workspace.md's older claim that worktree add is blocked by .git protection. `wr2`/`wt2` are registered in arrange.setup so the harness removes them in finally (the per-probe clean would otherwise delete the prep-created repo before the probe runs).",
+  "hypothesis": "worktree add completes: WTMARK and wt2/.git both appear. Only init/clone (S8-a / network) actually need the prep phase; worktree add itself is fine inside the sandbox."
+}

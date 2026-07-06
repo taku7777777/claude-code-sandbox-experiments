@@ -1,0 +1,50 @@
+{
+  "id": "P3-write-glob-asymmetry-DANGER/e-deny-edit-path",
+  "modality": "sdk",
+  "title": "deny Edit(PROOF.txt) vs the Write tool -> does the docs' 'Edit rules apply to all built-in editing tools' cover Write? (the CORRECT per-file guard, measured)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-guarded-file",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/P3-write-glob-asymmetry-DANGER/e-deny-edit-path/PROOF.txt with the content 'ok'. Use ONLY the Write tool — if the Write tool is unavailable or the call is denied, do NOT use any other tool or workaround; just report what happened. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "DENIED_HARD",
+      "verdict": "DENIED_HARD",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The Write tool call was denied: \"File is in a directory that is denied by your permission settings.\"",
+      "error": null
+    },
+    {
+      "probeId": "write-other-file",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/P3-write-glob-asymmetry-DANGER/e-deny-edit-path/OTHER.txt with the content 'ok'. Use ONLY the Write tool — if the Write tool is unavailable or the call is denied, do NOT use any other tool or workaround; just report what happened. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [
+        "OTHER.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "Done.",
+      "error": null
+    }
+  ],
+  "hypothesis": "Docs define path-based edit control on Read/Edit rules and state that Edit rules apply to the built-in editing tools (so the Write tool should be in scope). If true, the correct way to guard a single file is deny Edit(PROOF.txt) (gitignore semantics: equivalent to Edit(**/PROOF.txt)) — NOT deny Write(PROOF.txt), which P3-c proved is a silent no-op. Probe 1: Write to the guarded name -> expected DENIED (scoped deny: tool stays visible, denial recorded). Probe 2: Write to a different name under the same settings -> ALLOWED via allow Write(*) (the deny is file-scoped, not tool-wide). If probe 1 turns out ALLOWED instead, that contradicts the docs and P3-c's advice ('個別ファイル保護は別手段を検討') stays as-is — either outcome settles G2.",
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T11:04:56Z",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

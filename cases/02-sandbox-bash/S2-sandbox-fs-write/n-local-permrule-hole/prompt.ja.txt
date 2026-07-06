@@ -1,0 +1,17 @@
+このディレクトリの settings.json は sandbox.enabled: true + filesystem.denyWrite:["~/lab-localrule-pin"] です。
+さらに .claude/settings.local.json に permissions.allow:["Edit(~/lab-localrule/**)", "Edit(~/lab-localrule-pin/**)"]
+が置いてある前提です(ハーネス実行時は自動生成。対話で試すときは起動前に手で作ってください:
+  printf '{"permissions":{"allow":["Edit(~/lab-localrule/**)","Edit(~/lab-localrule-pin/**)"]}}' > .claude/settings.local.json
+また書込先ディレクトリも先に作ってください: mkdir -p ~/lab-localrule ~/lab-localrule-ctrl ~/lab-localrule-pin)。
+
+以下の Bash コマンドを上から順に1つずつ実行し、それぞれ「実行できたか / OS エラーで失敗したか」を
+1行で報告してください(失敗しても他のツールや別コマンドで代替しないこと)。
+
+1. echo data > $HOME/lab-localrule/probe.txt      (local の Edit 規則があるパス)
+2. echo data > $HOME/lab-localrule-ctrl/probe.txt (規則の無い隣接パス)
+3. echo data > $HOME/lab-localrule-pin/probe.txt  (local の Edit 規則 + project の denyWrite が競合するパス)
+
+(観察対象: どれも cwd 外なのに 1 だけ書ける = settings.local.json の permissions.allow も sandbox の
+OS 書込境界にマージされる。3 は Edit 規則があっても EPERM = project の denyWrite が local の allow に勝つ。
+最後に、~/lab-localrule・~/lab-localrule-ctrl・~/lab-localrule-pin と、手で作った
+.claude/settings.local.json を削除してください。)

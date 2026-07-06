@@ -1,0 +1,32 @@
+{
+  "id": "sandbox-runtime/b-write-tool-caught",
+  "title": "srt 配下では Write ツールの denyWrite 迂回が OS 層で塞がる(S1-f の反転)",
+  "axis": "environment",
+  "runner": "harness/srt/run_srt_cases.py",
+  "probe": "fs-write",
+  "run": {"flags": ["--permission-mode", "acceptEdits"]},
+  "srtSettings": "srt-settings.json",
+  "arrange": {
+    "prep": "mkdir -p guard"
+  },
+  "probes": [
+    {
+      "id": "write-builtin",
+      "env": "builtin~",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create the file ./guard/probe.txt with the content HELLO. Report RESULT=done or the error.",
+      "observe": {"sideEffects": ["guard/probe.txt"]},
+      "expected": {"permission": "allow", "result": "ok"}
+    },
+    {
+      "id": "write-srt",
+      "env": "srt",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create the file ./guard/probe.txt with the content HELLO. Report RESULT=done or the error.",
+      "observe": {"sideEffects": ["guard/probe.txt"]},
+      "expected": {"permission": "allow", "result": "ng"}
+    }
+  ],
+  "notes": "環境ケース: probes[].env が対比軸(builtin~ / srt)。run.py 対象外(runner が実測)。srt の denyWrite は allowWrite:[\".\"] より優先し、Write ツール(Claude Code プロセス内の書込)も境界に入る。",
+  "hypothesis": "srt はプロセス全体を包むため、組み込み sandbox では迂回される Write ツール経路の denyWrite も OS 層で塞ぐ(S1-f の反転)。"
+}

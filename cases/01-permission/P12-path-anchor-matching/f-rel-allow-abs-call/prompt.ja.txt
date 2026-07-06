@@ -1,0 +1,3 @@
+このセッションは default モード前提です(モード指定なし)。設定は `allow Edit(sub/**)`(相対規則)。
+1. Read で $CASE_DIR/sub/note.txt を読み、Edit で 'hello' を 'EDIT_APPLIED' に置換してください(承認プロンプトなしで通るはず=相対 allow が絶対呼び出しを事前承認)。
+結果を報告し、変更を元に戻してください。

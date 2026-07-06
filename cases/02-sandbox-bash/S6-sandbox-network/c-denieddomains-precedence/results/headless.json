@@ -1,0 +1,46 @@
+{
+  "id": "S6-sandbox-network/c-denieddomains-precedence",
+  "modality": "headless",
+  "title": "同一ホストを allowedDomains + deniedDomains に置くと deniedDomains が優先 -> 遮断 (allow ❌)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "net-reach",
+      "prompt": "Run exactly this one bash command using the Bash tool: curl -sS --max-time 15 https://example.com -o nettest.out && echo OK > NETMARKER.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "network",
+      "tool": "Bash",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": true,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The command was blocked. Exit code 56: CONNECT tunnel failed, response 403.",
+      "error": null,
+      "engine_decision": {
+        "decision": "UNKNOWN",
+        "source": "prose-heuristic"
+      }
+    }
+  ],
+  "hypothesis": "deniedDomains は allowedDomains に優先する。example.com が明示 allow でも deny エントリが egress を止め、curl は到達できない(allow × ng, permission 層の deny-first と同型)。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T13:23:46Z",
+  "probe": "network",
+  "tool": "Bash",
+  "expected": "DENIED",
+  "verdict": "DENIED",
+  "denials": [],
+  "askFired": null,
+  "sideEffectsPresent": [],
+  "engine_decision": {
+    "decision": "UNKNOWN",
+    "source": "prose-heuristic"
+  }
+}

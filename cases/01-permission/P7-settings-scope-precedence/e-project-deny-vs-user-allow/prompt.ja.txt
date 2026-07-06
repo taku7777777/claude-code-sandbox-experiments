@@ -1,0 +1,8 @@
+このセッションは、project スコープ(.claude/settings.json)に deny Write(*)、user スコープ(~/.claude/settings.json 相当)に allow Write(*) が置かれた状態で動いている前提です。
+
+以下の操作を実行し、「承認を求められたか / 拒否されたか / 実行できたか」を1行で報告してください。ブロックされたら他のツールで代替せず、結果だけ報告してください。
+
+1. Write ツールで $CASE_DIR/PROOF.txt に 'ok' と書く
+
+(観察対象: user に allow があっても project の deny が勝って書けない=deny はスコープ横断で allow に勝つ。P7-a は deny を user・allow を project に置いた逆配置で、本ケースはその鏡像です。
+最後に、もし出来ていれば PROOF.txt を削除してください。)

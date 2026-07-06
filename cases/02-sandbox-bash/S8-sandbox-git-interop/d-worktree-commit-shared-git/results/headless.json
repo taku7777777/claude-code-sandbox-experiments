@@ -1,0 +1,50 @@
+{
+  "id": "S8-sandbox-git-interop/d-worktree-commit-shared-git",
+  "modality": "headless",
+  "title": "`git commit` from a linked worktree writes the shared `.git` -> {allow, ok} (no allowWrite injection)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "worktree-commit",
+      "prompt": "Run exactly this one bash command using the Bash tool, then report its output verbatim (do not summarize, do not run anything else): cd wt && git -c user.email=x@x.com -c user.name=x commit --allow-empty -m x 2>err.txt && echo COMMITOK > COMMITMARK.txt; echo \"exit=$?\"; cat err.txt",
+      "probe": "fs-write",
+      "tool": "Bash",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [
+        "wt/COMMITMARK.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "```\n[wt 63efdee] x\nexit=0\n```",
+      "error": null,
+      "engine_decision": {
+        "decision": "ALLOW",
+        "source": "side-effect"
+      }
+    }
+  ],
+  "hypothesis": "commit completes from inside the worktree with NO allowWrite: COMMITMARK appears -> {allow, ok}. Confirms sandboxing.md and refutes refactor-plan §W4. If it fails -> refactor-plan §W4 is right in this environment (record whichever occurs).",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T13:26:17Z",
+  "probe": "fs-write",
+  "tool": "Bash",
+  "expected": "ALLOWED",
+  "verdict": "ALLOWED",
+  "denials": [],
+  "askFired": null,
+  "sideEffectsPresent": [
+    "wt/COMMITMARK.txt"
+  ],
+  "engine_decision": {
+    "decision": "ALLOW",
+    "source": "side-effect"
+  }
+}

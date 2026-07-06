@@ -1,0 +1,55 @@
+{
+  "id": "P11-mcp-tool-rules/f-deny-tool",
+  "title": "deny mcp__server__tool は除去型(init tools から消える・denials 空)。兄弟ツールは ask のまま",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "arrange": {
+    "mcpServers": {
+      "probe": {
+        "type": "stdio",
+        "command": "node",
+        "args": [
+          "$CASE_DIR/../mcp-probe-server.mjs"
+        ]
+      }
+    }
+  },
+  "probes": [
+    {
+      "id": "named-tool-removed",
+      "tool": "mcp__probe__read_path",
+      "prompt": "Call the tool mcp__probe__read_path with argument path = \"$CASE_DIR/note.txt\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "note.txt",
+            "content": "SENT_P11F_read_h3m"
+          }
+        ]
+      },
+      "observe": {
+        "cleanup": [
+          "note.txt"
+        ]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    },
+    {
+      "id": "sibling-still-asks",
+      "tool": "mcp__probe__net_get",
+      "prompt": "Call the tool mcp__probe__net_get with argument url = \"https://example.com\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "observe": {},
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "deny の現れ方の確認。scratch 2026-07-06: initMcpTools=[mcp__probe__net_get](read_path が消失)・denials 空・モデルは MCP_BLOCKED 報告=除去型。P2-c/d(deny のみ=除去型)と同じ現れ方。監査上 denials に痕跡が残らない点も同じ。",
+  "hypothesis": "ツール名 deny はツールセットから除去する(呼び出し自体が起きない)。ground truth は init tools の欠落。兄弟ツールに波及しない=1 ツール単位で塞げる。"
+}

@@ -1,0 +1,11 @@
+このディレクトリの settings.json は sandbox on + ask: ["Bash(touch *)"](content-scoped 形)です。
+以下の操作を上から順に1つずつ Bash ツールで実行し、「承認を求められたか / そのまま実行できたか」を
+報告してください(ブロックされても他のツールで代替しないこと)。
+
+1. touch s4f-file.txt(ask 規則の対象)
+2. echo data > inside.txt(規則の対象外)
+
+(観察対象: sandbox の auto-allow 下でも 1 だけ承認プロンプトが出る = content-scoped ask は
+auto-allow を貫通する。2 は無プロンプト = auto-allow は生きている。bare 形の ask ["Bash"] が
+スキップされる e と対比すると「貫通するのは内容を指定した ask だけ」が見えます。
+最後に、作成された s4f-file.txt / inside.txt があれば削除してください。)

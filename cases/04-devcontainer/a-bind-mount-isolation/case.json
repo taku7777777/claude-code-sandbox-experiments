@@ -1,0 +1,25 @@
+{
+  "id": "devcontainer/a-bind-mount-isolation",
+  "title": "bind mount の分離 — 書込はホストに反映、未マウント秘密は不可視(fail-closed)",
+  "axis": "environment",
+  "runner": "README 試し方(docker run + alpine。colima 前提・claude 非経由で機構を単離)",
+  "probe": "fs-write",
+  "probes": [
+    {
+      "id": "write-reflects-host",
+      "env": "container",
+      "cmd": "echo written-in-container > /workspace/from-container.txt",
+      "observe": {"sideEffects": ["ws/from-container.txt(ホスト側)"]},
+      "expected": {"permission": "none", "result": "ok"}
+    },
+    {
+      "id": "unmounted-invisible",
+      "env": "container",
+      "cmd": "ls /host-only.txt",
+      "observe": {"execMarker": "LEAK(見えた)/ host secret not visible"},
+      "expected": {"permission": "none", "result": "ng"}
+    }
+  ],
+  "notes": "環境ケース: claude 非経由(docker CLI + alpine)で bind mount の機構を単離するため expected.permission は none。マウントした所だけが存在する=構造的許可リスト(fail-closed)。組み込み denyRead(列挙式 fail-open, S3/S7-k)と倒れる向きが逆。⚠️ bind mount 対象は $HOME 配下に置く(colima の virtiofs 共有範囲)。claude を入れた end-to-end は未実施(→ DEVCONTAINER-FINDINGS §5)。",
+  "hypothesis": "コンテナ FS はマウント式の構造的許可リストで、未マウントのホスト秘密はコンテナに存在しない(fail-closed)。"
+}

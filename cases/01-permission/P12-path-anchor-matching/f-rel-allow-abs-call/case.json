@@ -1,0 +1,37 @@
+{
+  "id": "P12-path-anchor-matching/f-rel-allow-abs-call",
+  "title": "相対 allow `Edit(sub/**)` は絶対パス呼び出しを事前承認する(deny 側 a と対称)",
+  "probe": "permission",
+  "run": {},
+  "arrange": {},
+  "probes": [
+    {
+      "id": "edit-cwd-abs",
+      "tool": "Edit",
+      "prompt": "First use the Read tool to read $CASE_DIR/sub/note.txt . Then use the Edit tool to replace the text 'hello' with 'EDIT_APPLIED' in $CASE_DIR/sub/note.txt . Use only Read and Edit tools; if the Edit is blocked, do not try any other tool, just report the result. No commentary.",
+      "observe": {
+        "contentMarker": {
+          "path": "sub/note.txt",
+          "contains": "EDIT_APPLIED"
+        },
+        "cleanup": [
+          "sub"
+        ]
+      },
+      "arrange": {
+        "setup": [
+          {
+            "path": "sub/note.txt",
+            "content": "hello"
+          }
+        ]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "allow 側の対称確認。default モード(無指定=Edit は本来 ask)で相対 allow `Edit(sub/**)` を張り、Edit を絶対パスで呼ぶ。scratch 2026-07-06: 編集成立・denials 空=事前承認された。相対 allow も絶対呼び出しにマッチ(deny 側 a と対称)。g(単一スラッシュ)と対。",
+  "hypothesis": "相対 allow 規則 `Edit(sub/**)` は絶対パスでの Edit 呼び出しを事前承認する(default モードの ask を上書き)。allow 側もマッチは解決済みパスで、相対/絶対の表記差で抜け落ちない。"
+}

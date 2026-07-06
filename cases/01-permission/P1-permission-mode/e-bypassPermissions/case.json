@@ -1,0 +1,75 @@
+{
+  "id": "P1-permission-mode/e-bypassPermissions",
+  "title": "bypassPermissions mode -> permission prompts are skipped, every write-type call goes through",
+  "probe": "permission",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "bypassPermissions"
+    ],
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "write-home",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $HOME/p1e-proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["~/p1e-proof.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "write-subdir",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/sub/proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["sub/proof.txt"],
+        "cleanup": ["sub"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "edit-cwd",
+      "tool": "Edit",
+      "prompt": "First use the Read tool to read $CASE_DIR/note.txt. Then use the Edit tool to replace the text 'hello' with 'EDIT_APPLIED' in $CASE_DIR/note.txt. Do it immediately. Do not ask, do not explain — just make the tool calls.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "note.txt",
+            "content": "hello"
+          }
+        ]
+      },
+      "observe": {
+        "contentMarker": {
+          "path": "note.txt",
+          "contains": "EDIT_APPLIED"
+        }
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "bypassPermissions skips permission prompts — INCLUDING writes to protected paths (.git, .claude, .vscode, etc. per official permissions.md), NOT excepting them. The only things that still prompt are explicit `ask` rules and the rm -rf / rm -rf ~ circuit breaker (plus deny rules via deny-first). So every write-type call here succeeds with no allow rule, regardless of path or tool. Equivalent to --dangerously-skip-permissions; isolated environments only. (Correction 2026-07-05: earlier text said 'except protected paths' — wrong per docs; protected-path writes are skipped too. Verified via official permissions.md Permission-modes Warning box.)"
+}

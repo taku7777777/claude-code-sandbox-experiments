@@ -1,0 +1,26 @@
+{
+  "id": "P9-hooks-vs-permission/c-json-deny-beats-allow",
+  "title": "JSON deny hook (exit 0 + permissionDecision=deny) beats allow Write(*) -> DENIED; reason string is fed back to the model",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Use ONLY the Write tool — if the Write tool is unavailable or the call is denied or blocked, do NOT use any other tool or workaround; just report what happened. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"],
+        "evidenceFile": "hook-ran.marker",
+        "evidenceMarker": "P9_HOOK_JSON_DENY"
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    }
+  ],
+  "hypothesis": "『hook で締める』JSON 経路: exit 0 + hookSpecificOutput.permissionDecision=deny も allow Write(*) に勝つ。b(exit 2)とは経路が別 — exit 2 は「規則評価より前に止める」blocking error、JSON deny は hook の判断として返る(hooks docs の実装例はこちらの形が一般的)。permissionDecisionReason(P9_HOOK_JSON_DENY)がモデルに返る。b と対で「締める2経路はどちらも allow を越える」が埋まる。",
+  "notes": "MEASURED-DESIGN 2026-07-05: scratch 探索で JSON deny も permission_denials に記録され、reason 文言がモデル出力に現れると確認。P9 GAPS G5(hook×規則マトリクスの JSON deny セル)を埋める新設ケース。"
+}

@@ -1,0 +1,14 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "denyRead": [
+        "~/lab-readdrift",
+        "~/lab-readdrift-ctrl"
+      ],
+      "allowRead": [
+        "."
+      ]
+    }
+  }
+}

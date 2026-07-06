@@ -1,0 +1,6 @@
+このセッションは permissions.allow に WebFetch(domain:*.example.com) と Write(*) がある前提です。
+
+以下を実行し「承認要求なしに取得・作成できたか」を1行で報告してください。
+1. WebFetch ツールで https://www.example.com を取得し、成功したら Write ツールで WF_MARKER.txt（内容 FETCHED）を作る（ブロックされたら何も書かない）
+
+(観察対象: ワイルドカード domain:*.example.com がサブドメイン www.example.com にマッチして事前承認するか。最後に WF_MARKER.txt を削除してください。)

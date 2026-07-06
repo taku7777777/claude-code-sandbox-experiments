@@ -1,0 +1,19 @@
+{
+  "id": "devcontainer/g-root-bypass-in-container",
+  "title": "root では --dangerously-skip-permissions は拒否される — コンテナでも例外にならない(非 root 運用が必須)",
+  "axis": "environment",
+  "runner": "harness/devcontainer/run_devc_e2e.sh",
+  "probe": "permission",
+  "probes": [
+    {
+      "id": "root-skip-permissions-rejected",
+      "env": "container",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create /workspace/root-test.txt with content ROOT_RAN. Report RESULT=done.",
+      "observe": {"evidenceMarker": "cannot be used with root/sudo privileges"},
+      "expected": {"permission": "deny", "result": "-"}
+    }
+  ],
+  "notes": "環境ケース(c のイメージに相乗り・両方向に価値がある設計): `docker run -u root` で `claude --dangerously-skip-permissions` を起動する。仮説は両方向 — docs は root/sudo で拒否と言うが、P1-e 注記『認識された sandbox 内では例外』がコンテナに適用され許可される可能性もあった。★実測(2026-07-06): **拒否**。エラー『--dangerously-skip-permissions cannot be used with root/sudo privileges for security reasons』でツールに到達せず(ファイル未作成)。= コンテナでも例外は発動せず、無人運用には**非 root(remoteUser / -u 非 root)が必須**。c 本体は非 root 成功パスで実測しているので、本ケースは『root では回せない』の裏取り。",
+  "hypothesis": "root 起動の --dangerously-skip-permissions は CLI が拒否する。コンテナ検出による例外(P1-e)が発動して許可される可能性もあったが、実測では拒否 = 非 root 運用が必須。"
+}

@@ -1,0 +1,56 @@
+{
+  "id": "P3-write-glob-asymmetry-DANGER/d-path-scoped-noop",
+  "modality": "sdk",
+  "title": "path-scoped Write allow rules are silent no-ops in EVERY form (relative / ./ / absolute / abs-glob / ~) -> the write stays ask",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-subdir",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/P3-write-glob-asymmetry-DANGER/d-path-scoped-noop/sub/proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ASK",
+      "verdict": "ASK",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [
+        "Write"
+      ],
+      "askFired": [
+        "Write"
+      ],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The write operation was blocked by a permission check. The system requires explicit permission before writing to the filesystem, even though you've requested immediate execution.",
+      "error": null
+    },
+    {
+      "probeId": "write-home-lab",
+      "prompt": "Use the Write tool to create a file at $HOME/lab-p3d/proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ASK",
+      "verdict": "ASK",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [
+        "Write"
+      ],
+      "askFired": [
+        "Write"
+      ],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The Write tool requires permission. The system is asking for authorization before creating the file.",
+      "error": null
+    }
+  ],
+  "hypothesis": "The path-scoped Write allow forms SWEPT HERE fail to match — relative single-star (sub/*), dot-relative (./sub/*), absolute (via $CASE_DIR, with * and **), and home (~/lab-p3d/*). The settings stack ALL of them at once and the targeted writes still fall to ask (no rule matched). CORRECTION 2026-07-05: this sweep did NOT include the relative directory-doublestar form Write(<dir>/**) (e.g. Write(sub/**)), which S9-a shows DOES match (deny Write(assets/**) blocks writes; mechanism ASK). So the earlier conclusion 'path-scoping cannot be expressed for the Write tool at all' was an over-generalization from an incomplete sweep. Working Write forms: Write(*) / bare Write, AND relative Write(<dir>/**). Notably the absolute $CASE_DIR/sub/** here is a no-op while S9's relative assets/** works -> the decisive factor looks like relative-path + doublestar. Consequence: dir-scoped nesting IS partially expressible via relative dir/** (but only as an ASK gate); single-star / absolute / exact-path forms are no-ops.",
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T09:44:30Z",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

@@ -1,0 +1,49 @@
+{
+  "id": "P12-path-anchor-matching/e-home-anchor-deny",
+  "title": "`~/` home アンカー `Edit(~/dir/sub/**)` deny は cwd 外ファイルを守る(効く形)",
+  "probe": "permission",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ]
+  },
+  "arrange": {
+    "configDir": {
+      "trusted": true
+    }
+  },
+  "probes": [
+    {
+      "id": "edit-abs",
+      "tool": "Edit",
+      "prompt": "First use the Read tool to read $HOME/lab-p12/sub/note.txt . Then use the Edit tool to replace the text 'hello' with 'EDIT_APPLIED' in $HOME/lab-p12/sub/note.txt . Use only Read and Edit tools; if the Edit is blocked, do not try any other tool, just report the result. No commentary.",
+      "observe": {
+        "contentMarker": {
+          "path": "~/lab-p12/sub/note.txt",
+          "contains": "EDIT_APPLIED"
+        },
+        "cleanup": [
+          "~/lab-p12"
+        ]
+      },
+      "arrange": {
+        "setup": [
+          {
+            "path": "~/lab-p12/sub/note.txt",
+            "content": "hello"
+          }
+        ]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-",
+        "byModality": {
+          "headless": "INCONCLUSIVE"
+        }
+      }
+    }
+  ],
+  "notes": "`~/` home アンカー形が効くことの実測(S9-d2 と同型だが、脱出でなく素直な保護対象で確認)。cwd の外の ~/lab-p12 を additionalDirectories で編集可能にした上で `deny Edit(~/lab-p12/sub/**)` を張る。scratch 2026-07-06: 編集不成立=ハード deny。additionalDirectories は未 trust だと無視される(P7-c)ため configDir.trusted=true。効く絶対系アンカーは `~/`(本ケース)と `//`(d)。",
+  "hypothesis": "`~/` home アンカーの Edit deny は cwd 外の home 配下ファイルを絶対パス呼び出しに対してブロックする(効く形)。"
+}

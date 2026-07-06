@@ -1,0 +1,76 @@
+{
+  "id": "P1-permission-mode/f-auto-mode",
+  "title": "auto mode (research preview) -> in this env the documented auto-approval does not manifest; behaves like default (all writes ask)",
+  "probe": "permission",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "auto"
+    ],
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "write-home",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $HOME/p1f-proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["~/p1f-proof.txt"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "write-subdir",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/sub/proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["sub/proof.txt"],
+        "cleanup": ["sub"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "edit-cwd",
+      "tool": "Edit",
+      "prompt": "First use the Read tool to read $CASE_DIR/note.txt. Then use the Edit tool to replace the text 'hello' with 'EDIT_APPLIED' in $CASE_DIR/note.txt. Do it immediately. Do not ask, do not explain — just make the tool calls.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "note.txt",
+            "content": "hello"
+          }
+        ]
+      },
+      "observe": {
+        "contentMarker": {
+          "path": "note.txt",
+          "contains": "EDIT_APPLIED"
+        }
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "Documented auto behavior (spec §1.4): working-dir edits are auto-approved (step ②), rest goes to a model classifier (step ③). auto is a research preview with heavy eligibility (Team/Enterprise enablement, model constraints, CLAUDE_CODE_ENABLE_AUTO_MODE=1). In THIS env (individual account, no enablement flag, LAB_MODEL=haiku) the flag is accepted but the auto-approval does not manifest — measured behavior equals default mode (every write-type call is ask). Expected below records the measured this-env behavior, not the documented spec.",
+  "notes": "Research preview / eligibility-gated. If the env becomes eligible, re-measure: write-cwd and edit-cwd should flip to allow (spec §1.4 ②). Taxonomy gap: TAXONOMY-GAPS.md T4."
+}

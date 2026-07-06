@@ -1,0 +1,3 @@
+このケースは deny 常勝の確認です(deny: mcp__probe + allow: mcp__probe__read_path)。
+1. mcp__probe__read_path で note.txt を読む。 2. mcp__probe__net_get で https://example.com を取得。
+(どちらもツール一覧に存在しないはず=サーバ deny の内側にツール allow で穴は開かない)。結果を報告してください。

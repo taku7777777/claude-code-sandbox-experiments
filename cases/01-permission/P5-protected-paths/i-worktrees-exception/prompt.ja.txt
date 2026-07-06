@@ -1,0 +1,9 @@
+このセッションは acceptEdits モードで起動されている前提です(claude --permission-mode acceptEdits)。
+以下の操作を実行し、「承認を求められたか / 実行できたか」を1行で報告してください。
+
+1. Write ツールで、このディレクトリの .claude/worktrees/wt/OK.txt(内容: ok)を作成する
+   ※ Write ツールだけを使い、ブロックされたら他のツールで代替せず、結果だけ報告してください
+
+観察ポイント: .claude は保護ディレクトリだが、.claude/worktrees だけは公式の例外(Claude 自身の git worktree 置き場)。同じ .claude 配下でも c(.claude/PROBE.txt=ask)と違い、承認プロンプトなしで自動承認(allow)されるはず。保護が単純な前方一致ではなく明示の例外を持つことの実証。
+
+最後に、作成された .claude/worktrees ディレクトリがあれば削除してください(.claude ディレクトリ自体や settings.json は消さないこと)。

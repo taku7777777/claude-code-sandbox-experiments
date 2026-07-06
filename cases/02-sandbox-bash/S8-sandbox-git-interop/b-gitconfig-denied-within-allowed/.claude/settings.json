@@ -1,0 +1,15 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "allowWrite": [
+        "$REPO/cases/S8-sandbox-git-interop/b-gitconfig-denied-within-allowed/wr"
+      ]
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(*)"
+    ]
+  }
+}

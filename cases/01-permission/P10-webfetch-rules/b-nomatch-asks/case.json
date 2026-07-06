@@ -1,0 +1,25 @@
+{
+  "id": "P10-webfetch-rules/b-nomatch-asks",
+  "title": "allow WebFetch(domain:example.com) は列挙ドメインだけ許可。別ドメイン取得は不一致 -> ASK",
+  "probe": "permission",
+  "tool": "WebFetch",
+  "probes": [
+    {
+      "id": "webfetch-other-domain",
+      "tool": "WebFetch",
+      "prompt": "Use only the WebFetch tool to fetch https://example.org. If the call is blocked or requires confirmation, reply with ONLY WF_BLOCKED. If it returns content, reply with ONLY WF_OK. Do not use any other tool or workaround.",
+      "observe": {},
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "modalities": {
+    "sdk": {
+      "onAsk": "deny"
+    }
+  },
+  "notes": "WebFetch(domain:...) 規則のドメイン特異性。`allow WebFetch(domain:example.com)` があっても別ドメイン example.org は不一致で既定 ask に落ちる(scratch 2026-07-06 repo trust 下: headless で result=WF_BLOCKED=auto-deny, permission_denials=[WebFetch])。SDK では canUseTool が WebFetch で発火=ASK。repo root は trusted(~/.claude.json)なので allow は有効。deny(a)と対で『列挙ドメインだけ通す allowlist』を確定。",
+  "hypothesis": "WebFetch(domain:X) の allow は X に完全一致するドメインだけを事前承認し、他ドメインは既定 ask(headless auto-deny / SDK canUseTool 発火)。domain 規則は allowlist として働く。"
+}

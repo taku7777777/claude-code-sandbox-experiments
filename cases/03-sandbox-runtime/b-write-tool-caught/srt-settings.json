@@ -1,0 +1,12 @@
+{
+  "_comment": "差分ランナーが CASE_DIR/HOME を実値へ置換。denyWrite でガード dir を塞ぐ(allowWrite '.' より優先)。",
+  "filesystem": {
+    "denyRead": [],
+    "allowWrite": [".", "/tmp", "__HOME__/.claude", "__HOME__/.claude.json"],
+    "denyWrite": ["__CASE_DIR__/guard"]
+  },
+  "network": {
+    "allowedDomains": ["api.anthropic.com", "*.anthropic.com"],
+    "deniedDomains": []
+  }
+}

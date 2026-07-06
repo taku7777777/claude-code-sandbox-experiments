@@ -1,0 +1,35 @@
+{
+  "id": "P2-allow-deny-precedence/f-param-match-deny",
+  "title": "deny Bash(run_in_background:true) -> parameter-match deny blocks only calls WITH that param; omitted param does not match",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "bash-bg",
+      "tool": "Bash",
+      "prompt": "Use the Bash tool with the parameter run_in_background set to true (this exact tool parameter, not shell '&') to run exactly this command: touch $CASE_DIR/bg_proof.txt . Do it immediately. Do not ask, do not explain — just make the tool call with run_in_background: true.",
+      "observe": {
+        "sideEffects": ["bg_proof.txt"]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    },
+    {
+      "id": "bash-fg",
+      "tool": "Bash",
+      "prompt": "Use the Bash tool in the foreground (do NOT set the run_in_background parameter) to run exactly this command: touch $CASE_DIR/fg_proof.txt . Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["fg_proof.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "Docs (spec-inventory §2): deny/ask rules support Tool(param:value) matching for top-level scalar tool parameters, e.g. Bash(run_in_background:true). (1) A Bash call WITH run_in_background:true matches the deny and is blocked at call time (tool stays visible — param-scoped deny is not bare-equivalent, so no context removal; denial recorded). (2) The same command WITHOUT the parameter does not match (omitted parameter = no match, docs) and falls through to allow Bash(*) -> runs. This is the param-syntax sibling of the scope contrast in P4-a."
+}

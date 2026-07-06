@@ -1,0 +1,38 @@
+{
+  "id": "P3-write-glob-asymmetry-DANGER/d-path-scoped-noop",
+  "title": "path-scoped Write allow rules are silent no-ops in EVERY form (relative / ./ / absolute / abs-glob / ~) -> the write stays ask",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-subdir",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/sub/proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["sub/proof.txt"],
+        "cleanup": ["sub"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "write-home-lab",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $HOME/lab-p3d/proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["~/lab-p3d/proof.txt"],
+        "cleanup": ["~/lab-p3d"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "The path-scoped Write allow forms SWEPT HERE fail to match — relative single-star (sub/*), dot-relative (./sub/*), absolute (via $CASE_DIR, with * and **), and home (~/lab-p3d/*). The settings stack ALL of them at once and the targeted writes still fall to ask (no rule matched). RE-CORRECTION 2026-07-05: an interim note claimed the relative Write(<dir>/**) form matches (an ASK gate, per S9-a) — this was DISPROVEN by measurement. S9's 1-variable split shows deny Write(assets/**) alone is a NO-OP (5/5 written under acceptEdits); the block in S9-a came entirely from a co-present deny Edit(assets/**). So path-scoping genuinely cannot be expressed for the Write tool by ANY form (single-star / absolute / exact-path / relative dir/** all no-op). Working Write forms: only Write(*) / bare Write. To scope a directory at the tool layer, use an Edit rule Edit(<dir>/**) — a hard deny covering the whole edit family incl. the Write tool (docs: 'Edit rules apply to all built-in tools that edit files'), NOT an ASK gate.",
+  "notes": "The '//'-rooted absolute form (Write(//private/tmp/.../sub/**)) cannot be expressed with $CASE_DIR tokens; it was probed manually on 2026-07-05 (v2.1.201) and also did not match. Matcher is shared between allow and deny (P3-b/c), so these no-ops apply to deny too: deny Write(~/secret/*) (single-star) and deny Write(/abs/secret.txt) (exact path) protect nothing -- BUT deny Write(secret-dir/**) (relative dir doublestar) DOES protect (S9-a). See cases/S9-tool-write-scope."
+}

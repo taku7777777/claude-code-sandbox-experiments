@@ -1,0 +1,92 @@
+{
+  "id": "P1-permission-mode/a-default-deny",
+  "title": "default mode, no rules -> every write-type tool call is ask, regardless of path or tool",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "write-home",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $HOME/p1a-proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["~/p1a-proof.txt"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "write-subdir",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/sub/proof.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["sub/proof.txt"],
+        "cleanup": ["sub"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "edit-cwd",
+      "tool": "Edit",
+      "prompt": "First use the Read tool to read $CASE_DIR/note.txt. Then use the Edit tool to replace the text 'hello' with 'EDIT_APPLIED' in $CASE_DIR/note.txt. Do it immediately. Do not ask, do not explain — just make the tool calls.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "note.txt",
+            "content": "hello"
+          }
+        ]
+      },
+      "observe": {
+        "contentMarker": {
+          "path": "note.txt",
+          "contains": "EDIT_APPLIED"
+        }
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "read-cwd",
+      "tool": "Read",
+      "probe": "fs-read",
+      "prompt": "Use the Read tool to read the file $CASE_DIR/sentinel.txt and output its exact contents. Do it immediately. Do not ask, do not explain.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "sentinel.txt",
+            "content": "P1A_SENT_r4k9"
+          }
+        ]
+      },
+      "observe": {
+        "sentinel": "P1A_SENT_r4k9"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "In `default` mode with no rules, the permission engine returns ask for every write-type tool call — independent of target path (cwd / $HOME / subdir) and of tool (Write / Edit). The classic 'denyしてないのに拒否される' is this ask left unapproved (headless auto-deny). Positive control (read-cwd): read-only tools sit in the no-approval tier, so default denies nothing but writes — Read succeeds with no prompt even in headless."
+}

@@ -1,0 +1,46 @@
+{
+  "id": "S4-sandbox-autoallow-behavior/d-autoallow-false-strict",
+  "modality": "sdk",
+  "title": "autoAllowBashIfSandboxed:false -> 自動許可が消え通常の承認フローに戻る -> cwd 書込も ASK (ask ✅)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "bash-write-cwd",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > inside.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "permission",
+      "tool": "Bash",
+      "expected": "ASK",
+      "verdict": "ASK",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [
+        "Bash"
+      ],
+      "askFired": [
+        "Bash"
+      ],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The command was blocked with error: \"probe: recording ask, denying to avoid side effects\"",
+      "error": null
+    }
+  ],
+  "hypothesis": "autoAllowBashIfSandboxed:false removes the sandbox auto-approve, so Bash falls back to the normal permission flow. In default mode the cwd write becomes an ASK (canUseTool fires); headless auto-denies it, SDK/interactive show the prompt. Contrast a (default true -> allow x ok); only this key differs.",
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T12:50:27Z",
+  "probe": "permission",
+  "tool": "Bash",
+  "expected": "ASK",
+  "verdict": "ASK",
+  "denials": [
+    "Bash"
+  ],
+  "askFired": [
+    "Bash"
+  ],
+  "sideEffectsPresent": [],
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

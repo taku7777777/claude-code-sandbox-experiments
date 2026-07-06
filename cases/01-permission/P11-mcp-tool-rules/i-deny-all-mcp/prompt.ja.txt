@@ -1,0 +1,2 @@
+このケースは deny 側 bare glob の確認です(deny: mcp__*)。
+1. mcp__probe__read_path で note.txt を読んでください(MCP ツールが一覧に一つも無いはず=全除去)。結果を報告してください。

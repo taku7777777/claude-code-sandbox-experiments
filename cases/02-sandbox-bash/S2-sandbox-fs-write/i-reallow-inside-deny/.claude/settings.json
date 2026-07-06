@@ -1,0 +1,9 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "allowWrite": ["~/lab-nest", "~/lab-nest/sub/inner"],
+      "denyWrite": ["~/lab-nest/sub"]
+    }
+  }
+}

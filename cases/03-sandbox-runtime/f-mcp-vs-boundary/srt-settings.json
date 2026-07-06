@@ -1,0 +1,12 @@
+{
+  "_comment": "runner が __CASE_DIR__(一時 workspace)/__HOME__ を実値へ置換。denyRead=MCP に読ませる秘密 dir / allowedDomains=anthropic のみ(example.com は既定全ブロックへ)。/private/tmp は macOS の /tmp 実体(claude/node の一時物用)。config dir は runner が allowWrite へ自動追加。",
+  "filesystem": {
+    "denyRead": ["__CASE_DIR__/lab-mcp-note"],
+    "allowWrite": [".", "/tmp", "/private/tmp", "__HOME__/.claude", "__HOME__/.claude.json"],
+    "denyWrite": []
+  },
+  "network": {
+    "allowedDomains": ["api.anthropic.com", "*.anthropic.com"],
+    "deniedDomains": []
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "id": "S4-sandbox-autoallow-behavior/e-bare-ask-skipped",
+  "title": "bare `Bash` ask 規則は sandbox 実行分にはスキップされ、fallback (excluded=非 sandbox) 実行分には適用される",
+  "probe": "permission",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "sandboxed-echo-skips-ask",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > inside.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["inside.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "excluded-touch-fallback-ask",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: touch s4e-fallback.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["s4e-fallback.txt"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "S4 GAPS G4 (spec §4.2 ④ の両半分)。設定は ask:[\"Bash\"] (bare 形) + excludedCommands:[\"touch *\"] の1枚で、経路だけをプローブで変える: probe 1 (echo) は sandbox 内実行 → bare Bash ask は『sandbox 実行分にはスキップ』= 無プロンプトで完遂。probe 2 (touch) は excludedCommands により sandbox 外 (非 sandbox) 実行 → 通常の permission フローに乗り bare Bash ask が適用 = ASK。scratch 探索 (2026-07-05) で headless の両挙動 (probe1: denials 空+副作用 / probe2: denials=[Bash]) を確認済み。touch は read-only 集合外 (P4-i) なので『元々無条件承認』の交絡なし。",
+  "hypothesis": "bare `Bash` ask 規則は sandbox 化された実行には適用されず (auto-allow が勝ってスキップ)、sandbox の外で実行される分 (excluded による fallback 経路) には適用される。同一設定で probe 1 = allow x ok / probe 2 = ask x ok に割れることが④の両半分の直接実証。"
+}

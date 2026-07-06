@@ -1,0 +1,12 @@
+このディレクトリの settings.json は sandbox on +
+allowWrite: ["~/lab-nest", "~/lab-nest/sub/inner"](deny の内側を名指しで再許可する意図)+
+denyWrite: ["~/lab-nest/sub"] です。事前に ~/lab-nest/sub/inner を作成した上で、
+以下の操作を上から順に1つずつ Bash ツールで実行し、「実行できたか / OS エラーで失敗したか」を報告してください
+(失敗しても他のツールで代替しないこと)。
+
+1. echo x > $HOME/lab-nest/sub/inner/f.txt(deny 領域の内側の再 allow 対象)
+2. echo x > $HOME/lab-nest/f.txt(allow 領域の外周・deny 対象外)
+
+(観察対象: 1 が operation not permitted なら「write 側に allowRead 相当の再許可は無い= deny 常勝」。
+2 が書ければ allowWrite 自体は生きている、の対照。read 側の allowRead は再許可が効く(S3-b)ので
+非対称性の確認でもあります。最後に、作成したファイルと ~/lab-nest を削除してください。)

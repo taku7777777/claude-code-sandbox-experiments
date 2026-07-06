@@ -1,0 +1,14 @@
+このセッションは sandbox 有効・filesystem.denyRead:["~"] の前提です(.claude/settings.json)。
+このリポジトリ(作業ディレクトリ)はホーム配下にあるため、cwd も denyRead:["~"] の対象になります。
+まず準備として、この作業ディレクトリ直下に検証用ファイルを作ります:
+  echo 'SENT_S3C_5pQ1' > ./probe_note.txt
+
+以下を実行し、「読めたか(番兵 SENT_... が出たか)」を報告してください。
+
+1. Bash ツールで実行: cat ./probe_note.txt 2>/dev/null; printf 'MARK_S3C'
+
+観察ポイント: 書けた(cwd は暗黙で書込可)ファイルなのに、cat で読み返せない
+= MARK_S3C だけ出て番兵は出ないはず。cwd も ~ 配下 → denyRead:["~"] が cwd 読取も潰す
+(書込は許可・読取は不可という write/read の非対称)。修正するには allowRead に作業ディレクトリを足す。
+
+最後に、./probe_note.txt を削除してください。

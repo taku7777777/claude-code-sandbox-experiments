@@ -1,0 +1,32 @@
+{
+  "id": "S8-sandbox-git-interop/d-worktree-commit-shared-git",
+  "title": "`git commit` from a linked worktree writes the shared `.git` -> {allow, ok} (no allowWrite injection)",
+  "probe": "fs-write",
+  "run": {
+    "maxTurns": 3
+  },
+  "arrange": {
+    "prep": "rm -rf mainrepo wt && git init -q mainrepo && git -C mainrepo -c user.email=x@x.com -c user.name=x commit -q --allow-empty -m init && git -C mainrepo worktree add -q ../wt",
+    "setup": [
+      { "path": "mainrepo" },
+      { "path": "wt" }
+    ]
+  },
+  "probes": [
+    {
+      "id": "worktree-commit",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool, then report its output verbatim (do not summarize, do not run anything else): cd wt && git -c user.email=x@x.com -c user.name=x commit --allow-empty -m x 2>err.txt && echo COMMITOK > COMMITMARK.txt; echo \"exit=$?\"; cat err.txt",
+      "observe": {
+        "sideEffects": ["wt/COMMITMARK.txt"],
+        "cleanup": ["wt/COMMITMARK.txt", "wt/err.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "CENTRAL DOCS CLAIM (sandboxing.md, https://code.claude.com/docs/en/sandboxing.md): 'when the working directory is a linked git worktree, the sandbox also allows writes to the main repository shared .git directory so commands such as git commit can update refs and the index.' cwd=wt + `git commit` writes mainrepo/.git/{logs,refs,objects,worktrees/wt} -- none of which is the denied config/hooks -- and MUST succeed WITHOUT any allowWrite injection -> {allow, ok} = 'allow ✅'. This DIRECTLY tests refactor-plan §W4's OPPOSITE claim ('worktree commit needs .git allowWrite injection'). Settings deliberately have NO allowWrite so the auto-allowance itself is measured. NOTE: here the shared .git (mainrepo/.git) lives INSIDE the writable case dir, so the write is allowed both by the general writable-region rule and by the documented worktree allowance; the finding is that no injection is needed. mainrepo/wt are prep-created outside the sandbox and registered in arrange.setup for finally-cleanup. MUST MEASURE -- whatever it measures is the finding.",
+  "hypothesis": "commit completes from inside the worktree with NO allowWrite: COMMITMARK appears -> {allow, ok}. Confirms sandboxing.md and refutes refactor-plan §W4. If it fails -> refactor-plan §W4 is right in this environment (record whichever occurs)."
+}

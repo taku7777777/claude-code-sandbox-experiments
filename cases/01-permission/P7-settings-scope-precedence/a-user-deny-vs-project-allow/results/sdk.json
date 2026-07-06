@@ -1,0 +1,38 @@
+{
+  "id": "P7-settings-scope-precedence/a-user-deny-vs-project-allow",
+  "modality": "sdk",
+  "title": "user-scope deny Write(*) vs project-scope allow Write(*) -> DENY (deny wins from any scope)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-cwd",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/P7-settings-scope-precedence/a-user-deny-vs-project-allow/PROOF.txt with the content 'ok'. Use only the Write tool — if the call is blocked, do not try any other tool; just report the result. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "DENIED_HARD",
+      "verdict": "DENIED_HARD",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The Write tool call is blocked — it's not enabled in this context. Cannot proceed with alternative tools per your instructions.",
+      "error": null,
+      "evidenceFound": false
+    }
+  ],
+  "hypothesis": "project の allow Write(*) と user の deny Write(*) が衝突すると deny がスコープ横断で勝ち ❌。公式 docs permissions / Settings precedence: 'a user-level deny blocks a project-level allow, because deny rules from any scope are evaluated before allow rules'。evidenceMarker(未 trust 警告)が出ない = project allow は有効なまま deny に負けた、の帰属証跡(c の対照)。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-05T15:15:47Z",
+  "probe": "permission",
+  "tool": "Write",
+  "expected": "DENIED_HARD",
+  "verdict": "DENIED_HARD",
+  "denials": [],
+  "askFired": [],
+  "sideEffectsPresent": []
+}

@@ -1,0 +1,46 @@
+{
+  "id": "S9-tool-write-scope/a-subdir-file-write",
+  "modality": "headless",
+  "title": "W1 config: deny Write(assets/**)+Edit(assets/**) blocks the Write tool -> but the block comes from Edit(assets/**) (edit-family hard deny); Write(assets/**) is a no-op",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-scoped-dir",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/S9-tool-write-scope/a-subdir-file-write/assets/data.txt with the content 'v=1'. Just make the tool call, no commentary.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "INCONCLUSIVE",
+      "verdict": "INCONCLUSIVE",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The Write tool call failed due to permission restrictions on the target directory. The path `$REPO/cases/S9-tool-write-scope/a-subdir-file-write/assets/` is not allowed by your permission settings.",
+      "error": null,
+      "engine_decision": {
+        "decision": "UNKNOWN",
+        "source": "n/a"
+      }
+    }
+  ],
+  "hypothesis": "The W1 tool-layer config blocks the Write tool, but attribution shows: Write(assets/**) is a NO-OP (5/5 written; joins P3's no-op Write-deny family), while Edit(assets/**) is the rule that hard-blocks the Write tool (0/5) because Edit rules cover the whole edit-family (docs). The block is a hard deny (not an approvable ask): acceptEdits does not lift it and canUseTool-approve does not write it. Contrast the Bash vector: sandbox denyWrite (b) is an OS EPERM (allow x ng). Two vectors, two hard layers -- and Write(dir/**) is a no-op trap that gives false security.",
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T14:03:27Z",
+  "probe": "permission",
+  "tool": "Write",
+  "expected": "INCONCLUSIVE",
+  "verdict": "INCONCLUSIVE",
+  "denials": [],
+  "askFired": null,
+  "sideEffectsPresent": [],
+  "engine_decision": {
+    "decision": "UNKNOWN",
+    "source": "n/a"
+  },
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

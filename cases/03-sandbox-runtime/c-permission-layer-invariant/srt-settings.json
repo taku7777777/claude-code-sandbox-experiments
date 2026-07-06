@@ -1,0 +1,12 @@
+{
+  "_comment": "claude 稼働の最小許可のみ(deny/denyWrite は置かない)。permission 層の対照実験なので srt 側は素の境界。差分ランナーが __HOME__ を実値へ置換して使う。",
+  "filesystem": {
+    "denyRead": [],
+    "allowWrite": [".", "/tmp", "__HOME__/.claude", "__HOME__/.claude.json"],
+    "denyWrite": []
+  },
+  "network": {
+    "allowedDomains": ["api.anthropic.com", "*.anthropic.com"],
+    "deniedDomains": []
+  }
+}

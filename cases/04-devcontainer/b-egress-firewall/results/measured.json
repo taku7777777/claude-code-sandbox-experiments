@@ -1,0 +1,15 @@
+{
+  "id": "devcontainer/b-egress-firewall",
+  "axis": "environment",
+  "measuredAt": "2026-07-06",
+  "model": null,
+  "claudeCodeVersion": null,
+  "platform": "darwin",
+  "envVersions": {"colima": "0.10.3", "docker": "29.5.2", "container": "alpine + NET_ADMIN/NET_RAW", "vm": "Ubuntu 24.04"},
+  "probes": [
+    {"probeId": "pre-firewall", "env": "container", "op": "before firewall: curl example.com", "expected": {"permission": "none", "result": "ok"}, "observed": "HTTP 200", "verdict": "ALLOWED", "match": true},
+    {"probeId": "post-firewall-blocked", "env": "container", "op": "after default-deny: curl example.com (not allowlisted)", "expected": {"permission": "none", "result": "ng"}, "observed": "HTTP 000", "verdict": "DENIED_OS", "match": true},
+    {"probeId": "post-firewall-allowed", "env": "container", "op": "after default-deny: curl 1.1.1.1 (allowlisted)", "expected": {"permission": "none", "result": "ok"}, "observed": "HTTP 301", "verdict": "ALLOWED", "match": true}
+  ],
+  "note": "claude 非経由(docker CLI + alpine で機構を単離)のため model/claudeCodeVersion は null。iptables -P OUTPUT DROP + 個別 ACCEPT。init-firewall.sh の機構。コンテナ netns 全体に効く=全プロセスの egress を allowlist に縛る。"
+}

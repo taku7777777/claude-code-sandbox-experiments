@@ -1,0 +1,58 @@
+{
+  "id": "S9-tool-write-scope/d2-additionaldir-home-anchor",
+  "modality": "headless",
+  "title": "Fix form for d: a home-anchored deny Edit(~/s9d-extra/scripts/**) DOES hard-block writes into the additional directory's scripts/ (while the rest of the extra root stays auto-approved)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-addir-scripts",
+      "prompt": "Use the Write tool to create a file at $HOME/s9d-extra/scripts/x.txt with the content 'v=1'. Use only the Write tool - if the call is blocked, do not try any other tool; just report the result. Just make the tool call, no commentary.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "INCONCLUSIVE",
+      "verdict": "INCONCLUSIVE",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The Write tool call was blocked: \"File is in a directory that is denied by your permission settings.\"",
+      "error": null,
+      "evidenceFound": false,
+      "engine_decision": {
+        "decision": "UNKNOWN",
+        "source": "n/a"
+      }
+    },
+    {
+      "probeId": "write-addir-other",
+      "prompt": "Use the Write tool to create a file at $HOME/s9d-extra/other/x.txt with the content 'v=1'. Use only the Write tool - if the call is blocked, do not try any other tool; just report the result. Just make the tool call, no commentary.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [
+        "~/s9d-extra/other/x.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "Done. File created at `$HOME/s9d-extra/other/x.txt` with content `v=1`.",
+      "error": null,
+      "engine_decision": {
+        "decision": "ALLOW",
+        "source": "side-effect"
+      }
+    }
+  ],
+  "hypothesis": "W1 remediation: in a multi-root workspace, each root needs its own anchored deny. deny Edit(~/s9d-extra/scripts/**) hard-blocks the edit-family inside the additional directory's scripts/ (which the cwd-relative form in d silently missed), while leaving the rest of the extra root writable under acceptEdits.",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-05T14:58:36Z"
+}

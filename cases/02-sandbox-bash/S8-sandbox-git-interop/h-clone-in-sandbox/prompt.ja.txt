@@ -1,0 +1,15 @@
+このセッションは sandbox 有効・Bash(*) 許可の前提で起動されています(.claude/settings.json)。
+クローン元のローカル repo `srcrepo` は事前に(sandbox の外で)用意済みです
+(未作成なら claude 起動前にホスト側で: git init -q srcrepo && git -C srcrepo -c user.email=x@x.com -c user.name=x commit -q --allow-empty -m init)。
+
+次の 2 つの bash コマンドを Bash ツールで 1 つずつ順に実行し(1 コマンド = 1 回の Bash 呼び出し)、それぞれの出力(標準エラー含む)をそのまま報告してください。他のコマンドや代替手段は使わないでください。
+
+  git clone file://$PWD/srcrepo cloned 2>err.txt && echo CLONEOK > CLONEMARK.txt; echo "exit=$?"; cat err.txt
+
+  git clone --template= file://$PWD/srcrepo cloned2 2>err2.txt && echo CLONE2OK > CLONE2MARK.txt; echo "exit=$?"; cat err2.txt
+
+(file:// はローカル転送なので network は一切関与しません。
+ 1 は S8-a と同一の `fatal: cannot copy .../templates/hooks/... : Operation not permitted` で失敗
+ = clone の失敗は network 遮断「以前」に `.git/hooks` への write deny で起きる、が観察対象です。
+ 2 はテンプレを外した対照: それでも `.git/config` の作成 deny で失敗するはず(S8-f と同じ第 2 の関門)。
+最後に、この検証で作った cloned / cloned2 / err.txt / err2.txt / CLONEMARK.txt / CLONE2MARK.txt を削除してください。srcrepo は自動で片付けられます。)

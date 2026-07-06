@@ -1,0 +1,41 @@
+{
+  "id": "P6-ask-rules/a-ask-alone",
+  "modality": "interactive",
+  "recordedBy": "cmux-driven (agent)",
+  "title": "ask Write(*) alone -> Write is pre-approval-gated (ask), not auto-allowed",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-cwd",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ASK",
+      "verdict": "ASK",
+      "match": true,
+      "humanObservations": {
+        "prompted": true,
+        "humanDecision": "allow",
+        "evidence": "TUI に \"Do you want to create PROOF.txt? / 1. Yes / 2. Yes, allow all edits during this session / 3. No\" が表示された(承認プロンプト=ASK)。1.Yes を選択し \"Wrote 1 line to PROOF.txt\" を確認(ask ✅)。"
+      },
+      "sideEffectsPresent": [
+        "PROOF.txt"
+      ]
+    }
+  ],
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T01:52:41Z",
+  "probe": "permission",
+  "tool": "Write",
+  "expected": "ASK",
+  "verdict": "ASK",
+  "humanObservations": {
+    "prompted": true,
+    "humanDecision": "allow"
+  },
+  "sideEffectsPresent": [
+    "PROOF.txt"
+  ],
+  "method": "cmux socket API で claude TUI を起動→プロンプト送信→read-screen で承認プロンプトを観測→send-key で承認。screen キャプチャに基づく忠実な自動観測(手動 human ではない)。"
+}

@@ -1,0 +1,3 @@
+このケースは WebSearch の bare deny の確認です(deny: WebSearch)。
+1. WebSearch ツールで「example domain reserved documentation」を検索してください(ツール一覧に存在しないはず=除去型)。
+結果を報告してください。

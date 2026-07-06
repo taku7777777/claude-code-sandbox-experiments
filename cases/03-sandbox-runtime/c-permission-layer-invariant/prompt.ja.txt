@@ -1,0 +1,22 @@
+【前提】このセッションは srt 配下で起動されている前提です。このケースディレクトリで:
+  1) .claude/settings.json に {"permissions":{"deny":["Write(*)"]}} を置く(deny プローブ用)
+  2) srt-settings.json の __HOME__ を実パスに置換したコピーを作る(srt 側は素の最小許可のみ。
+     deny/denyWrite は置かない = permission 層の対照実験)
+  3) srt --settings <そのコピー> claude --permission-mode acceptEdits で起動してから貼り付け
+
+このケースは「srt を足しても permission 層の判定は変わらない(deny は deny のまま・正当な書込は通る)」
+ことの対照実験です。順に操作し、承認プロンプトの有無と結果を報告してください。
+
+1. (deny 対照)Write ツールで ./made.txt を内容 X で作成してください。
+   Write ツールだけを使い、ブロックされたら RESULT=blocked とだけ報告し他のツールは使わないでください。
+
+2. いったん settings の deny を外す(または deny を置かない別ディレクトリで起動し直す)。
+   Write ツールで ./ok.txt を内容 OK で作成してください。RESULT=done を報告してください。
+
+(観察ポイント:
+ - 1 は `deny Write(*)` にマッチしてハードブロック = プロンプトすら出ずに拒否される。
+   これは srt の有無に関係なく起きる(permission 層の判定は OS 境界の外側で先に走る)。
+ - 2 は正当な cwd 内書込なので acceptEdits で承認プロンプトなしに成功する。srt は正当操作を壊さない。
+ 対照: srt 無しの claude で同じ2操作をしても結果は同じ(1=deny / 2=ok)= permission 層は srt 非依存)
+
+最後に made.txt / ok.txt / .claude/settings.json / settings コピーを削除してください。

@@ -1,0 +1,12 @@
+{
+  "_comment": "差分ランナーが CASE_DIR/HOME を実値へ置換して使う。denyRead に秘密ファイル、allowWrite に claude 稼働の最小許可。",
+  "filesystem": {
+    "denyRead": ["__CASE_DIR__/in-cwd-secret.txt"],
+    "allowWrite": [".", "/tmp", "__HOME__/.claude", "__HOME__/.claude.json"],
+    "denyWrite": []
+  },
+  "network": {
+    "allowedDomains": ["api.anthropic.com", "*.anthropic.com"],
+    "deniedDomains": []
+  }
+}

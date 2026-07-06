@@ -1,0 +1,34 @@
+{
+  "id": "P5-protected-paths/d-vscode-protected",
+  "title": "acceptEdits does NOT pre-approve .vscode writes -> the protected path still prompts (ask); same rule covers .idea/.husky/.cargo/… and protected files",
+  "probe": "permission",
+  "tool": "Write",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ],
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-vscode",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/.vscode/PROBE.txt with the content 'x'. Do it immediately. Use only the Write tool — if the call is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": [
+          ".vscode/PROBE.txt",
+          ".vscode"
+        ],
+        "cleanup": [
+          ".vscode"
+        ]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "The official protected-directory list is .git, .config/git, .vscode, .idea, .husky, .cargo, .devcontainer, .yarn, .mvn, .claude (except .claude/worktrees), plus a protected-FILE list (.gitconfig, .npmrc, .mcp.json, .claude.json, shell rc files, …). All are 'Prompted' in default/acceptEdits/plan (engine=ask, approvable), never auto-approved. .vscode stands in for the whole class here; the mechanism is identical to .git (P5-a) and .claude (P5-c). Headless auto-denies the ask; SDK canUseTool fires (ASK)."
+}

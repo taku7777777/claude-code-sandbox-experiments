@@ -1,0 +1,51 @@
+{
+  "id": "S2-sandbox-fs-write/g-nested-deny-wins",
+  "modality": "sdk",
+  "title": "広い allowWrite + 内側 denyWrite -> 外側は書けるが内側は deny 勝ち (allow x ng)。「deny勝ち」を「そもそも書けない」から分離",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "w-nest-outer",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo x > $HOME/lab-nest/f.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "fs-write",
+      "tool": "Bash",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [
+        "~/lab-nest/f.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "Done.",
+      "error": null
+    },
+    {
+      "probeId": "w-nest-inner",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo x > $HOME/lab-nest/sub/f.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "fs-write",
+      "tool": "Bash",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The command is blocked with \"operation not permitted\" error.",
+      "error": null
+    }
+  ],
+  "hypothesis": "In the sandbox FS layer deny wins over allow: with allowWrite:[~/lab-nest] the outer path is writable (allow x ok) but the carved-out denyWrite:[~/lab-nest/sub] blocks the inner path (allow x ng).",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T13:32:18Z"
+}

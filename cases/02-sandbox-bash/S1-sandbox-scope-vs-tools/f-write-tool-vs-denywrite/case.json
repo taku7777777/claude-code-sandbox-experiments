@@ -1,0 +1,68 @@
+{
+  "id": "S1-sandbox-scope-vs-tools/f-write-tool-vs-denywrite",
+  "title": "the Write TOOL bypasses sandbox denyWrite:[sub] (acceptEdits) -> file written; the same Bash write is OS-blocked (EPERM)",
+  "probe": "permission",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ],
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "bash-denywrite-control",
+      "tool": "Bash",
+      "probe": "fs-write",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > sub/control.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the exact error message.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "sub/.keep",
+            "content": ""
+          }
+        ]
+      },
+      "observe": {
+        "sideEffects": [
+          "sub/control.txt"
+        ],
+        "cleanup": [
+          "sub"
+        ],
+        "evidenceMarker": "not permitted"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    },
+    {
+      "id": "write-tool-denywrite",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/sub/PROOF.txt with the content 'ok'. Use only the Write tool — if the call is blocked, do not try any other tool; just report the result. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "sub/.keep",
+            "content": ""
+          }
+        ]
+      },
+      "observe": {
+        "sideEffects": [
+          "sub/PROOF.txt"
+        ],
+        "cleanup": [
+          "sub"
+        ]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "S3-d(Read ツール × denyRead 迂回)の write 側対応物(S1 GAPS G4 / GAPS-BACKLOG カテゴリ D)。permission 層は acceptEdits で通す: allow Write(sub/**) 形はどの規則種別でも no-op と実測済み(S9-a2 反転 / P6-h)のため、ask で層分離がマスクされない事前承認手段は acceptEdits が正。dir は probes[].arrange.setup で用意する(case レベル setup だと probe 開始時 clean の cleanup:[sub] に消され「no such file」の交絡になる — S9-b 初回実測で実例)。evidenceMarker で EPERM(operation not permitted)を記録し dir 不在エラーと区別する。",
+  "hypothesis": "sandbox.filesystem の denyWrite は OS 層(Bash とその子プロセス)にのみ効く。同じ sub/ への書込でも、Bash 経由は EPERM で遮断(allow ng = 対照・denyWrite 稼働証明)、Write ツール経由は sandbox を通らないため acceptEdits の事前承認だけで書けてしまう(allow ok)。denyWrite で保護したつもりのパスはツール経由で書ける — S3-d(denyRead の秘密漏れ)と対称の落とし穴。全経路を塞ぐには permissions 側の deny Edit(sub/**) 併用が要る(S9 の二ベクタ)。"
+}

@@ -1,0 +1,41 @@
+{
+  "id": "P7-settings-scope-precedence/f-ask-user-vs-project-allow",
+  "modality": "interactive",
+  "recordedBy": "cmux-driven (agent)",
+  "title": "user-scope ask Write(*) vs project-scope allow Write(*) -> ASK (ask もスコープ横断で allow に勝つ)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-cwd",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ASK",
+      "verdict": "ASK",
+      "match": true,
+      "humanObservations": {
+        "prompted": true,
+        "humanDecision": "allow",
+        "evidence": "project allow Write(*) があっても user scope の ask Write(*) が勝ち、Write PROOF.txt に承認プロンプトが表示(\"Do you want to create PROOF.txt? / 1.Yes / ...\")=ask はスコープ横断で allow に勝つ。承認後 PROOF.txt 作成を確認(ask ✅)。"
+      },
+      "sideEffectsPresent": [
+        "PROOF.txt"
+      ]
+    }
+  ],
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T01:58:25Z",
+  "probe": "permission",
+  "tool": "Write",
+  "expected": "ASK",
+  "verdict": "ASK",
+  "humanObservations": {
+    "prompted": true,
+    "humanDecision": "allow"
+  },
+  "sideEffectsPresent": [
+    "PROOF.txt"
+  ],
+  "method": "cmux socket API で claude TUI(分離 CLAUDE_CONFIG_DIR で user ask Write(*) + project allow Write(*))を起動→Write プロンプト送信→read-screen で観測→承認。自動観測。"
+}

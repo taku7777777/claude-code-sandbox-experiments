@@ -1,0 +1,12 @@
+{
+  "_comment": "sandbox-runtime (@anthropic-ai/sandbox-runtime) 設定テンプレート。~/.srt-settings.json か --settings で渡す。差分ランナーが __PLACEHOLDER__ を各プローブごとに書き換えて使う。既定は全書込拒否・全ネットワーク拒否なので、claude 自身が動く最小許可(cwd 書込 + ~/.claude + api.anthropic.com)をここで開ける。",
+  "filesystem": {
+    "denyRead": ["__DENY_READ__"],
+    "allowWrite": [".", "/tmp", "__HOME__/.claude", "__HOME__/.claude.json"],
+    "denyWrite": ["__DENY_WRITE__"]
+  },
+  "network": {
+    "allowedDomains": ["api.anthropic.com", "*.anthropic.com"],
+    "deniedDomains": []
+  }
+}

@@ -1,0 +1,10 @@
+このディレクトリの設定(.claude/settings.json)は空 = default モードです。
+以下の操作を上から順に1つずつ実行し、それぞれ「承認を求められたか / 実行できたか」を1行で報告してください。
+
+1. Write ツールで、このディレクトリ直下に PROOF.txt(内容: ok)を作成する
+2. Write ツールで、ホームディレクトリに p1a-proof.txt(内容: ok)を作成する
+3. Write ツールで、このディレクトリの sub/proof.txt(内容: ok)を作成する
+4. note.txt(内容: hello)を作成してから、Edit ツールで note.txt の 'hello' を 'EDIT_APPLIED' に置換する
+5. sentinel.txt(内容: 任意の文字列)を作成してから、Read ツールで読み、内容をそのまま出力する(読取は承認なしで通るはず=肯定対照)
+
+最後に、この検証で作ったファイル(PROOF.txt / ~/p1a-proof.txt / sub/ / note.txt / sentinel.txt)をすべて削除してください。

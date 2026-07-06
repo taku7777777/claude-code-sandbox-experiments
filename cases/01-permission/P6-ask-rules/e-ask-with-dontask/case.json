@@ -1,0 +1,28 @@
+{
+  "id": "P6-ask-rules/e-ask-with-dontask",
+  "title": "ask Write(*) + dontAsk mode -> the ask resolves to DENY (no prompt to be had), unlike every prompting mode",
+  "probe": "permission",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "dontAsk"
+    ]
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Use only the Write tool — if the call is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": [
+          "PROOF.txt"
+        ]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    }
+  ],
+  "hypothesis": "Official permission-modes doc (dontAsk section, verified 2026-07-05): 'explicit ask rules are denied rather than prompting' — dontAsk auto-denies everything that would prompt, and an explicit ask rule is by definition a prompt. So the same ask Write(*) that yields ASK under default (P6-a), acceptEdits (P6-c), and even bypassPermissions (P6-d) resolves to an outright DENY here: SDK canUseTool should NOT fire (DENIED_HARD), the exact opposite observable from a/c/d. This corrects the group README's overstatement that explicit ask rules 'apply in every mode' in the sense of prompting — in dontAsk the rule still isn't silently approved, but there is no approval opportunity either. Pairs with P5-g (dontAsk resolves protected-path asks to deny the same way)."
+}

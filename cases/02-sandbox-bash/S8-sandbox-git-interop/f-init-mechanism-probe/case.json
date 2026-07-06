@@ -1,0 +1,38 @@
+{
+  "id": "S8-sandbox-git-interop/f-init-mechanism-probe",
+  "title": "`git init --template=` still fails at `.git/config` -> the deny is the PATH (.git/config & .git/hooks), not the template copy; bare init succeeds",
+  "probe": "fs-write",
+  "run": {
+    "maxTurns": 3
+  },
+  "probes": [
+    {
+      "id": "init-no-template",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool, then report its output verbatim (do not summarize, do not run anything else): git init --template= newrepo 2>err.txt && echo TPLOK > TPLMARK.txt; echo \"exit=$?\"; cat err.txt",
+      "observe": {
+        "sideEffects": ["TPLMARK.txt"],
+        "cleanup": ["newrepo", "err.txt", "TPLMARK.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    },
+    {
+      "id": "init-bare-no-template",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool, then report its output verbatim (do not summarize, do not run anything else): git init --bare --template= barerepo 2>err2.txt && echo BAREOK > BAREMARK.txt; echo \"exit=$?\"; cat err2.txt",
+      "observe": {
+        "sideEffects": ["BAREMARK.txt"],
+        "cleanup": ["barerepo", "err2.txt", "BAREMARK.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "MECHANISM-ISOLATION for S8-a (GAPS G2). S8-a fails at the hooks TEMPLATE COPY (first .git write in git's init sequence) -- but is the template copy the CAUSE, or just the first write to hit a denied path? Probe 1 disables templates (--template=): scratch-probed 2026-07-05, init then fails at the NEXT write, `error: could not write config file .../newrepo/.git/config: Operation not permitted` -> CREATING .git/config is denied just like appending to an existing one (S8-b), so the deny is on the PATH pattern (.git/config, .git/hooks/), independent of template processing and of whether the file exists. Probe 2 is the 1-variable contrast: --bare puts config at barerepo/config (NOT under a .git/ dir) -> init SUCCEEDS, confirming the deny matches the `.git/`-shaped path, not git config files semantically. NOT doc-backed for plain repos (sandboxing.md documents the config/hooks deny only for the linked-worktree shared .git) -- evidence is the captured first-party stderr.",
+  "hypothesis": "Probe 1: --template= removes the hooks copy but init still fails, now at .git/config creation (TPLMARK never appears; stderr shows 'could not write config file'). Probe 2: bare init succeeds (BAREMARK appears) because bare 'config' is not under .git/. Together: the S8-a failure mechanism is a path-based write deny on .git/config + .git/hooks/, with TWO independent blockers in normal init (template copy AND config creation) -- so no --template= workaround exists for non-bare repos, and prep-outside-sandbox remains necessary for init/clone."
+}

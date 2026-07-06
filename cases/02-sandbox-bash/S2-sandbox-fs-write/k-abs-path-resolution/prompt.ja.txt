@@ -1,0 +1,12 @@
+このディレクトリの settings.json は sandbox on +
+allowWrite: ["/private/tmp/lab-abs-resolved", "/tmp/lab-abs-literal"]
+(解決済み表記と symlink 表記を1つずつ。macOS の /tmp は /private/tmp への symlink)です。
+事前に両ディレクトリを作成した上で、以下を上から順に1つずつ Bash ツールで実行し、
+「実行できたか / OS エラーで失敗したか」を報告してください(失敗しても他のツールで代替しないこと)。
+
+1. echo x > /tmp/lab-abs-resolved/f.txt(設定は /private/tmp/... 表記のエントリ)
+2. echo y > /tmp/lab-abs-literal/g.txt(設定は /tmp/... 表記のエントリ)
+
+(観察対象: 両方書ければ「FS write の照合は両側とも symlink 解決済みの実パス」= 表記揺れの影響なし。
+unix socket(S6-f)は /tmp 表記が不一致だったので、その非対称の確認でもあります。
+最後に、作成したファイルと両ディレクトリを削除してください。)

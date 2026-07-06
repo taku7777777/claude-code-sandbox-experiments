@@ -1,0 +1,12 @@
+{
+  "_comment": "runner が __CASE_DIR__(一時 workspace)/__HOME__ を実値へ置換。denyWrite でガード dir を塞ぐ(allowWrite '.' より優先)。Edit ツールの書込先が guard/ に当たる。",
+  "filesystem": {
+    "denyRead": [],
+    "allowWrite": [".", "/tmp", "__HOME__/.claude", "__HOME__/.claude.json"],
+    "denyWrite": ["__CASE_DIR__/guard"]
+  },
+  "network": {
+    "allowedDomains": ["api.anthropic.com", "*.anthropic.com"],
+    "deniedDomains": []
+  }
+}

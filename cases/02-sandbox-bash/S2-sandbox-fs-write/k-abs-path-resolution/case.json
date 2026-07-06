@@ -1,0 +1,42 @@
+{
+  "id": "S2-sandbox-fs-write/k-abs-path-resolution",
+  "title": "allowWrite の絶対パスは symlink 解決して照合される -> /tmp/... 表記でも /private/tmp/... 表記でも効く (S6-f の socket 非解決とは非対称)",
+  "probe": "fs-write",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "w-resolved-entry-via-tmp",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo x > /tmp/lab-abs-resolved/f.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "arrange": {
+        "setup": [{ "path": "/tmp/lab-abs-resolved/.keep", "content": "" }]
+      },
+      "observe": {
+        "sideEffects": ["/tmp/lab-abs-resolved/f.txt"],
+        "cleanup": ["/private/tmp/lab-abs-resolved"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "w-literal-entry-via-tmp",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo y > /tmp/lab-abs-literal/g.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "arrange": {
+        "setup": [{ "path": "/tmp/lab-abs-literal/.keep", "content": "" }]
+      },
+      "observe": {
+        "sideEffects": ["/tmp/lab-abs-literal/g.txt"],
+        "cleanup": ["/private/tmp/lab-abs-literal"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "S2 GAPS G5。macOS の /tmp は /private/tmp への symlink。allowWrite に「解決済み表記 /private/tmp/lab-abs-resolved」と「symlink 表記 /tmp/lab-abs-literal」を1つずつ入れ、どちらも /tmp/... 表記で書きに行く。probe 1 が通る = 書込先パスが解決されてから照合される(カーネルが見る実パス /private/tmp/... が設定の解決済み表記にマッチ)。probe 2 も通る = 設定側の symlink 表記も解決されて実質同じ規則になる。両方 ALLOWED (scratch 実測 2026-07-05) = FS write の照合は両側とも解決済み実パスで行われ、表記揺れで穴が開いたり閉じたりしない。S6-f (unix socket は /tmp 表記が不一致で /private/tmp 表記が必要) とは対称でない — COVERAGE が socket の実測を『sandbox FS/socket パス』と FS 側へ外挿していた記述の訂正を兼ねる。/ 絶対プレフィックス自体の動作確認 (S2 は従来 ~/ のみ) も兼ねる。",
+  "hypothesis": "sandbox FS write の allowWrite は、設定側・書込先側の両方が symlink 解決された実パスで照合される。/tmp 表記と /private/tmp 表記のどちらで設定しても、/tmp 経由の書込が通る (両プローブ allow x ok)。socket (S6-f: 非解決で /tmp 表記は不一致) とは挙動が違う。"
+}

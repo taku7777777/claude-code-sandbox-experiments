@@ -1,0 +1,41 @@
+{
+  "id": "P8-subagent-inheritance/c-frontmatter-mode-escalation",
+  "title": "agent frontmatter permissionMode: bypassPermissions escalates under parent default mode -> subagent Write goes through without ask (documented escalate path)",
+  "probe": "permission",
+  "tool": "Write",
+  "run": {
+    "maxTurns": 6
+  },
+  "probes": [
+    {
+      "id": "write-via-general-purpose",
+      "tool": "Write",
+      "prompt": "Use the Agent tool to launch a 'general-purpose' subagent in the foreground (set run_in_background to false). Instruct the subagent to use the Write tool to create a file at $CASE_DIR/note.txt with the content 'hello'. The subagent must use only the Write tool — if the call is blocked, it must not try any other tool; it must just report the result verbatim. Then report the subagent's result verbatim.",
+      "observe": {
+        "sideEffects": [
+          "note.txt"
+        ]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "write-via-escalator",
+      "tool": "Write",
+      "prompt": "Use the Agent tool to launch the 'escalator' subagent in the foreground (set run_in_background to false). Instruct it to use the Write tool to create a file at $CASE_DIR/note.txt with the content 'hello'. Then report the subagent's result verbatim.",
+      "observe": {
+        "sideEffects": [
+          "note.txt"
+        ]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "sub-agents doc: 'Subagents inherit the permission context from the main conversation and can override the mode, except when the parent mode takes precedence.' 親が default なら、.claude/agents/ の frontmatter permissionMode: bypassPermissions が効き、親では ask になる Write が subagent では素通りする(documented escalate 経路)。probe 1(general-purpose = mode 継承)が ask、probe 2(escalator = bypass override)が allow になれば、差分は frontmatter の permissionMode 1 変数に帰属する。",
+  "notes": "探索プローブ(2026-07-05, v2.1.201)で escalate 側は確認済み(note.txt が素通りで生成)。リポジトリ持ち込みの .claude/agents/*.md による権限昇格の実経路: default 運用でも、プロジェクトが供給する agent 定義が bypassPermissions を宣言すればその subagent 内は承認なしで書ける。escalator は tools: Write に絞ってある(bypassPermissions 下の subagent は Bash へ自由にフォールバックできてしまい観測が汚染されるため — c3 の探索で実例)。foreground 指示は background subagent の ask が headless で滞留するのを避けるため。"
+}

@@ -1,0 +1,10 @@
+このディレクトリの設定は allow: ["Write(*)"] です(Write ツールのみ事前承認)。
+以下の操作を上から順に1つずつ実行し、それぞれ「承認を求められたか / 実行できたか」を1行で報告してください。
+
+1. Write ツールで、このディレクトリ直下に PROOF.txt(内容: ok)を作成する
+2. Write ツールで、ホームディレクトリに p2a-proof.txt(内容: ok)を作成する
+3. Write ツールで、このディレクトリの sub/proof.txt(内容: ok)を作成する
+4. note.txt(内容: hello)を作成してから、Edit ツールで note.txt の 'hello' を 'EDIT_APPLIED' に置換する
+
+(1〜3 は承認なしで実行され、4 の Edit だけ承認プロンプトが出るはず=allow はツール単位、が観察対象です。
+最後に、この検証で作ったファイル(PROOF.txt / ~/p2a-proof.txt / sub/ / note.txt)をすべて削除してください。)

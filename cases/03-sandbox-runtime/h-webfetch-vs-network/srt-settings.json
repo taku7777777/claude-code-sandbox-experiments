@@ -1,0 +1,12 @@
+{
+  "_comment": "runner が __HOME__ を実値へ置換。allowedDomains=anthropic のみ = example.com はローカル発の通信なら srt egress で遮断される。WebFetch がローカル発なら塞がり、サーバ側実行なら素通り(探索型)。/private/tmp は claude の一時物用。config dir は runner が allowWrite へ自動追加。",
+  "filesystem": {
+    "denyRead": [],
+    "allowWrite": [".", "/tmp", "/private/tmp", "__HOME__/.claude", "__HOME__/.claude.json"],
+    "denyWrite": []
+  },
+  "network": {
+    "allowedDomains": ["api.anthropic.com", "*.anthropic.com"],
+    "deniedDomains": []
+  }
+}

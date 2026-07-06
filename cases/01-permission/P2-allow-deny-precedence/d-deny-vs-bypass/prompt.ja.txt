@@ -1,0 +1,14 @@
+このディレクトリの設定は deny: ["Write(*)"] で、セッションは bypassPermissions モード(permission プロンプト省略)で
+起動されている前提です(claude --permission-mode bypassPermissions)。
+⚠️ 危険なモードです。隔離された環境でのみ試してください。
+以下の操作を上から順に1つずつ実行し、それぞれ「承認を求められたか / 拒否されたか / 実行できたか」を1行で報告してください。
+Write が拒否されても他のツール(Bash 等)で代替しないでください(bypass では代替が通ってしまい観察が汚れます)。
+
+1. Write ツールで、このディレクトリ直下に PROOF.txt(内容: ok)を作成する
+2. Write ツールで、ホームディレクトリに p2d-proof.txt(内容: ok)を作成する
+3. Write ツールで、このディレクトリの sub/proof.txt(内容: ok)を作成する
+4. note.txt(内容: hello)を作成してから、Edit ツールで note.txt の 'hello' を 'EDIT_APPLIED' に置換する
+
+(1〜3 の Write は bypass でも deny が生き残って拒否され、4 の Edit は deny の対象外なので
+bypass が素通しするはず=deny は bypass より強いがツール単位、が観察対象です。
+もし何か作成された場合のみ、最後にすべて削除してください。)

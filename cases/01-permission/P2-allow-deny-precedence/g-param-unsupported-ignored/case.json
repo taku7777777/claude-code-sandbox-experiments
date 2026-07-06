@@ -1,0 +1,24 @@
+{
+  "id": "P2-allow-deny-precedence/g-param-unsupported-ignored",
+  "title": "deny Bash(command:touch *) is silently ignored (unsupported param name) -> the 'denied' command still runs via allow Bash(*)",
+  "probe": "permission",
+  "tool": "Bash",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "bash-touch",
+      "tool": "Bash",
+      "prompt": "Use the Bash tool to run exactly this command: touch $CASE_DIR/PROOF.txt . Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "Docs (spec-inventory §2): Tool(param:value) matching covers only top-level scalar tool parameters; content-bearing params like command/file_path/path/url are NOT supported — a rule like Bash(command:touch *) is ignored (with a startup warning). So the touch call matches nothing on the deny side and falls through to allow Bash(*) -> ALLOWED. This is the P3-style 'silently no-op rule' landmine in param syntax: 'I denied the command' but the rule never matches. The correct form for command prefixes is Bash(touch *) (P4 syntax), not Bash(command:touch *)."
+}

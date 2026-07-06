@@ -1,0 +1,34 @@
+{
+  "id": "S4-sandbox-autoallow-behavior/f-content-ask-forced",
+  "title": "content-scoped ask 規則 (Bash(touch *)) は sandbox の auto-allow を貫通してプロンプト強制。対象外コマンドは auto-allow のまま",
+  "probe": "permission",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "scoped-touch-forced-ask",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: touch s4f-file.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["s4f-file.txt"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "unscoped-echo-autoallowed",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > inside.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["inside.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "S4 GAPS G5 (spec §4.2 ③)。docs の例示は Bash(git push *) だが、機構は content-scoped ask 一般の話なので、P6-g で規則形の動作が実測済みの Bash(touch *) を使い remote scaffolding を避けた (1変数対照を優先)。probe 1: 規則対象の touch は sandbox の auto-allow 下でも ASK (scratch 2026-07-05: headless denials=[Bash])。probe 2 (対照): 規則対象外の echo は auto-allow のまま無プロンプト。e (bare 形はスキップ) と対にして『bare は抜ける / content-scoped は抜けない』の分岐が確定する。",
+  "hypothesis": "content-scoped ask 規則は sandbox の auto-allow より強く、対象コマンドはプロンプト強制 (ask x ok)。bare `Bash` ask (e: sandbox 実行分にはスキップ) との対比で、auto-allow を貫通するのは『内容を指定した ask』だけと分かる。"
+}

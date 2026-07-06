@@ -1,0 +1,49 @@
+{
+  "id": "P7-settings-scope-precedence/f-ask-user-vs-project-allow",
+  "title": "user-scope ask Write(*) vs project-scope allow Write(*) -> ASK (ask もスコープ横断で allow に勝つ)",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "arrange": {
+    "configDir": {
+      "trusted": true,
+      "userSettings": {
+        "permissions": {
+          "ask": [
+            "Write(*)"
+          ]
+        }
+      }
+    }
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Use only the Write tool — if the call is blocked, do not try any other tool; just report the result. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": [
+          "PROOF.txt"
+        ]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "modalities": {
+    "sdk": {
+      "onAsk": "allow",
+      "options": {
+        "settingSources": [
+          "user",
+          "project"
+        ]
+      }
+    }
+  },
+  "hypothesis": "評価順 deny→ask→allow はスコープ横断でも成立: user の ask Write(*) が project の allow Write(*) に勝ち ASK になる(P6-b の『ask は allow に勝つ』の同一スコープ版を、スコープ横断へ拡張)。SDK onAsk=allow で ASK 発火 + 承認して書込完遂を確認(ask ✅)。",
+  "notes": "P6-b(同一 project スコープ内で ask > allow)のスコープ横断版。deny がスコープ横断で勝つ(P7-a)のと同じく、ask も『どのスコープにあっても allow より先に評価される』かを実測する。SDK は settingSources:[user,project] を明示しないと user の ask を読まず allow のまま素通り(P7-a と同根の交絡)。onAsk=allow で承認側も実測し ✅ を確定する(P6-a の型)。"
+}

@@ -1,0 +1,55 @@
+{
+  "id": "P11-mcp-tool-rules/d-allow-tool-glob",
+  "modality": "headless",
+  "title": "allow mcp__server__*(サーバ後の glob)は有効=同サーバ全ツール事前承認",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "read-allowed",
+      "prompt": "Call the tool mcp__probe__read_path with argument path = \"$REPO/cases/01-permission/P11-mcp-tool-rules/d-allow-tool-glob/note.txt\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "probe": "fs-read",
+      "tool": "mcp__probe__read_path",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": true,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "SENT_P11D_read_p9c",
+      "error": null,
+      "engine_decision": {
+        "decision": "ALLOW",
+        "source": "side-effect"
+      }
+    },
+    {
+      "probeId": "net-allowed",
+      "prompt": "Call the tool mcp__probe__net_get with argument url = \"https://example.com\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "probe": "fs-read",
+      "tool": "mcp__probe__net_get",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": true,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "NET_OK status=200",
+      "error": null,
+      "engine_decision": {
+        "decision": "ALLOW",
+        "source": "side-effect"
+      }
+    }
+  ],
+  "hypothesis": "リテラルなサーバ接頭辞の後ろに限り glob が効く(mcp__github__get_* のような部分 glob も docs 上は可)。c と同じ範囲を開けるが、部分 glob で「参照系ツール名だけ」を開ける書き方の土台になる。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T03:43:38Z"
+}

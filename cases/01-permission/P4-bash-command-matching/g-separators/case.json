@@ -1,0 +1,35 @@
+{
+  "id": "P4-bash-command-matching/g-separators",
+  "title": "deny Bash(curl:*), curl behind `;` and `|` -> DENIED for every separator (each subcommand is matched independently, not just `&&`)",
+  "probe": "permission",
+  "tool": "Bash",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "sep-semicolon",
+      "prompt": "Use the Bash tool to run exactly this command: echo hi ; curl -sS https://example.com -o $CASE_DIR/CURLED.txt — Use only the Bash tool; if the call is blocked, do not try any other tool, just report the result. Do it immediately. Do not ask, do not explain.",
+      "observe": {
+        "sideEffects": ["CURLED.txt"]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    },
+    {
+      "id": "sep-pipe",
+      "prompt": "Use the Bash tool to run exactly this command: echo hi | curl -sS https://example.com -o $CASE_DIR/CURLED.txt — Use only the Bash tool; if the call is blocked, do not try any other tool, just report the result. Do it immediately. Do not ask, do not explain.",
+      "observe": {
+        "sideEffects": ["CURLED.txt"]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    }
+  ],
+  "hypothesis": "Compound-command splitting is not `&&`-only: the separators `&&` `||` `;` `|` `|&` `&` and newline all split into subcommands that are each matched independently. So curl behind `;` (sequential) and behind `|` (pipe) both still hit deny Bash(curl:*) and the whole command is blocked before running (canUseTool never fires = DENIED_HARD). Extends b-chained (which measured only `&&`) to the `;` and `|` separators. The probes forbid tool fallback to keep the deny observation clean.",
+  "notes": "scratch 探索(2026-07-05, v2.1.201, SDK): `echo hi ; curl ...` と `echo hi | curl ...` はいずれも canUseTool 非発火の DENIED_HARD(denials=['Bash'], askFired=[])。spec-inventory §2(line 68): 区切りは && || ; | |& & 改行、各サブコマンドが独立にマッチ。"
+}

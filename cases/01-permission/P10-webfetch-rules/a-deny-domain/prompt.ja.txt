@@ -1,0 +1,6 @@
+このセッションは permissions.deny に WebFetch(domain:example.com) がある前提です。
+
+以下を実行し「承認要求/拒否/実行できたか」を1行で報告してください。他ツールでの代替はしないでください。
+1. WebFetch ツールで https://example.com を取得する
+
+(観察対象: deny WebFetch(domain:example.com) で当該ドメインの取得が permission 層でブロックされるか。S6-h の「WebFetch は sandbox network を迂回」に対し、permission 層の domain 規則は効くことを確認します。)

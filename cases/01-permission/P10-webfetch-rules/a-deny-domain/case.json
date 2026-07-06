@@ -1,0 +1,20 @@
+{
+  "id": "P10-webfetch-rules/a-deny-domain",
+  "title": "deny WebFetch(domain:example.com) は WebFetch ツールの当該ドメイン取得を permission 層でブロック -> DENY",
+  "probe": "permission",
+  "tool": "WebFetch",
+  "probes": [
+    {
+      "id": "webfetch-denied",
+      "tool": "WebFetch",
+      "prompt": "Use only the WebFetch tool to fetch https://example.com. If the call is blocked or denied, reply with ONLY WF_BLOCKED. If it returns content, reply with ONLY WF_OK. Do not use any other tool or workaround.",
+      "observe": {},
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    }
+  ],
+  "notes": "F3(WebFetch permission 規則)の主軸。S6-h は『WebFetch は sandbox network(OS 層)を迂回する』を示したが、permission 層の domain 規則が WebFetch を止められるかは未検証だった。本ケースは `deny WebFetch(domain:example.com)` で WebFetch の当該ドメイン取得が permission 層でブロックされることを実測(scratch 2026-07-06: headless で result=WF_BLOCKED, permission_denials=[WebFetch])。deny は trust ゲート対象外なので repo trust に依存しない。S6(sandbox egress)+ 本群(WebFetch permission)= ネットワークを絞る 2 層のうち後段。docs: permissions の WebFetch(domain:...) 規則形式(gitignore 準拠でなく domain マッチ)。",
+  "hypothesis": "WebFetch は sandbox network を迂回する(S6-h)が、permission 層の `WebFetch(domain:example.com)` deny 規則には従う。よって deny で example.com 取得はブロックされる(DENIED)。ネットワークを本当に絞るには sandbox network(Bash/サブプロセス)+ WebFetch permission の 2 層が要る、の後段の裏づけ。"
+}

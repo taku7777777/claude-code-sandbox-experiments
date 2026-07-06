@@ -1,0 +1,10 @@
+このディレクトリの settings.json は sandbox on + deny: ["Bash(echo:*)"] です。
+以下の操作を上から順に1つずつ Bash ツールで実行し、「拒否されたか / そのまま実行できたか」を
+報告してください(拒否されても他のツールや別コマンドで代替しないこと)。
+
+1. echo data > inside.txt(deny 規則の対象)
+2. touch s4g-ctrl.txt(規則の対象外)
+
+(観察対象: sandbox の auto-allow 下でも 1 は承認の余地なく拒否される = 明示 deny は auto-allow に勝つ。
+2 は無プロンプトで通る = auto-allow は生きている。
+最後に、作成された inside.txt / s4g-ctrl.txt があれば削除してください。)

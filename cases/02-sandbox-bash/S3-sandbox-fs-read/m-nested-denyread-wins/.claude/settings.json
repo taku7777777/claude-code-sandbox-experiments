@@ -1,0 +1,14 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "denyRead": [
+        "~",
+        "~/lab-nest-m/inner"
+      ],
+      "allowRead": [
+        "~/lab-nest-m"
+      ]
+    }
+  }
+}

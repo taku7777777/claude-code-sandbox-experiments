@@ -1,0 +1,13 @@
+このディレクトリの設定は permissions.additionalDirectories: ["<home>/s9d-extra"] + permissions.deny: ["Edit(scripts/**)"] です。
+このセッションは acceptEdits モードで起動されている前提です(claude --permission-mode acceptEdits)。
+事前に ~/s9d-extra を作成してあります(なければ先に mkdir -p ~/s9d-extra)。
+以下の操作を上から順に1つずつ、Write ツールだけで実行し、それぞれ「承認を求められたか / 拒否されたか / 実行できたか」を1行で報告してください。拒否されても他のツールで代替しないでください。
+
+1. Write ツールで、~/s9d-extra/other/x.txt(内容: v=1)を作成する
+2. Write ツールで、~/s9d-extra/scripts/x.txt(内容: v=1)を作成する
+3. Write ツールで、このディレクトリ直下の scripts/x.txt(内容: v=1)を作成する
+
+(観察対象: 1・2 は cwd 外なのに承認なしで書けるはず=additionalDirectories が acceptEdits の自動承認域を広げる。
+特に 2 は deny Edit(scripts/**) があるのに素通りする=無印の規則は cwd 起点で additional dir にマッチしない罠。
+3 だけがハードにブロックされる=同じ規則が cwd 側では効いている対照。
+最後に、作成されたファイルがあれば ~/s9d-extra と scripts/ を削除してください。)

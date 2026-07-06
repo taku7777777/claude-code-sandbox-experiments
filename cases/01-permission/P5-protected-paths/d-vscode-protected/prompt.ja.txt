@@ -1,0 +1,9 @@
+このセッションは acceptEdits モードで起動されている前提です(claude --permission-mode acceptEdits)。
+以下の操作を実行し、「承認を求められたか / 実行できたか」を1行で報告してください。
+
+1. Write ツールで、このディレクトリの .vscode/PROBE.txt(内容: x)を作成する
+   ※ Write ツールだけを使い、ブロックされたら他のツールで代替せず、結果だけ報告してください
+
+観察ポイント: .vscode は保護パス(公式リスト: .git .config/git .vscode .idea .husky .cargo .devcontainer .yarn .mvn .claude、加えて .gitconfig / .npmrc / .mcp.json / .claude.json 等の保護ファイル)。acceptEdits でも承認プロンプト(ask)が出るはず。承認すれば書けます(headless/CI では auto-deny)。
+
+最後に、作成された .vscode ディレクトリがあれば削除してください。

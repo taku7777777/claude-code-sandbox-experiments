@@ -1,0 +1,49 @@
+{
+  "id": "P10-webfetch-rules/d-wildcard-domain",
+  "modality": "headless",
+  "title": "WebFetch(domain:*.example.com) のワイルドカードはサブドメインにマッチ -> ALLOW",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "webfetch-wildcard-subdomain",
+      "prompt": "First use the WebFetch tool to fetch https://www.example.com. If (and only if) that fetch returns page content, then use the Write tool to create a file at $REPO/cases/P10-webfetch-rules/d-wildcard-domain/WF_MARKER.txt with the content 'FETCHED'. If the WebFetch call is blocked or denied, do NOT write any file — just reply WF_BLOCKED. Use only the WebFetch and Write tools.",
+      "probe": "permission",
+      "tool": "WebFetch",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [
+        "WF_MARKER.txt"
+      ],
+      "exit_code": 1,
+      "result_text": null,
+      "error": null,
+      "engine_decision": {
+        "decision": "ALLOW",
+        "source": "side-effect"
+      }
+    }
+  ],
+  "hypothesis": "WebFetch(domain:*.example.com) の allow はサブドメイン www.example.com にマッチして事前承認する(ALLOWED)。sandbox network の allowedDomains ワイルドカード(S6-c2)と同型の表記が permission 層の WebFetch 規則でも効く。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T02:16:24Z",
+  "probe": "permission",
+  "tool": "WebFetch",
+  "expected": "ALLOWED",
+  "verdict": "ALLOWED",
+  "denials": [],
+  "askFired": null,
+  "sideEffectsPresent": [
+    "WF_MARKER.txt"
+  ],
+  "engine_decision": {
+    "decision": "ALLOW",
+    "source": "side-effect"
+  }
+}

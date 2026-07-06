@@ -1,0 +1,45 @@
+{
+  "id": "P12-path-anchor-matching/d-doubleslash-abs-deny",
+  "modality": "headless",
+  "title": "二重スラッシュ絶対 `Edit(//abs/sub/**)` deny は効く(c と 1 スラッシュ差)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "edit-cwd-abs",
+      "prompt": "First use the Read tool to read $REPO/cases/01-permission/P12-path-anchor-matching/d-doubleslash-abs-deny/sub/note.txt . Then use the Edit tool to replace the text 'hello' with 'EDIT_APPLIED' in $REPO/cases/01-permission/P12-path-anchor-matching/d-doubleslash-abs-deny/sub/note.txt . Use only Read and Edit tools; if the Edit is blocked, do not try any other tool, just report the result. No commentary.",
+      "probe": "permission",
+      "tool": "Edit",
+      "expected": "INCONCLUSIVE",
+      "verdict": "INCONCLUSIVE",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "Edit blocked: File is in a directory that is denied by your permission settings.",
+      "error": null,
+      "engine_decision": {
+        "decision": "UNKNOWN",
+        "source": "n/a"
+      }
+    }
+  ],
+  "hypothesis": "二重スラッシュ絶対アンカー `Edit(//abs/sub/**)` は Edit deny として機能する(ハード deny)。単一スラッシュ(c)との差はスラッシュ 1 つだけ。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T04:22:02Z",
+  "probe": "permission",
+  "tool": "Edit",
+  "expected": "INCONCLUSIVE",
+  "verdict": "INCONCLUSIVE",
+  "denials": [],
+  "askFired": null,
+  "sideEffectsPresent": [],
+  "engine_decision": {
+    "decision": "UNKNOWN",
+    "source": "n/a"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "P10-webfetch-rules/c-allow-match",
+  "title": "allow WebFetch(domain:example.com) は当該ドメイン取得を事前承認 -> ALLOW (陽性対照)",
+  "probe": "permission",
+  "tool": "WebFetch",
+  "probes": [
+    {
+      "id": "webfetch-allowed",
+      "tool": "WebFetch",
+      "prompt": "First use the WebFetch tool to fetch https://example.com. If (and only if) that fetch returns page content, then use the Write tool to create a file at $CASE_DIR/WF_MARKER.txt with the content 'FETCHED'. If the WebFetch call is blocked or denied, do NOT write any file — just reply WF_BLOCKED. Use only the WebFetch and Write tools.",
+      "observe": {
+        "sideEffects": ["WF_MARKER.txt"],
+        "cleanup": ["WF_MARKER.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "allow WebFetch(domain:example.com) の陽性対照(a=deny / b=no-match の対)。WebFetch はディスク副作用を持たないため、fetch 成功時にだけ Write でマーカー WF_MARKER.txt を作らせ、その存在で ALLOWED を判定する(WebFetch が deny/ask なら fetch できずマーカーも出ない=DENIED に落ちる設計)。tool=WebFetch。repo root trusted 前提。example.com への到達性は S6-h の preflight で確認済み(オフライン時は fetch 失敗でマーカー不出現→誤 DENIED になり得る点に注意)。S6-h(sandbox 迂回で到達)と同じ allow WebFetch(domain:example.com) 設定を permission 層の視点で確認する。",
+  "hypothesis": "allow WebFetch(domain:example.com) は example.com の WebFetch 取得を事前承認する。fetch 成功→Write マーカー生成=ALLOWED。deny(a)・no-match(b)との対で domain allowlist の陽性側を確定。"
+}

@@ -1,0 +1,16 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "allowUnsandboxedCommands": false,
+    "network": {
+      "allowUnixSockets": [
+        "/private/tmp/lab_uxb.sock"
+      ]
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(*)"
+    ]
+  }
+}

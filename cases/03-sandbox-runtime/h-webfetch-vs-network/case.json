@@ -1,0 +1,42 @@
+{
+  "id": "sandbox-runtime/h-webfetch-vs-network",
+  "title": "WebFetch は srt の network 境界に掛かる(実測: 非許可ドメインは Socket is closed で遮断・S6-h の反転)",
+  "axis": "environment",
+  "runner": "harness/srt/run_srt_cases.py",
+  "probe": "network",
+  "run": {"flags": []},
+  "srtSettings": "srt-settings.json",
+  "arrange": {
+    "configDir": {"trusted": true},
+    "workspaceSettings": {"permissions": {"allow": ["WebFetch(domain:example.com)", "Write(*)"]}}
+  },
+  "probes": [
+    {
+      "id": "webfetch-builtin",
+      "env": "builtin~",
+      "tool": "WebFetch",
+      "prompt": "First use the WebFetch tool to fetch https://example.com. If (and only if) that fetch returns page content, then use the Write tool to create a file at ./WF_MARKER.txt with the content FETCHED. If the WebFetch call is blocked or fails, do NOT write any file and do NOT use any other tool (no Bash) — just reply RESULT=blocked. Use only the WebFetch and Write tools.",
+      "observe": {"sideEffects": ["WF_MARKER.txt"], "cleanup": ["WF_MARKER.txt"]},
+      "expected": {"permission": "allow", "result": "ok"}
+    },
+    {
+      "id": "webfetch-srt",
+      "env": "srt",
+      "tool": "WebFetch",
+      "prompt": "First use the WebFetch tool to fetch https://example.com. If (and only if) that fetch returns page content, then use the Write tool to create a file at ./WF_MARKER.txt with the content FETCHED. If the WebFetch call is blocked or fails, do NOT write any file and do NOT use any other tool (no Bash) — just reply RESULT=blocked. Use only the WebFetch and Write tools.",
+      "observe": {"sideEffects": ["WF_MARKER.txt"], "cleanup": ["WF_MARKER.txt"]},
+      "expected": {"permission": "allow", "result": "ng"}
+    },
+    {
+      "id": "webfetch-srt-allowed",
+      "env": "srt",
+      "tool": "WebFetch",
+      "srtSettings": "srt-settings-allow.json",
+      "prompt": "First use the WebFetch tool to fetch https://example.com. If (and only if) that fetch returns page content, then use the Write tool to create a file at ./WF_MARKER.txt with the content FETCHED. If the WebFetch call is blocked or fails, do NOT write any file and do NOT use any other tool (no Bash) — just reply RESULT=blocked. Use only the WebFetch and Write tools.",
+      "observe": {"sideEffects": ["WF_MARKER.txt"], "cleanup": ["WF_MARKER.txt"]},
+      "expected": {"permission": "allow", "result": "ok"}
+    }
+  ],
+  "notes": "環境ケース(探索型→確定): probes[].env が対比軸(builtin~ / srt)。run.py 対象外(runner が実測)。論点=WebFetch が srt の network 境界(localhost proxy)に掛かるか。srt 側は allowedDomains=anthropic のみ(example.com は非許可)。⚠️ 成功検出は WebFetch が fetch できたときだけ Write する『Write マーカー gate』(P10-d の型)で行う: headless は実 fetch と『モデルが example.com の周知テキストを記憶から復唱』を区別できない(S6-h)ので、ページ内容の outputMarker 照合ではなく、fetch 成功を gate した副作用(WF_MARKER.txt の有無)で判定する。fallback 禁止(特に Bash curl は srt に止められ偽 DENIED になる)。trust 交絡回避: configDir.trusted + workspaceSettings allow(WebFetch(domain:example.com) は P10 で確定した形式)。★実測(2026-07-06): builtin~=到達(marker 出現)/ srt=遮断(marker 出ず・tool_result は 'Socket is closed'・denials 空)。第一仮説『サーバ側実行で掛からない』は外れ = WebFetch はローカル発の通信で srt egress の対象。expected を実測(webfetch-srt=allow×ng)に合わせて確定。★許可側対照 webfetch-srt-allowed(2026-07-06 追加): srt-settings-allow.json で allowedDomains に example.com を含めて WebFetch を再実測 → 到達(marker 出現・allow×ok)。これで両側対照(非許可=遮断 / 許可=到達)が揃い、『srt 配下では WebFetch 経路が全滅(proxy 非継承等)』という対立仮説を棄却 = 遮断は srt の allowlist 判定に掛かる、と帰属が確定。WebFetch は srt の proxy env を尊重するクライアント(生 node https を使う f の MCP net_get とは対照的)。",
+  "hypothesis": "第一仮説(サーバ側実行で srt に掛からない=allow×ok)は外れた。実測: WebFetch はローカルプロセス発の HTTP で、srt の network 境界(localhost proxy 強制)に掛かる。非許可ドメイン(example.com)は 'Socket is closed' で遮断され、番兵ページ内容が返らず Write マーカーも出ない(allow×ng・denials 空=OS/network 層)。許可側(allowedDomains に example.com を追加)では到達(marker 出現・allow×ok)= 遮断は allowlist 判定によるもので両側対照で確定。= srt はプロセス全体の egress(Bash も WebFetch も)を1本化する。permission 層の WebFetch(domain:…)(P10)とは独立に、srt の allowedDomains も WebFetch に効く2層構造。WebFetch は proxy env を尊重するので allowlist が両側で効く。"
+}

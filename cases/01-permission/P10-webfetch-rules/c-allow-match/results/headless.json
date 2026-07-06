@@ -1,0 +1,49 @@
+{
+  "id": "P10-webfetch-rules/c-allow-match",
+  "modality": "headless",
+  "title": "allow WebFetch(domain:example.com) は当該ドメイン取得を事前承認 -> ALLOW (陽性対照)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "webfetch-allowed",
+      "prompt": "First use the WebFetch tool to fetch https://example.com. If (and only if) that fetch returns page content, then use the Write tool to create a file at $REPO/cases/P10-webfetch-rules/c-allow-match/WF_MARKER.txt with the content 'FETCHED'. If the WebFetch call is blocked or denied, do NOT write any file — just reply WF_BLOCKED. Use only the WebFetch and Write tools.",
+      "probe": "permission",
+      "tool": "WebFetch",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [
+        "WF_MARKER.txt"
+      ],
+      "exit_code": 1,
+      "result_text": null,
+      "error": null,
+      "engine_decision": {
+        "decision": "ALLOW",
+        "source": "side-effect"
+      }
+    }
+  ],
+  "hypothesis": "allow WebFetch(domain:example.com) は example.com の WebFetch 取得を事前承認する。fetch 成功→Write マーカー生成=ALLOWED。deny(a)・no-match(b)との対で domain allowlist の陽性側を確定。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T02:16:09Z",
+  "probe": "permission",
+  "tool": "WebFetch",
+  "expected": "ALLOWED",
+  "verdict": "ALLOWED",
+  "denials": [],
+  "askFired": null,
+  "sideEffectsPresent": [
+    "WF_MARKER.txt"
+  ],
+  "engine_decision": {
+    "decision": "ALLOW",
+    "source": "side-effect"
+  }
+}

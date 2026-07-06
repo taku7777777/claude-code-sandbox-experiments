@@ -1,0 +1,42 @@
+{
+  "id": "P2-allow-deny-precedence/g-param-unsupported-ignored",
+  "modality": "sdk",
+  "title": "deny Bash(command:touch *) is silently ignored (unsupported param name) -> the 'denied' command still runs via allow Bash(*)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "bash-touch",
+      "prompt": "Use the Bash tool to run exactly this command: touch $REPO/cases/P2-allow-deny-precedence/g-param-unsupported-ignored/PROOF.txt . Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Bash",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [
+        "PROOF.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "Done.",
+      "error": null
+    }
+  ],
+  "hypothesis": "Docs (spec-inventory §2): Tool(param:value) matching covers only top-level scalar tool parameters; content-bearing params like command/file_path/path/url are NOT supported — a rule like Bash(command:touch *) is ignored (with a startup warning). So the touch call matches nothing on the deny side and falls through to allow Bash(*) -> ALLOWED. This is the P3-style 'silently no-op rule' landmine in param syntax: 'I denied the command' but the rule never matches. The correct form for command prefixes is Bash(touch *) (P4 syntax), not Bash(command:touch *).",
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T10:36:12Z",
+  "probe": "permission",
+  "tool": "Bash",
+  "expected": "ALLOWED",
+  "verdict": "ALLOWED",
+  "denials": [],
+  "askFired": [],
+  "sideEffectsPresent": [
+    "PROOF.txt"
+  ],
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

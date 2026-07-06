@@ -1,0 +1,55 @@
+{
+  "id": "P11-mcp-tool-rules/g-deny-server-beats-allow-tool",
+  "title": "サーバ deny の内側にツール allow で穴は開けられない(deny 常勝・P2-e の MCP 版)",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "arrange": {
+    "mcpServers": {
+      "probe": {
+        "type": "stdio",
+        "command": "node",
+        "args": [
+          "$CASE_DIR/../mcp-probe-server.mjs"
+        ]
+      }
+    }
+  },
+  "probes": [
+    {
+      "id": "allowed-tool-still-removed",
+      "tool": "mcp__probe__read_path",
+      "prompt": "Call the tool mcp__probe__read_path with argument path = \"$CASE_DIR/note.txt\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "note.txt",
+            "content": "SENT_P11G_read_r8d"
+          }
+        ]
+      },
+      "observe": {
+        "cleanup": [
+          "note.txt"
+        ]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    },
+    {
+      "id": "server-wide-removed",
+      "tool": "mcp__probe__net_get",
+      "prompt": "Call the tool mcp__probe__net_get with argument url = \"https://example.com\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "observe": {},
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    }
+  ],
+  "notes": "「広 deny + 狭 allow」の向きが MCP でも彫れないことの実測。scratch 2026-07-06: initMcpTools=[](全ツール消失)。P2-e(deny Bash(*) + allow Bash(echo:*) → echo も DENIED_HARD)と同型。",
+  "hypothesis": "評価順 deny→ask→allow はネストを見ない。サーバごと deny したら個別ツールの再 allow は無効。例外を彫りたい向きは h(広 allow + 狭 deny)だけ。"
+}

@@ -1,0 +1,83 @@
+{
+  "id": "P6-ask-rules/g-ask-bash-specifier",
+  "modality": "headless",
+  "title": "broad allow Bash(*) + narrow ask Bash(touch *): the docs-recommended pattern works — touch asks (also via a chain), everything else flows",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "bash-touch-ask",
+      "prompt": "Use the Bash tool to run exactly this command: touch $REPO/cases/P6-ask-rules/g-ask-bash-specifier/t1.txt — run it immediately. Use only the Bash tool with exactly this command — if it is blocked, do not try any other tool or any other command; just report the result.",
+      "probe": "permission",
+      "tool": "Bash",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [
+        "Bash"
+      ],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The command was blocked - Bash requires permissions that haven't been granted yet.",
+      "error": null,
+      "engine_decision": {
+        "decision": "UNKNOWN",
+        "source": "prose-heuristic"
+      }
+    },
+    {
+      "probeId": "bash-mkdir-control",
+      "prompt": "Use the Bash tool to run exactly this command: mkdir $REPO/cases/P6-ask-rules/g-ask-bash-specifier/d1 — run it immediately. Use only the Bash tool with exactly this command — if it is blocked, do not try any other tool or any other command; just report the result.",
+      "probe": "permission",
+      "tool": "Bash",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [
+        "d1"
+      ],
+      "exit_code": 0,
+      "result_text": "Command completed successfully.",
+      "error": null,
+      "engine_decision": {
+        "decision": "ALLOW",
+        "source": "side-effect"
+      }
+    },
+    {
+      "probeId": "bash-chain-touch-ask",
+      "prompt": "Use the Bash tool to run exactly this compound command: echo hi && touch $REPO/cases/P6-ask-rules/g-ask-bash-specifier/t2.txt — run it immediately. Use only the Bash tool with exactly this command — if it is blocked, do not try any other tool or any other command; just report the result.",
+      "probe": "permission",
+      "tool": "Bash",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [
+        "Bash"
+      ],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The Bash command was blocked — Claude requested permission to use Bash, but it hasn't been granted yet.",
+      "error": null,
+      "engine_decision": {
+        "decision": "UNKNOWN",
+        "source": "prose-heuristic"
+      }
+    }
+  ],
+  "hypothesis": "The docs' recommended ask-rule pattern is 'broad allow + narrow ask' and its natural habitat is Bash specifiers — yet P6 a-d only ever probed Write(*). Three probes on one setting (allow Bash(*) + ask Bash(touch *)): (1) touch t1.txt matches the ask specifier -> ask beats the co-present broad allow (Bash-specifier version of P6-b; permissions doc: 'a matching ask rule prompts even when a more specific allow rule also matches', and order deny->ask->allow). (2) Control mkdir d1: mkdir is NOT in the unconditional read-only set (P4-i measured touch=ask without rules, same tier as mkdir), so its ALLOWED outcome proves the broad allow works and probe 1's ask is attributable to the ask rule, not to Bash prompting in general. (3) Chain echo hi && touch t2.txt: compound commands are matched per-subcommand (P4-b/g for deny); expected: the ask on the touch subcommand gates the whole compound (ask analog of P4-d). Probes use 'exactly this command' phrasing to prevent the model from paraphrasing the command into a form that changes rule matching.",
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T12:19:48Z",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

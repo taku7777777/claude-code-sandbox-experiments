@@ -1,0 +1,9 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "excludedCommands": ["touch *"]
+  },
+  "permissions": {
+    "ask": ["Bash"]
+  }
+}

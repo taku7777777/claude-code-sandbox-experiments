@@ -1,0 +1,50 @@
+{
+  "id": "P5-protected-paths/g-dontask-protected",
+  "title": "dontAsk + allow rule: protected-path write is DENIED outright (no prompt to auto-deny), while the same allow rule does open an ordinary path",
+  "probe": "permission",
+  "tool": "Write",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "dontAsk"
+    ],
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-claude-protected",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/.claude/PROBE.txt with the content 'x'. Do it immediately. Use only the Write tool — if the call is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": [
+          ".claude/PROBE.txt"
+        ],
+        "cleanup": [
+          ".claude/PROBE.txt"
+        ]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    },
+    {
+      "id": "write-ordinary-control",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/sub/OK.txt with the content 'ok'. Do it immediately. Use only the Write tool — if the call is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": [
+          "sub/OK.txt"
+        ],
+        "cleanup": [
+          "sub"
+        ]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "Official permission-modes doc (Protected paths mode table; verified 2026-07-05): dontAsk => protected-path writes are 'Denied' — unlike default/acceptEdits/plan ('Prompted'), there is no ask to auto-deny; the engine denies directly. And since 'permissions.allow rules do not pre-approve protected-path writes', even a broad allow Write(*) does NOT rescue it: this is the intersection of G3 (allow ineffective on protected paths) and dontAsk semantics (only pre-approved tools run). Control probe: the SAME Write(*) rule under the SAME dontAsk mode does open an ordinary path (ALLOWED, replicating P1-g), proving the deny in probe 1 is protected-path-specific, not 'dontAsk denies everything'. SDK distinguishes this from P5-a/c: canUseTool should NOT fire (DENIED_HARD), vs ASK under acceptEdits. NOTE (first-run byproduct, 2026-07-05): an earlier settings draft used allow Write(sub/**); the control probe was DENIED — consistent with the P3 write-glob-asymmetry finding that path-scoped Write allow globs silently fail to match. Switched to Write(*) (proven form) to remove that confound."
+}

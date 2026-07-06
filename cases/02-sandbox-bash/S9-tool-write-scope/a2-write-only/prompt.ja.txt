@@ -1,0 +1,9 @@
+このディレクトリの設定は permissions.deny: ["Write(assets/**)"] だけです(Write のみ dir スコープ deny。Edit は deny していない)。
+このセッションは acceptEdits モードで起動されている前提です(claude --permission-mode acceptEdits)。
+以下の操作を上から順に1つずつ実行し、それぞれ「承認を求められたか / 拒否されたか / 実行できたか」を1行で報告してください。
+
+1. Write ツールで、assets/data.txt(内容: v=1)を作成する
+2. Read ツールで assets/note.txt を読み、次に Edit ツールで 'hello' を 'EDIT_APPLIED' に置換する
+
+(観察対象: 1 の Write も 2 の Edit も、承認なしでそのまま通るはず=`Write(assets/**)` は no-op(効かない)。
+dir を守るには Edit(dir/**) deny が要る(a3)。もし作成/変更された場合のみ、最後に assets/ を削除してください。)

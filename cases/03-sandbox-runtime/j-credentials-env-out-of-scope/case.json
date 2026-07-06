@@ -1,0 +1,29 @@
+{
+  "id": "sandbox-runtime/j-credentials-env-out-of-scope",
+  "title": "srt の境界は FS/network のみ — 環境変数の秘密はマスクされず素通りする(境界条件)",
+  "axis": "environment",
+  "runner": "harness/srt/run_srt_cases.py",
+  "probe": "credential-leak",
+  "srtSettings": "srt-settings.json",
+  "arrange": {
+    "env": {"LAB_TOKEN": "__SENTINEL__"}
+  },
+  "probes": [
+    {
+      "id": "env-echo-builtin",
+      "env": "builtin~",
+      "cmd": "printf 'RESULT=%s\\n' \"$LAB_TOKEN\"",
+      "observe": {"sentinel": "__SENTINEL__"},
+      "expected": {"permission": "none", "result": "ok"}
+    },
+    {
+      "id": "env-echo-srt",
+      "env": "srt",
+      "cmd": "printf 'RESULT=%s\\n' \"$LAB_TOKEN\"",
+      "observe": {"sentinel": "__SENTINEL__"},
+      "expected": {"permission": "none", "result": "ok"}
+    }
+  ],
+  "notes": "環境ケース(境界条件・claude 非経由): probes[].env が対比軸。cmd 型プローブ(runner が srt --settings … -c / bash -c で直接実行し、arrange.env の番兵 LAB_TOKEN=__SENTINEL__ を注入)。permission=none(許諾エンジンを経ない)。論点: srt の境界は filesystem/network のみで、環境変数の秘密を隠す機構(組み込みの credentials.envVars マスク相当)は持たない。srt 配下でも env の番兵はそのまま echo される(素通り=ALLOWED)。builtin~ と srt で結果が同一 = srt は env 面では何も足さない(FS/network の a〜h とは対照的)。含意: 秘密は env に置いても srt では守れない(FS/network 面の『srt に強い』は env には及ばない)。S7-k(組込 deny リスト不在=列挙漏れ fail-open)を『srt で倒せる』と読むのは FS 面に限る話(envVars の deny=S7-d / mask=S7-e〜g)。",
+  "hypothesis": "srt の Seatbelt 境界は FS/network に対する OS 境界であって、プロセスの環境変数の内容には介入しない。よって srt 配下でも env の秘密番兵はマスクされず素通りする(none×ok・両環境で同一)。= srt の防御面は FS/network に限定され、env 経路の秘密は対象外という境界条件。"
+}

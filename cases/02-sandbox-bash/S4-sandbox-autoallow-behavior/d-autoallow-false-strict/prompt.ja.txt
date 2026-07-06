@@ -1,0 +1,7 @@
+このセッションは sandbox 有効 + autoAllowBashIfSandboxed:false で動いている前提です。自動許可を切ると Bash が通常の承認フローに戻ることを確かめます(a との差分はこのキーだけ)。
+以下の Bash コマンドを実行し、「承認を求められたか / 実行できたか」を1行で報告してください。ブロックされたら他のツールで代替せず、結果だけ報告してください。
+
+1. echo data > inside.txt        （cwd 直下への書込）
+
+(a では無プロンプトで通ったのと違い、ここでは承認プロンプト(ask)が出るはず＝autoAllowBashIfSandboxed:false で sandbox 自動許可が消え、default モードの承認フローに戻る、が観察対象です。これは OS 層のブロックでも「strict sandbox mode」でもなく、承認すれば cwd に書けます(headless では承認者不在で auto-deny)。
+最後に、もし出来ていれば inside.txt を削除してください。)

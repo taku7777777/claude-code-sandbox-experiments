@@ -1,0 +1,10 @@
+このセッションは sandbox 有効・Bash(*) 許可・allowWrite 指定なしの前提で起動されています(.claude/settings.json)。
+メイン repo `mainrepo` と、それに紐づく linked worktree `wt` は事前に(sandbox の外で)用意済みです。
+次の bash コマンドを Bash ツールで1回だけ実行し、出力をそのまま報告してください。他のコマンドや代替手段は使わないでください。
+
+  cd wt && git -c user.email=x@x.com -c user.name=x commit --allow-empty -m x 2>err.txt && echo COMMITOK > COMMITMARK.txt; echo "exit=$?"; cat err.txt
+
+(worktree の中(cwd=wt)からの commit は、共有 `mainrepo/.git` の logs/refs/objects へ書く。
+ allowWrite を注入していなくても成功するはず(`[wt ....] x` が出て COMMITMARK が出来る)=allow ✅、が観察対象です。
+ これは「worktree commit には .git の allowWrite 注入が必要」という旧設計主張が正しいかを直接試すものです。
+最後に、この検証で作った成果物を削除してください。mainrepo / wt は自動で片付けられます。)

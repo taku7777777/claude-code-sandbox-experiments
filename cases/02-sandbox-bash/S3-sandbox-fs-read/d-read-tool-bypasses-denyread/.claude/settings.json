@@ -1,0 +1,15 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "denyRead": [
+        "~"
+      ]
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Read(~/**)"
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "id": "S4-sandbox-autoallow-behavior/e-bare-ask-skipped",
+  "modality": "headless",
+  "title": "bare `Bash` ask 規則は sandbox 実行分にはスキップされ、fallback (excluded=非 sandbox) 実行分には適用される",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "sandboxed-echo-skips-ask",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > inside.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "permission",
+      "tool": "Bash",
+      "expected": "ALLOWED",
+      "verdict": "ALLOWED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [
+        "inside.txt"
+      ],
+      "exit_code": 0,
+      "result_text": "Command succeeded.",
+      "error": null,
+      "engine_decision": {
+        "decision": "ALLOW",
+        "source": "side-effect"
+      }
+    },
+    {
+      "probeId": "excluded-touch-fallback-ask",
+      "prompt": "Run exactly this one bash command using the Bash tool: touch s4e-fallback.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "permission",
+      "tool": "Bash",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [
+        "Bash"
+      ],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The command was blocked — Bash permissions not granted.",
+      "error": null,
+      "engine_decision": {
+        "decision": "ASK",
+        "source": "sdk"
+      }
+    }
+  ],
+  "hypothesis": "bare `Bash` ask 規則は sandbox 化された実行には適用されず (auto-allow が勝ってスキップ)、sandbox の外で実行される分 (excluded による fallback 経路) には適用される。同一設定で probe 1 = allow x ok / probe 2 = ask x ok に割れることが④の両半分の直接実証。",
+  "model": "claude-haiku-4-5-20251001",
+  "measuredAt": "2026-07-05T13:39:58Z",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "stampBackfilled": true
+}

@@ -1,0 +1,27 @@
+{
+  "id": "P6-ask-rules/c-ask-with-acceptEdits",
+  "title": "ask Write(*) + acceptEdits mode -> explicit ask survives acceptEdits, Write stays ask",
+  "probe": "permission",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ]
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": ["PROOF.txt"]
+      },
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "明示 ask 規則はどのモードでも残る（spec §1）。acceptEdits はファイル編集を自動承認するが、ask 規則がそれを上書きしてプロンプト強制するはず。acceptEdits の自動承認 vs ask 規則の優先の対照。",
+  "notes": "MEASURED 2026-07-05: headless=DENIED, SDK=ASK (askFired=Write) under acceptEdits -> explicit ask overrides acceptEdits auto-approve. spec §1."
+}

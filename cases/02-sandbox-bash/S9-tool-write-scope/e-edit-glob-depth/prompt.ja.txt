@@ -1,0 +1,10 @@
+このディレクトリの設定は permissions.deny: ["Edit(assets/*)"] だけです(二重星ではなく単一星の dir glob)。
+このセッションは acceptEdits モードで起動されている前提です(claude --permission-mode acceptEdits)。
+以下の操作を上から順に1つずつ、Write ツールだけで実行し、それぞれ「承認を求められたか / 拒否されたか / 実行できたか」を1行で報告してください。拒否されても他のツールで代替しないでください。
+
+1. Write ツールで、assets/data.txt(内容: v=1)を作成する
+2. Write ツールで、assets/x/y.txt(内容: v=1)を作成する
+
+(観察対象: 1 だけでなく 2(深度2)もブロックされるはず=単一星 `assets/*` は子ディレクトリ assets/x にマッチし、
+サブツリー全体が「denied な directory の中」になる。docs の字面(`*`=1セグメント)から予想される深度の抜け穴は無い。
+もし作成された場合のみ、最後に assets/ を削除してください。)

@@ -1,0 +1,60 @@
+{
+  "id": "S2-sandbox-fs-write/l-scope-merge",
+  "title": "sandbox.filesystem はスコープ間で配列マージ (置換ではない) -> project の allowWrite で user の denyWrite は外せない",
+  "probe": "fs-write",
+  "tool": "Bash",
+  "arrange": {
+    "configDir": {
+      "trusted": true,
+      "userSettings": {
+        "sandbox": {
+          "filesystem": {
+            "denyWrite": ["~/lab-merge/sub"]
+          }
+        }
+      }
+    }
+  },
+  "probes": [
+    {
+      "id": "w-user-denied-sub",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo x > $HOME/lab-merge/sub/f.txt && echo SUB_OK || echo SUB_FAIL — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "arrange": {
+        "setup": [{ "path": "~/lab-merge/sub/.keep", "content": "" }]
+      },
+      "observe": {
+        "sideEffects": ["~/lab-merge/sub/f.txt"],
+        "cleanup": ["~/lab-merge"],
+        "evidenceMarker": "operation not permitted"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    },
+    {
+      "id": "w-project-allowed-outer",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo x > $HOME/lab-merge/f.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "arrange": {
+        "setup": [{ "path": "~/lab-merge/.keep", "content": "" }]
+      },
+      "observe": {
+        "sideEffects": ["~/lab-merge/f.txt"],
+        "cleanup": ["~/lab-merge"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "modalities": {
+    "sdk": {
+      "options": { "settingSources": ["user", "project"] }
+    }
+  },
+  "notes": "S2 GAPS G6。docs CONFIRMED: sandbox.filesystem の配列はスコープ間でマージされ『どのスコープも狭められるが他スコープの deny を外せない』(spec §4.3)。user スコープ (arrange.configDir の userSettings = 分離 CLAUDE_CONFIG_DIR、P7 と同じ仕組み) に denyWrite:[~/lab-merge/sub]、project スコープに allowWrite:[~/lab-merge]。probe 1: project の allowWrite が sub を含んでいても user の denyWrite が勝つ (リポジトリ側 settings で管理側の deny を無効化できない、というセキュリティ上の要)。probe 2: allowWrite は和集合として有効 = マージは置換ではない。SDK は既定で project スコープしか読まない (P7-a) ため settingSources:[user,project] を明示。S7 (credentials) とも共通の合成規則。",
+  "hypothesis": "スコープ間の sandbox.filesystem は配列マージ: user denyWrite + project allowWrite の合成で、sub への書込は deny 勝ちの EPERM (allow x ng)、deny 対象外の ~/lab-merge 直下は project の allowWrite で書ける (allow x ok)。project 側の設定では user の deny を外せない。"
+}

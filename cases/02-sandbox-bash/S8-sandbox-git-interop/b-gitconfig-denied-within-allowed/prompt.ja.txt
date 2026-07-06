@@ -1,0 +1,9 @@
+このセッションは sandbox 有効・Bash(*) 許可・allowWrite にこのケースの `wr` を含めた前提で起動されています(.claude/settings.json)。
+リポジトリ `wr` は事前に(sandbox の外で)用意済みです。
+次の bash コマンドを Bash ツールで1回だけ実行し、出力(標準エラーを含む)をそのまま報告してください。他のコマンドや代替手段は使わないでください。
+
+  ( echo x >> wr/.git/config ) 2>err.txt && echo DONE > W5MARK.txt; echo "exit=$?"; cat err.txt
+
+(allowWrite が `wr` を覆っていても `wr/.git/config` への書込だけは `Operation not permitted` で拒否され、
+ W5MARK.txt は作られないはず=allow(Bash 許可)だが OS 層で ❌、が観察対象です。
+最後に、この検証で作った err.txt / W5MARK.txt を削除してください。wr は自動で片付けられます。)

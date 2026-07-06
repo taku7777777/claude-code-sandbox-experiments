@@ -1,0 +1,3 @@
+このケースは bare glob allow が無効なことの確認です(allow: mcp__*)。
+1. mcp__probe__read_path で note.txt を読んでください(allow を書いたのに承認プロンプトが出るはず=bare mcp__* は無言でスキップ)。
+承認の有無と結果を報告してください。

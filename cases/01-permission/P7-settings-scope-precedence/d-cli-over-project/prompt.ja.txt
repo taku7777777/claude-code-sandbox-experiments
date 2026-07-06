@@ -1,0 +1,12 @@
+このセッションは acceptEdits モードで起動されている前提です(claude --permission-mode acceptEdits)。
+このディレクトリの project スコープ(.claude/settings.json)には defaultMode: "plan" が置かれています。
+
+以下の操作を実行し、「承認を求められたか / 実行できたか」を1行で報告してください。
+
+1. Write ツールで、このディレクトリの PROOF.txt(内容: ok)を作成する
+
+観察ポイント: precedence は CLI 引数 > project なので acceptEdits が採用され、cwd への Write は
+承認プロンプトなしで自動承認されるはず。もし plan モードの挙動(書き込み系がブロック/計画提示)に
+なったら project 側が勝っている=precedence の仮説が崩れた、が観察対象です。
+
+最後に、作成した PROOF.txt を削除してください。

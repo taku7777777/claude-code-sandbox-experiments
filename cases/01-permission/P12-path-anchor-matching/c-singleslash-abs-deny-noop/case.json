@@ -1,0 +1,42 @@
+{
+  "id": "P12-path-anchor-matching/c-singleslash-abs-deny-noop",
+  "title": "⚠️ 単一スラッシュ絶対 `Edit(/abs/sub/**)` deny は無言 no-op(編集が通る)",
+  "probe": "permission",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ]
+  },
+  "arrange": {},
+  "probes": [
+    {
+      "id": "edit-cwd-abs",
+      "tool": "Edit",
+      "prompt": "First use the Read tool to read $CASE_DIR/sub/note.txt . Then use the Edit tool to replace the text 'hello' with 'EDIT_APPLIED' in $CASE_DIR/sub/note.txt . Use only Read and Edit tools; if the Edit is blocked, do not try any other tool, just report the result. No commentary.",
+      "observe": {
+        "contentMarker": {
+          "path": "sub/note.txt",
+          "contains": "EDIT_APPLIED"
+        },
+        "cleanup": [
+          "sub"
+        ]
+      },
+      "arrange": {
+        "setup": [
+          {
+            "path": "sub/note.txt",
+            "content": "hello"
+          }
+        ]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "⚠️ 落とし穴。単一スラッシュの絶対パスアンカー `Edit(/Users/.../sub/**)`(settings で $CASE_DIR を展開=先頭 1 スラッシュ)で deny を書いたのに、**無言で no-op** になり編集が通る(acceptEdits の cwd 内自動承認に素通り)。scratch 2026-07-06 で 3 回とも編集成立。d(二重スラッシュ=効く)との 1 スラッシュ差の対照。P3 の Write path no-op と同系の『書いたのに効かない』罠。",
+  "hypothesis": "単一スラッシュ絶対アンカー `Edit(/abs/sub/**)` は Edit deny として機能しない(no-op)。効くのは `//abs`(d)か `~/`(e)。エラーも警告も出ないため『deny を書いた=守られている』が成立しない。"
+}

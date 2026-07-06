@@ -1,0 +1,46 @@
+{
+  "id": "P9-hooks-vs-permission/d-hook-allow-vs-ask-rule",
+  "modality": "sdk",
+  "title": "PreToolUse allow hook cannot bypass ask Write(*) -> the prompt remains (hook fires, but the ask rule still gates)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-cwd",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/P9-hooks-vs-permission/d-hook-allow-vs-ask-rule/PROOF.txt with the content 'ok'. Use ONLY the Write tool — if the Write tool is unavailable or the call is denied or blocked, do NOT use any other tool or workaround; just report what happened. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ASK",
+      "verdict": "ASK",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [
+        "Write"
+      ],
+      "askFired": [
+        "Write"
+      ],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The Write tool call was denied with the error: \"probe: recording ask, denying to avoid side effects\"",
+      "error": null,
+      "evidenceFileFound": true
+    }
+  ],
+  "hypothesis": "『hook で緩める』方向は ask 規則も越えられない(permissions docs: \"a matching ask rule still prompts even when the hook returned 'allow' or 'ask'\")。a(deny 版)との違い: deny 規則は hook を発火させずに止めるが、ask 規則では hook は発火する(marker あり)— それでも hook の allow は prompt を消せない。a の probe 2(規則なし+hook allow = 承認プロンプトなしで通る)と対比すると『hook の allow が上書きできるのは既定の ask だけで、明示の ask 規則は上書きできない』が確定する。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-05T15:16:48Z",
+  "probe": "permission",
+  "tool": "Write",
+  "expected": "ASK",
+  "verdict": "ASK",
+  "denials": [
+    "Write"
+  ],
+  "askFired": [
+    "Write"
+  ],
+  "sideEffectsPresent": []
+}

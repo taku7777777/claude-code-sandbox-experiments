@@ -1,0 +1,37 @@
+{
+  "id": "P7-settings-scope-precedence/e-project-deny-vs-user-allow",
+  "modality": "sdk",
+  "title": "project-scope deny Write(*) vs user-scope allow Write(*) -> DENY (a の鏡像: deny はどちらのスコープにあっても勝つ)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-cwd",
+      "prompt": "Use the Write tool to create a file at $REPO/cases/P7-settings-scope-precedence/e-project-deny-vs-user-allow/PROOF.txt with the content 'ok'. Use only the Write tool — if the call is blocked, do not try any other tool; just report the result. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "DENIED_HARD",
+      "verdict": "DENIED_HARD",
+      "match": true,
+      "sentinelFound": null,
+      "reachable": null,
+      "denials": [],
+      "askFired": [],
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The Write tool is blocked in this context and unavailable. Unable to create the file.",
+      "error": null
+    }
+  ],
+  "hypothesis": "a(deny@user × allow@project → deny)の鏡像: deny を project、allow を user に入れ替えても deny が勝つ ❌。a と対で「deny はスコープに依らず allow に勝つ(deny-first)」の対称性を確定する。",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T00:04:20Z",
+  "probe": "permission",
+  "tool": "Write",
+  "expected": "DENIED_HARD",
+  "verdict": "DENIED_HARD",
+  "denials": [],
+  "askFired": [],
+  "sideEffectsPresent": []
+}

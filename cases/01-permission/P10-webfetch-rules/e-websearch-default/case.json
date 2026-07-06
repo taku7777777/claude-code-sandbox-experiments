@@ -1,0 +1,22 @@
+{
+  "id": "P10-webfetch-rules/e-websearch-default",
+  "title": "WebSearch は既定 ask(規則なしで承認要求) -> headless は auto-deny",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "websearch-asks",
+      "tool": "WebSearch",
+      "prompt": "Use only the WebSearch tool to run a web search for \"example domain reserved documentation\". If the search returns results, reply with ONLY WS_OK. If the tool call is blocked or denied or the tool is not available, reply with ONLY WS_BLOCKED. Do not use any other tool.",
+      "observe": {},
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "WebSearch のツール単位規則(P10 README『未カバー』の解消・その1)。docs: tools-reference の Permission required=Yes(Read 等の read-only 組込と違い既定承認要求)。scratch 2026-07-06: WebSearchInTools=True・denials=[WebSearch]=ask の auto-deny。f(allow)・g(deny)の参照点。",
+  "hypothesis": "WebSearch は網羅外部アクセスを持つため read-only ツールの無条件承認集合(P4-i)に入らず既定 ask。egress を気にする環境で『刺さっているだけ』では動かない=fail-closed。"
+}

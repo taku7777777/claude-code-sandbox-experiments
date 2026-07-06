@@ -1,0 +1,51 @@
+{
+  "id": "S9-tool-write-scope/e-edit-glob-depth",
+  "title": "deny Edit(assets/*) (single star) hard-blocks writes at depth 1 AND depth 2 -- the single-segment glob matches the child directory, so the whole subtree is protected (directory-subtree matching, not per-file segment matching)",
+  "probe": "permission",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ]
+  },
+  "probes": [
+    {
+      "id": "write-depth1",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/assets/data.txt with the content 'v=1'. Use only the Write tool - if the call is blocked, do not try any other tool; just report the result. Just make the tool call, no commentary.",
+      "observe": {
+        "sideEffects": [
+          "assets/data.txt",
+          "assets"
+        ]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-",
+        "byModality": {
+          "headless": "INCONCLUSIVE"
+        }
+      }
+    },
+    {
+      "id": "write-depth2",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/assets/x/y.txt with the content 'v=1'. Use only the Write tool - if the call is blocked, do not try any other tool; just report the result. Just make the tool call, no commentary.",
+      "observe": {
+        "sideEffects": [
+          "assets/x/y.txt",
+          "assets"
+        ]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-",
+        "byModality": {
+          "headless": "INCONCLUSIVE"
+        }
+      }
+    }
+  ],
+  "notes": "S9 GAPS G6 (glob depth of the EFFECTIVE dir-protecting form, i.e. Edit rules -- Write rules are no-op per a2 so their depth is moot). SCRATCH EXPLORATION (2026-07-05, v2.1.201, neutral scratch dirs): deny Edit(assets/*) -> depth-1 write assets/data.txt BLOCKED and depth-2 write assets/x/y.txt ALSO BLOCKED, both with 'File is in a directory that is denied by your permission settings' and permission_denials=[] (hard deny, same shape as a3). Docs (permissions) say * matches within one path segment and ** spans directories, which would predict depth 2 passes -- measured behavior is stricter: gitignore-style matching lets assets/* match the child DIRECTORY assets/x, and a file inside a denied directory is blocked ('file is in a directory that is denied'). So for Edit deny rules, assets/* and assets/** are equivalent in subtree effect (a3 write-nested-depth2 measures the ** side). Contrast P3: on the Write-rule side glob form was a no-op question; on the Edit-rule side both glob forms protect the subtree. Headless is structurally INCONCLUSIVE (hard deny: no permission_denials, tool not removed); sdk gives DENIED_HARD.",
+  "hypothesis": "The effective dir-protection form Edit(<dir>/*) does not leave a depth loophole: the single-star glob matches the immediate child directory and everything below it is 'in a directory that is denied'. Depth-based bypass of a dir-scoped Edit deny is not possible; anchor mismatch (d) is the real bypass to worry about."
+}

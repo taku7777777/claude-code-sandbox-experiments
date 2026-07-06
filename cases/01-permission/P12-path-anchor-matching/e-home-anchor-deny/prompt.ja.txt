@@ -1,0 +1,3 @@
+このセッションは acceptEdits 前提です。設定は `deny Edit(~/lab-p12/sub/**)` + additionalDirectories。
+1. Read で ~/lab-p12/sub/note.txt を読み、Edit で 'hello' を 'EDIT_APPLIED' に置換(ブロックされるはず=`~/` アンカーは効く)。
+結果を報告してください。

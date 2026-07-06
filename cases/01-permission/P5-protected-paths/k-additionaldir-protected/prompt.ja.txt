@@ -1,0 +1,8 @@
+このセッションは acceptEdits モードで、permissions.additionalDirectories に ~/lab-f4-p5 が登録されている前提です。
+
+以下を1つずつ実行し「承認要求(ask)が出たか/自動承認されたか/作成できたか」を1行で報告してください。他ツールでの代替はしないでください。
+1. Write ツールで $HOME/lab-f4-p5/.git/hooks/PROBE.txt を作る （additionalDir 内の保護パス）
+2. Write ツールで $HOME/lab-f4-p5/normal/PROBE.txt を作る     （additionalDir 内の通常パス＝対照）
+
+(観察対象: additionalDirectories + acceptEdits は通常書込(2)を自動承認するが、additionalDir 内の保護パス .git/hooks/(1)は依然 ask になるか=保護パスは additionalDir でも塞がる(味方)。
+最後に ~/lab-f4-p5 を削除してください。)

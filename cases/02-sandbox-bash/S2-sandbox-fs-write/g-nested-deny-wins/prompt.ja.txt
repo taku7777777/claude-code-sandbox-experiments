@@ -1,0 +1,8 @@
+このセッションは sandbox 有効 + allowWrite:["~/lab-nest"] + denyWrite:["~/lab-nest/sub"] で動いている前提です。広い allow の内側に狭い deny を切ったときどうなるかを確かめます。
+以下の Bash コマンドを上から順に1つずつ実行し、それぞれ「承認を求められたか / 実行できたか」を1行で報告してください。ブロックされたら他のツールで代替せず、結果だけ報告してください。
+
+1. echo x > $HOME/lab-nest/f.txt         （allow の内側・deny の外側）
+2. echo x > $HOME/lab-nest/sub/f.txt     （deny で切り抜いた内側）
+
+(1 は成功、2 は "operation not permitted" で失敗するはず＝広い allowWrite が効いていること(1が成功)を示した上で、内側の denyWrite が勝つこと(2が失敗)を示す、が観察対象です。1 が無いと「deny が勝った」のか「そもそも allow が効いていない」のか区別できません。
+最後に、もし出来ていれば ~/lab-nest を削除してください。)

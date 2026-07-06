@@ -1,0 +1,6 @@
+このセッションは sandbox 有効(sandbox.enabled=true)で動いている前提です。credentials.envVars のルールは何も設定していません(ハーネスが環境変数 LAB_BUILD_VAL をビルド値として注入して claude を起動します)。
+以下の Bash コマンドを実行し、「承認を求められたか / 実行できたか / 出力に何が出たか」を1行で報告してください。ブロックされても他のツールで代替せず、結果だけ報告してください。
+
+1. printf 'MARK[%s]' "$LAB_BUILD_VAL"   （設定されているビルド値を確認する）
+
+(credentials.envVars のルールが無いので、sandboxed bash は親プロセスの環境変数をそのまま継承し、MARK[<ビルド値>] が出力されるはず＝allow ✅(値が見える)が観察対象です。これがベースラインで、S7-d はここに deny を1つ足すだけで空(MARK[])に反転します。)

@@ -1,0 +1,44 @@
+{
+  "id": "S8-sandbox-git-interop/h-clone-in-sandbox",
+  "title": "`git clone` of a LOCAL file:// repo fails in the sandbox -> same .git/hooks + .git/config path deny as init, network not involved",
+  "probe": "fs-write",
+  "run": {
+    "maxTurns": 3
+  },
+  "arrange": {
+    "prep": "rm -rf srcrepo && git init -q srcrepo && git -C srcrepo -c user.email=x@x.com -c user.name=x commit -q --allow-empty -m init",
+    "setup": [
+      { "path": "srcrepo" }
+    ]
+  },
+  "probes": [
+    {
+      "id": "clone-local-default",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool, then report its output verbatim (do not summarize, do not run anything else): git clone file://$CASE_DIR/srcrepo cloned 2>err.txt && echo CLONEOK > CLONEMARK.txt; echo \"exit=$?\"; cat err.txt",
+      "observe": {
+        "sideEffects": ["CLONEMARK.txt"],
+        "cleanup": ["cloned", "err.txt", "CLONEMARK.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    },
+    {
+      "id": "clone-local-no-template",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool, then report its output verbatim (do not summarize, do not run anything else): git clone --template= file://$CASE_DIR/srcrepo cloned2 2>err2.txt && echo CLONE2OK > CLONE2MARK.txt; echo \"exit=$?\"; cat err2.txt",
+      "observe": {
+        "sideEffects": ["CLONE2MARK.txt"],
+        "cleanup": ["cloned2", "err2.txt", "CLONE2MARK.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    }
+  ],
+  "notes": "Closes GAPS G5: the group title claimed 'init/clone fail' but clone was documented-only, and the group README attributed clone's failure to the NETWORK layer (S6). This case removes the network entirely: the source repo is a LOCAL prep-created repo cloned via file:// (local transport, forks git-upload-pack locally -- no egress). Scratch-probed 2026-07-05: probe 1 (default clone) fails at the hooks template copy with the SAME fatal as S8-a ('cannot copy .../templates/hooks/commit-msg.sample to .../cloned/.git/hooks/...: Operation not permitted') -- clone runs git's init path (template copy) BEFORE any transport, so it is blocked by the .git-path write deny even with zero network involvement. Probe 2 (--template=) then fails at .git/config creation ('could not write config file'), same second blocker as S8-f. So for REMOTE urls the network block (S6) is an ADDITIONAL, later barrier; clone inside the sandbox is impossible either way. srcrepo is prep-created outside the sandbox and registered in arrange.setup for finally-cleanup.",
+  "hypothesis": "Both probes fail with no marker file: probe 1 at the hooks template copy (identical mechanism to S8-a, proving clone's failure is NOT (only) the network), probe 2 at .git/config creation (identical to S8-f). Clone therefore has the same two independent path-deny blockers as init, plus the network block for remote URLs -- prep-outside-sandbox is the only way to materialize a clone."
+}

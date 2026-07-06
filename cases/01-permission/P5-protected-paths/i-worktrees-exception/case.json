@@ -1,0 +1,33 @@
+{
+  "id": "P5-protected-paths/i-worktrees-exception",
+  "title": ".claude/worktrees is the carve-out: a write INSIDE the protected .claude directory that acceptEdits auto-approves (allow)",
+  "probe": "permission",
+  "tool": "Write",
+  "run": {
+    "flags": [
+      "--permission-mode",
+      "acceptEdits"
+    ],
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "write-worktrees",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/.claude/worktrees/wt/OK.txt with the content 'ok'. Do it immediately. Use only the Write tool — if the call is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": [
+          ".claude/worktrees/wt/OK.txt"
+        ],
+        "cleanup": [
+          ".claude/worktrees"
+        ]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "hypothesis": "Official protected-directory list (permission-modes doc, verified 2026-07-05): '.claude, except for .claude/worktrees where Claude stores its own git worktrees'. This is the ONLY writable spot inside a protected directory — a strong positive control against P5-c: same mode (acceptEdits), same protected root (.claude), one variable changed (subpath worktrees/) flips ask -> allow. If protection were plain prefix-matching on .claude, this write would ask; the carve-out proves the matcher has an explicit exception. Cleanup removes only .claude/worktrees, never .claude itself (holds this case's settings.json)."
+}

@@ -1,0 +1,60 @@
+{
+  "id": "P11-mcp-tool-rules/c-allow-server",
+  "title": "allow mcp__server(サーバ形)は同サーバの全ツールを事前承認",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "arrange": {
+    "mcpServers": {
+      "probe": {
+        "type": "stdio",
+        "command": "node",
+        "args": [
+          "$CASE_DIR/../mcp-probe-server.mjs"
+        ]
+      }
+    }
+  },
+  "probes": [
+    {
+      "id": "read-allowed",
+      "tool": "mcp__probe__read_path",
+      "prompt": "Call the tool mcp__probe__read_path with argument path = \"$CASE_DIR/note.txt\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "note.txt",
+            "content": "SENT_P11C_read_t2f"
+          }
+        ]
+      },
+      "observe": {
+        "cleanup": [
+          "note.txt"
+        ],
+        "sentinel": "SENT_P11C_read_t2f"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      },
+      "probe": "fs-read"
+    },
+    {
+      "id": "net-allowed",
+      "tool": "mcp__probe__net_get",
+      "prompt": "Call the tool mcp__probe__net_get with argument url = \"https://example.com\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "observe": {
+        "sentinel": "NET_OK status=200"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      },
+      "probe": "fs-read"
+    }
+  ],
+  "notes": "サーバ名だけの allow が全ツールへ波及することの実測(docs CONFIRMED: mcp__puppeteer matches any tool provided by the puppeteer server)。scratch 2026-07-06: read=番兵 / net=NET_OK status=200。",
+  "hypothesis": "mcp__server 形はサーバ丸ごとの事前承認。便利だが「そのサーバの将来のツール追加」まで自動で開く点に注意(read-only サーバ以外では b/h の粒度に倒す)。"
+}

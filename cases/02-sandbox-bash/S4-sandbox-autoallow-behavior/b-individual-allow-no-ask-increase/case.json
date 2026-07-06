@@ -1,0 +1,35 @@
+{
+  "id": "S4-sandbox-autoallow-behavior/b-individual-allow-no-ask-increase",
+  "title": "個別 allow Bash(echo:*) を足しても ask は増えない。結果は c(allow:[])と同一 -> ask は allow 構成に依らない",
+  "probe": "permission",
+  "tool": "Bash",
+  "probes": [
+    {
+      "id": "simple-echo",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo hi > out.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["out.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    },
+    {
+      "id": "glob-file",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: for f in *.txt; do wc -l \"$f\"; done — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "arrange": {
+        "setup": [{ "path": "data.txt", "content": "a\nb\n" }]
+      },
+      "observe": {},
+      "expected": {
+        "permission": "ask",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "Materialized from the README-only S4-b (S4 GAPS G1/G3). Column allow:[Bash(echo:*)] -- one variable added over c (allow:[]), same two probes. Measured (v2.1.201): the results are IDENTICAL to c -- simple echo auto-allows (allow x ok), glob->var->file asks (ask x ok). Adding an individual allow does NOT increase ask frequency. This REFUTES multi-repo-workspace.md's claim that 'individual allow flips the permission layer into allow-matching mode and increases ask; allow:[] + autoAllow is best' -- ask is governed by command shape, not allow config. multi-repo-workspace.md L84/L286 need syncing (integration pass).",
+  "hypothesis": "Adding an individual allow rule Bash(echo:*) over the empty-allow baseline (c) does not change the outcome: simple echo still auto-allows, glob->file still asks. Individual allow does not increase ask."
+}

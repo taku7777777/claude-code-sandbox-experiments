@@ -1,0 +1,6 @@
+このセッションは「user スコープに LAB_BUILD_VAL の完全な mask 設定」+「プロジェクト設定(.claude/settings.json)に同名の deny」が同居している前提です(ハーネスは user スコープを分離 CLAUDE_CONFIG_DIR で注入し、環境変数 LAB_BUILD_VAL を注入して claude を起動します)。
+以下の Bash コマンドを実行し、「承認を求められたか / 実行できたか / 出力に何が出たか」を1行で報告してください。ブロックされても他のツールで代替せず、結果だけ報告してください。
+
+1. printf 'MARK7H[%s]' "$LAB_BUILD_VAL"   （設定されているビルド値を確認する）
+
+(スコープ間で credentials.envVars はマージされ、同一変数に deny と mask が同居すると deny が優先されるため、変数は実行前に unset され MARK7H[](空)が出力されるはず＝allow ❌(保護)が観察対象です。もし MARK7H[<何らかの値>] と非空が出たら mask の置換値が勝っている=優先則が docs と異なる、という読み方をします。)

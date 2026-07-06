@@ -1,0 +1,25 @@
+{
+  "id": "S6-sandbox-network/f-unixsocket-blocked",
+  "title": "sandbox は unix ソケットの connect も既定で遮断 -> 遮断 (allow ❌, allowUnixSockets 無し)",
+  "probe": "network",
+  "tool": "Bash",
+  "arrange": {
+    "bgServer": "python3 -c \"import socket,os,time\ntry: os.remove('/private/tmp/lab_uxa.sock')\nexcept FileNotFoundError: pass\ns=socket.socket(socket.AF_UNIX); s.bind('/private/tmp/lab_uxa.sock'); s.listen(5)\ntime.sleep(600)\""
+  },
+  "probes": [
+    {
+      "id": "net-reach",
+      "tool": "Bash",
+      "prompt": "Run exactly this one bash command using the Bash tool: python3 -c \"import socket; s=socket.socket(socket.AF_UNIX); s.connect('/private/tmp/lab_uxa.sock'); open('SOCKMARK.txt','w').write('OK')\" — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "observe": {
+        "sideEffects": ["SOCKMARK.txt"]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      }
+    }
+  ],
+  "notes": "unix ドメインソケットの connect も egress の一種として OS 層で遮断される(local なので preflight 不要 = オフライン非依存)。arrange.bgServer が短い /private/tmp パス(AF_UNIX の 104 文字制限回避)で listen 待受を張り、sandbox 内クライアントの connect() が allowUnixSockets 無しで拒否され SOCKMARK.txt が出来ない(allow × ng)。f2-unixsocket-allowed のベースライン。allowUnsandboxedCommands:false を補い(G1)非 sandbox フォールバックを封じた。",
+  "hypothesis": "listen 中の unix ソケットが存在しても、allowUnixSockets 未指定なら sandbox 内クライアントの connect() は遮断される(allow × ng)。マーカーは書かれない。"
+}

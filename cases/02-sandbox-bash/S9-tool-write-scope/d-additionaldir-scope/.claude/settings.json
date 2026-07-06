@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "additionalDirectories": [
+      "$HOME/s9d-extra"
+    ],
+    "deny": [
+      "Edit(scripts/**)"
+    ]
+  }
+}

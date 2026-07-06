@@ -1,0 +1,41 @@
+{
+  "id": "S4-sandbox-autoallow-behavior/d-autoallow-false-strict",
+  "modality": "interactive",
+  "recordedBy": "cmux-driven (agent)",
+  "title": "autoAllowBashIfSandboxed:false -> 自動許可が消え通常の承認フローに戻る -> cwd 書込も ASK (ask ✅)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "bash-write-cwd",
+      "probe": "permission",
+      "tool": "Bash",
+      "expected": "ASK",
+      "verdict": "ASK",
+      "match": true,
+      "humanObservations": {
+        "prompted": true,
+        "humanDecision": "allow",
+        "evidence": "autoAllowBashIfSandboxed:false で Bash `echo data > inside.txt` に承認プロンプトが表示(\"Do you want to proceed? / 1.Yes / 2.Yes, and always allow ... / 3.No\")=auto-allow が消え通常の ask に戻った(OS ブロックではない)。承認後 inside.txt 作成を確認(ask ✅)。"
+      },
+      "sideEffectsPresent": [
+        "inside.txt"
+      ]
+    }
+  ],
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T01:56:15Z",
+  "probe": "permission",
+  "tool": "Bash",
+  "expected": "ASK",
+  "verdict": "ASK",
+  "humanObservations": {
+    "prompted": true,
+    "humanDecision": "allow"
+  },
+  "sideEffectsPresent": [
+    "inside.txt"
+  ],
+  "method": "cmux socket API で claude TUI(sandbox on / autoAllowBashIfSandboxed:false)を起動→Bash プロンプト送信→read-screen で観測→承認。自動観測。"
+}

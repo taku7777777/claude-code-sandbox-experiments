@@ -1,0 +1,13 @@
+このディレクトリの設定は deny: ["Write(*)"] で、セッションは acceptEdits モード(ファイル編集を自動承認)で
+起動されている前提です(claude --permission-mode acceptEdits)。
+以下の操作を上から順に1つずつ実行し、それぞれ「承認を求められたか / 拒否されたか / 実行できたか」を1行で報告してください。
+Write が拒否されても他のツール(Bash 等)で代替しないでください。
+
+1. Write ツールで、このディレクトリ直下に PROOF.txt(内容: ok)を作成する
+2. Write ツールで、ホームディレクトリに p2c-proof.txt(内容: ok)を作成する
+3. Write ツールで、このディレクトリの sub/proof.txt(内容: ok)を作成する
+4. note.txt(内容: hello)を作成してから、Edit ツールで note.txt の 'hello' を 'EDIT_APPLIED' に置換する
+
+(1〜3 の Write は acceptEdits でも deny が勝って拒否され、4 の Edit は deny の対象外なので
+acceptEdits が自動承認するはず=deny はモードより強いがツール単位、が観察対象です。
+もし何か作成された場合のみ、最後にすべて削除してください。)

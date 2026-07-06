@@ -1,0 +1,36 @@
+{
+  "id": "P7-settings-scope-precedence/b-local-over-project",
+  "title": "local defaultMode acceptEdits vs project defaultMode plan -> local wins (Write to cwd auto-approved)",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "arrange": {
+    "localSettings": {
+      "permissions": {
+        "defaultMode": "acceptEdits"
+      }
+    }
+  },
+  "probes": [
+    {
+      "id": "write-cwd",
+      "tool": "Write",
+      "prompt": "Use the Write tool to create a file at $CASE_DIR/PROOF.txt with the content 'ok'. Do it immediately. Do not ask, do not explain — just make the tool call.",
+      "observe": {
+        "sideEffects": [
+          "PROOF.txt"
+        ]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok",
+        "byModality": {
+          "sdk": "ASK"
+        }
+      }
+    }
+  ],
+  "hypothesis": "local と project が defaultMode で衝突すると local が勝つ(precedence managed>CLI>local>project>user)。local=acceptEdits が効けば cwd への Write は自動承認され ✅。byModality.sdk=ASK は P1-i 実測(SDK は settings の defaultMode を適用しない: 規則は settings から、モードは options から)による。",
+  "notes": "settings.local.json は .gitignore でコミット禁止(per-developer 前提)のため、arrange.localSettings でハーネスが実行中だけ生成・撤去する。この方式なら workspace trust のコミット済み settings.local.json チェック(v2.1.200 仕様)にも該当しない。settings.local.json の扱いは v2.1.196-199 リグレッション歴あり(v2.1.200 復元)— 実測時のバージョン記録必須。trust の交絡なし: trust が縛るのは permissions.allow と additionalDirectories のみで defaultMode は対象外(公式 docs permissions / Project allow rules and workspace trust)。"
+}

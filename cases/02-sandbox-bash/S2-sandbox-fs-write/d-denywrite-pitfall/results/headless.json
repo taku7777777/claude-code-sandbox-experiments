@@ -1,0 +1,79 @@
+{
+  "id": "S2-sandbox-fs-write/d-denywrite-pitfall",
+  "modality": "headless",
+  "title": "denyWrite:[~] は allowWrite 例外も cwd 暗黙許可も両方潰す (アンチパターン) -> 全プローブ allow x ng",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "w-cwd",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > inside.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "fs-write",
+      "tool": "Bash",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "The command was blocked with \"operation not permitted: inside.txt\" error.",
+      "error": null,
+      "engine_decision": {
+        "decision": "UNKNOWN",
+        "source": "prose-heuristic"
+      }
+    },
+    {
+      "probeId": "w-allowlisted",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > $HOME/lab-fs-write/probe.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "fs-write",
+      "tool": "Bash",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "Blocked: operation not permitted.",
+      "error": null,
+      "engine_decision": {
+        "decision": "UNKNOWN",
+        "source": "prose-heuristic"
+      }
+    },
+    {
+      "probeId": "w-glob",
+      "prompt": "Run exactly this one bash command using the Bash tool: echo data > $HOME/lab-glob-XYZ/probe.txt — just run it, no commentary, no alternatives. If it is blocked, do not try any other tool; just report the result.",
+      "probe": "fs-write",
+      "tool": "Bash",
+      "expected": "DENIED",
+      "verdict": "DENIED",
+      "match": true,
+      "sentinelFound": null,
+      "attempted": true,
+      "reachable": null,
+      "denials": [],
+      "askFired": null,
+      "sideEffectsPresent": [],
+      "exit_code": 0,
+      "result_text": "Command blocked: operation not permitted on `$HOME/lab-glob-XYZ/probe.txt`",
+      "error": null,
+      "engine_decision": {
+        "decision": "UNKNOWN",
+        "source": "prose-heuristic"
+      }
+    }
+  ],
+  "hypothesis": "denyWrite:[~] does not merely cancel the allowWrite exception; because cwd is under ~, it also strips the implicit cwd write. Both w-cwd and w-allowlisted become allow x ng -- you lose the ability to write your own working directory.",
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T13:18:39Z"
+}

@@ -1,0 +1,5 @@
+このセッションは dontAsk モードで起動されており、settings.json には allow: ["Write(*)"] が登録されている前提です(claude --permission-mode dontAsk)。
+以下の操作を上から順に1つずつ実行し、それぞれ「承認を求められたか / 実行できたか」を1行で報告してください。
+
+1. Write ツールで、このディレクトリ直下に PROOF.txt(内容: ok)を作成する
+2. Read ツールで、このディレクトリ直下の sentinel.txt を読み、内容をそのまま出力する

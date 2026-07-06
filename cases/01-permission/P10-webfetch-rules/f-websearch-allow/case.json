@@ -1,0 +1,29 @@
+{
+  "id": "P10-webfetch-rules/f-websearch-allow",
+  "title": "allow WebSearch(bare・specifier なしが唯一の形)で事前承認 -> 検索が完遂",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "probes": [
+    {
+      "id": "websearch-allowed",
+      "tool": "WebSearch",
+      "prompt": "First use only the WebSearch tool to run a web search for \"example domain reserved documentation\". If (and only if) the search returns results, then use the Write tool to create a file at $CASE_DIR/WS_MARKER.txt with the content 'SEARCHED'. If the WebSearch call is blocked or denied, do NOT write any file — just reply WS_BLOCKED. Use only the WebSearch and Write tools.",
+      "observe": {
+        "sideEffects": [
+          "WS_MARKER.txt"
+        ],
+        "cleanup": [
+          "WS_MARKER.txt"
+        ]
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "docs: WebSearch permission rules take no specifier. A bare WebSearch entry in allow or deny is the only form(CONFIRMED)。WebFetch(domain:...)のような domain 限定は書けない=許すなら全域。scratch 2026-07-06: WS_OK。WebSearch はディスク副作用を持たないため P10-c と同じマーカー Write 方式(Write(*) を同居)で ALLOWED を確定。オンライン前提。",
+  "hypothesis": "WebSearch の許可は全か無か(ドメイン限定不可)。『限定的な web search』を規則で書く手段は無い=許可は信頼側の判断になる。絞りたければ WebFetch(domain allowlist=a〜d)に寄せてWebSearch は deny(g)する設計もある。"
+}

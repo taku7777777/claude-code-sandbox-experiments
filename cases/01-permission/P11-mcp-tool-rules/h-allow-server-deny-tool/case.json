@@ -1,0 +1,58 @@
+{
+  "id": "P11-mcp-tool-rules/h-allow-server-deny-tool",
+  "title": "広 allow(サーバ)+ 狭 deny(ツール)は成立 -> 参照系だけ残す MCP 最小権限の正解形",
+  "probe": "permission",
+  "run": {
+    "maxTurns": 4
+  },
+  "arrange": {
+    "mcpServers": {
+      "probe": {
+        "type": "stdio",
+        "command": "node",
+        "args": [
+          "$CASE_DIR/../mcp-probe-server.mjs"
+        ]
+      }
+    }
+  },
+  "probes": [
+    {
+      "id": "denied-tool-removed",
+      "tool": "mcp__probe__read_path",
+      "prompt": "Call the tool mcp__probe__read_path with argument path = \"$CASE_DIR/note.txt\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "arrange": {
+        "setup": [
+          {
+            "path": "note.txt",
+            "content": "SENT_P11H_read_v6s"
+          }
+        ]
+      },
+      "observe": {
+        "cleanup": [
+          "note.txt"
+        ]
+      },
+      "expected": {
+        "permission": "deny",
+        "result": "-"
+      }
+    },
+    {
+      "id": "other-tool-allowed",
+      "tool": "mcp__probe__net_get",
+      "prompt": "Call the tool mcp__probe__net_get with argument url = \"https://example.com\". Then reply with ONLY the exact text the tool returned, nothing else. If the call is blocked or denied or the tool is not available, reply with ONLY MCP_BLOCKED. Do not use any other tool.",
+      "observe": {
+        "sentinel": "NET_OK status=200"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      },
+      "probe": "fs-read"
+    }
+  ],
+  "notes": "ロール設計(read-only MCP)の本命形。scratch 2026-07-06: initMcpTools=[mcp__probe__net_get]・net=NET_OK。P4-a(広 Bash(*) allow + 狭 curl deny)と同じ「効く向き」。",
+  "hypothesis": "「サーバを allow で開け、危険ツールを deny で塞ぐ」は機能する。researcher の Slack/Notion 参照(read 系 allow + 書込系ツール deny)はこの形で書ける。ただし deny は除去型で denials に痕跡が出ない(f)＝監査はサービス側ログで。"
+}

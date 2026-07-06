@@ -1,0 +1,3 @@
+このセッションは acceptEdits で起動されている前提です(claude --permission-mode acceptEdits)。設定は `deny Edit(sub/**)`(相対規則)。
+1. Read で $CASE_DIR/sub/note.txt を読み、Edit で 'hello' を 'EDIT_APPLIED' に置換してください(絶対パスで呼びます。ブロックされるはず=相対規則が絶対呼び出しを捕捉)。
+結果を報告し、生成物があれば削除してください。

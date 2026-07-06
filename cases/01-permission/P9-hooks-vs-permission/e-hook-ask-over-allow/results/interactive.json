@@ -1,0 +1,42 @@
+{
+  "id": "P9-hooks-vs-permission/e-hook-ask-over-allow",
+  "modality": "interactive",
+  "recordedBy": "cmux-driven (agent)",
+  "title": "JSON ask hook (permissionDecision=ask) escalates an allow-listed Write to a confirmation -> ASK wins over allow Write(*)",
+  "match": true,
+  "probes": [
+    {
+      "probeId": "write-cwd",
+      "probe": "permission",
+      "tool": "Write",
+      "expected": "ASK",
+      "verdict": "ASK",
+      "match": true,
+      "humanObservations": {
+        "prompted": true,
+        "humanDecision": "allow",
+        "evidence": "allow Write(*) 済みでも hook の JSON ask 応答で Write PROOF.txt に承認プロンプトが表示(\"Do you want to create PROOF.txt?\")=hook ask は allow 済みを確認制に格上げできる。承認後 PROOF.txt 作成を確認(ask ✅)。"
+      },
+      "sideEffectsPresent": [
+        "PROOF.txt"
+      ],
+      "evidenceFileFound": true
+    }
+  ],
+  "model": "claude-haiku-4-5-20251001",
+  "claudeCodeVersion": "2.1.201",
+  "platform": "darwin",
+  "measuredAt": "2026-07-06T01:59:22Z",
+  "probe": "permission",
+  "tool": "Write",
+  "expected": "ASK",
+  "verdict": "ASK",
+  "humanObservations": {
+    "prompted": true,
+    "humanDecision": "allow"
+  },
+  "sideEffectsPresent": [
+    "PROOF.txt"
+  ],
+  "method": "cmux socket API で claude TUI(allow Write(*) + PreToolUse hook が JSON ask 応答)を起動→Write プロンプト送信→read-screen で観測→承認。自動観測。"
+}

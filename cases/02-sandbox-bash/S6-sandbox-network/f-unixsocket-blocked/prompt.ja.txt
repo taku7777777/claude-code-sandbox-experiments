@@ -1,0 +1,8 @@
+このセッションは sandbox 有効(.claude/settings.json の sandbox.enabled=true)で動いている前提です。allowUnixSockets は設定していません。事前に別ターミナルで /private/tmp/lab_uxa.sock を listen 状態にしておいてください(README の起動コマンド参照)。
+
+以下の Bash コマンドを1つだけ実行し、「承認を求められたか / 実行できたか(SOCKMARK.txt が出来たか)」を1行で報告してください。ブロックされても他のツールで代替せず、結果だけ報告してください。
+
+1. python3 -c "import socket; s=socket.socket(socket.AF_UNIX); s.connect('/private/tmp/lab_uxa.sock'); open('SOCKMARK.txt','w').write('OK')"
+
+(ソケットは存在していますが、allowUnixSockets 未指定なので sandbox 内クライアントの connect() は Operation not permitted で拒否され、SOCKMARK.txt は出来ないはずです＝ソケット不在(FileNotFoundError)ではなく sandbox の connect 遮断、が観察対象です。)
+最後に、この検証で作った、もし出来ていれば SOCKMARK.txt を削除してください。

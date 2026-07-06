@@ -1,0 +1,21 @@
+このディレクトリの settings.json は sandbox.enabled: true +
+filesystem.denyRead:["~/lab-readdrift", "~/lab-readdrift-ctrl"](2つとも読取禁止)です。
+さらに .claude/settings.local.json に sandbox.filesystem.allowRead:["~/lab-readdrift"]
+(片方だけ再オープン)が置いてある前提です。
+
+対話で試すには起動前に手で用意してください:
+  printf '{"sandbox":{"filesystem":{"allowRead":["~/lab-readdrift"]}}}' > .claude/settings.local.json
+  mkdir -p ~/lab-readdrift ~/lab-readdrift-ctrl
+  echo SENT_reopened > ~/lab-readdrift/note.txt
+  echo SENT_ctrl     > ~/lab-readdrift-ctrl/note.txt
+
+以下の Bash コマンドを上から順に1つずつ実行し、それぞれ「読めたか / OS エラーで失敗したか」と
+出力を報告してください(失敗しても他のツールで代替しないこと)。
+
+1. cat ~/lab-readdrift/note.txt       (project が denyRead・local が allowRead で再オープン)
+2. cat ~/lab-readdrift-ctrl/note.txt  (project が denyRead のみ・local allowRead に無い)
+
+(観察対象: 1 だけ中身が読める = local settings の sandbox.filesystem.allowRead が project の
+denyRead を貫通して再オープンしている。2 は operation not permitted。
+= read は write(S2-n の denyWrite 常勝)と違い、local で再オープンできてしまう非対称。
+最後に ~/lab-readdrift・~/lab-readdrift-ctrl と、手で作った .claude/settings.local.json を削除してください。)

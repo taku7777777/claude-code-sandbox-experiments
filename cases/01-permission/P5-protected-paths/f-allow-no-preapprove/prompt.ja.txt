@@ -1,0 +1,10 @@
+このセッションは acceptEdits モードで起動されている前提です(claude --permission-mode acceptEdits)。
+このディレクトリの .claude/settings.json には allow: ["Write(*)", "Write(.claude/**)", "Edit(.claude/**)"] が設定されています。
+以下の操作を実行し、「承認を求められたか / 実行できたか」を1行で報告してください。
+
+1. Write ツールで、このディレクトリの .claude/PROBE.txt(内容: x)を作成する
+   ※ Write ツールだけを使い、ブロックされたら他のツールで代替せず、結果だけ報告してください
+
+観察ポイント: allow 規則に Write(.claude/**) を書いても、保護パスの安全チェックは allow 評価より前に走るため、承認プロンプト(ask)が出るはず(= allow では保護パスを事前承認できない)。c(allow なし)と同じ結果になることが対照実験として意味を持ちます。
+
+最後に、作成された .claude/PROBE.txt があれば削除してください(.claude ディレクトリ自体や settings.json は消さないこと)。

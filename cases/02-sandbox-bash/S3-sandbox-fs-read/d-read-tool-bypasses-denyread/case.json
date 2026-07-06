@@ -1,0 +1,32 @@
+{
+  "id": "S3-sandbox-fs-read/d-read-tool-bypasses-denyread",
+  "title": "the Read TOOL bypasses sandbox denyRead:[~] -> the home file leaks (allow ok)",
+  "probe": "fs-read",
+  "run": {
+    "maxTurns": 3
+  },
+  "arrange": {
+    "setup": [
+      {
+        "path": "~/lab-note-d.txt",
+        "content": "SENT_S3D_8xR4"
+      }
+    ]
+  },
+  "probes": [
+    {
+      "id": "r-read-tool",
+      "tool": "Read",
+      "prompt": "Use the Read tool to read the file $HOME/lab-note-d.txt, then reply with ONLY its exact contents, nothing else.",
+      "observe": {
+        "sentinel": "SENT_S3D_8xR4"
+      },
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      }
+    }
+  ],
+  "notes": "The allow must be home-anchored Read(~/**): a project-settings Read(**) anchors to cwd and would NOT cover a home path, denying at the permission layer and masking the sandbox bypass we want to isolate. Headless -p reads project allow rules here because the repo is already trusted; in an untrusted workspace the allow would be ignored and the Read would deny at the permission layer (see README).",
+  "hypothesis": "sandbox.filesystem is OS-level and applies only to Bash + children (docs: sandboxing 'Scope' — Read/Edit/Write use the permission system directly). The Read TOOL reads the home file even though denyRead:[~] is set: permission=allow (Read(~/**)), result=ok, the sentinel leaks. To protect secrets you MUST also add permissions.deny Read(~/**) (see i-two-layer-fix)."
+}

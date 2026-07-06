@@ -1,0 +1,9 @@
+このセッションは sandbox 有効 + allowWrite:["~/lab-glob-*"](glob 風の記述)で動いている前提です。この "*" がリテラルか展開されるかを確かめます。
+以下の Bash コマンドを上から順に1つずつ実行し、それぞれ「承認を求められたか / 実行できたか」を1行で報告してください。ブロックされたら他のツールで代替せず、結果だけ報告してください。
+
+1. echo data > inside.txt                       （cwd 直下）
+2. echo data > $HOME/lab-fs-write/probe.txt      （cwd 外・別パス）
+3. echo data > $HOME/lab-glob-XYZ/probe.txt      （"~/lab-glob-*" が展開されれば書けるはずのパス）
+
+(1 だけ成功、2 と 3 は "operation not permitted" で失敗するはず＝allowWrite の "*" はリテラル(展開されない)ので、"lab-glob-*" という名前のディレクトリにしか効かず lab-glob-XYZ には不一致、が観察対象です。結果として e は allowWrite なしの a と同じ挙動になります。
+最後に、作った inside.txt と、もし出来ていれば ~/lab-fs-write ~/lab-glob-XYZ を削除してください。)
