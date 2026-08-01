@@ -1,0 +1,28 @@
+{
+  "id": "devcontainer/k-ephemeral-container-teardown",
+  "title": "役割イメージ + タスクごと使い捨て(--rm)インスタンスは秘密を持ち越さない — 長寿命の共有コンテナ(秘密の集積点)より fail-closed",
+  "axis": "environment",
+  "runner": "harness/devcontainer/run_devc_multitask.sh",
+  "probe": "credential-leak",
+  "arrange": {
+    "note": "claude 非経由の機構単離(コンテナのライフサイクル特性を測る)"
+  },
+  "probes": [
+    {
+      "id": "env-not-carried-to-next-task",
+      "env": "container",
+      "cmd": "task-A: docker run --rm -e LAB_TASK_SECRET=<乱数> ... / task-B: 新インスタンス(-e なし)で $LAB_TASK_SECRET を読む",
+      "observe": {"evidenceMarker": "__ABSENT__ = 前タスクが -e で注入した env 秘密は次インスタンスに存在しない(注入しなければ空=04-h と同型)"},
+      "expected": {"permission": "none", "result": "ng"}
+    },
+    {
+      "id": "container-write-not-carried",
+      "env": "container",
+      "cmd": "task-A: /home/node/scratch/prev-task.txt に秘密を書いて --rm 破棄 / task-B: 新インスタンスで同パスを cat",
+      "observe": {"evidenceMarker": "__ABSENT__ = --rm の使い捨てはコンテナ内書込(bind mount 外)を次タスクに残さない(fail-closed teardown)"},
+      "expected": {"permission": "none", "result": "ng"}
+    }
+  ],
+  "notes": "正の対照(推奨のライフサイクル): 役割ごとにイメージ/権限プロファイルを固定しつつ、インスタンスはタスクごとに使い捨て(--rm)にすれば、後続タスクのコンテナに前タスクの秘密が持ち越されない。k-1: -e で注入した env 秘密は -e なしの新インスタンスでは空(04-h/b2 の再確認・タスク跨ぎ版)。k-2: bind mount 外へのコンテナ内書込は --rm で消え次タスクに残らない。=これに対し『役割で共有した長寿命コンテナ』は、通過した全タスクの env 秘密(マスクされない=03-j/04-h)や書込・~/.claude 認証(04-d で読める)が同居し続ける秘密の集積点になる。コンテナ生成はイメージ層共有で速く(重いのは firewall/mount のポリシー構築=役割ごと)、『共有でコスト削減』の代わりに『役割テンプレート化 + タスク使い捨て』が、コストをほぼ変えず fail-closed を保つ。env 境界の詳細は 04-h、認証の読める→出せないは 04-d。",
+  "hypothesis": "タスクごとに使い捨てる(--rm)コンテナは前タスクの env 秘密もコンテナ内書込も持ち越さない(fail-closed teardown)。長寿命の共有コンテナは秘密の集積点になるため、役割はイメージで固定しインスタンスは使い捨てるのが安全。"
+}

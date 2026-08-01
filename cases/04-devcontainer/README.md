@@ -27,6 +27,17 @@
 | d | 認証流出面 | claude の Read で認証は**読める** → だが Bash curl は egress で**遮断**(「読める→出せない」の実 e2e) | S7(credentials) | [d-credential-exposure](./d-credential-exposure/README.md) |
 | g | root bypass | `-u root` の `--dangerously-skip-permissions` は拒否(非 root 必須) | P1-e | [g-root-bypass-in-container](./g-root-bypass-in-container/README.md) |
 | h | env 秘密の境界 | 注入した env は読める(マスクなし) / 注入しなければ存在しない(fail-closed) | S7-k / **03-j(手段2版)** | [h-env-secret-boundary](./h-env-secret-boundary/README.md) |
+| i | **共有コンテナ × permission ACL は脆い** | タスク分離を deny 規則に負わせると anchor 依存・書込限定で漏れる(効くのは相対 `Edit(dir/**)` だけ) | P3 / P12 / S9 | [i-shared-container-acl-leak](./i-shared-container-acl-leak/README.md) |
+| j | **per-task マウント分離(i の正解形)** | 未マウント=不可視 / read-only=EROFS(`--skip-permissions` でも)=fail-closed | S3 / 04-a・04-e | [j-per-task-mount-isolation](./j-per-task-mount-isolation/README.md) |
+| k | **使い捨てインスタンスの teardown** | `--rm` は前タスクの env 秘密もコンテナ内書込も持ち越さない(fail-closed) | 03-j / 04-h | [k-ephemeral-container-teardown](./k-ephemeral-container-teardown/README.md) |
+| l | **egress サイドカー(NET_ADMIN 分離)** | 別コンテナで egress default-deny + work は firewall 書換不可(特権分離) | S6 / 04-b・04-c | [l-egress-sidecar-no-netadmin](./l-egress-sidecar-no-netadmin/README.md) |
+
+### 追補: マルチタスク/サイドカー運用(i〜l)
+
+「複数タスク/サブエージェントを**限られたコンテナで捌く**」運用設計(隣接リポの devcontainer-orchestrator の推奨系)を
+本リポジトリの実測流儀で裏取りしたもの。**i が負の対照**(共有 + permission ACL は脆い)、**j/k/l が正解形**:
+分離は **OS マウント**(j)に置き、インスタンスは**タスクごと使い捨て**(k)、egress 制御は**サイドカー**(l)へ。
+ランナーは `harness/devcontainer/run_devc_multitask.sh`(i/j は claude e2e・認証要 / k/l は claude 非経由・認証不要)。
 
 ## 前提: colima で Docker を用意する
 

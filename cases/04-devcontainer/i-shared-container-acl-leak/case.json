@@ -1,0 +1,47 @@
+{
+  "id": "devcontainer/i-shared-container-acl-leak",
+  "title": "共有コンテナ × permission 層 ACL でタスクを仕切るのは脆い — 効くのは working な相対 Edit(dir/**) だけ、直感的な2形は無言 no-op で漏れる",
+  "axis": "environment",
+  "runner": "harness/devcontainer/run_devc_multitask.sh",
+  "probe": "permission",
+  "arrange": {
+    "layout": "1 コンテナに /workspace/taskA(claude の作業)と /workspace/taskB(別タスクのデータ)を bind mount で同居",
+    "mode": "acceptEdits(--permission-mode)。trust 済み /workspace"
+  },
+  "probes": [
+    {
+      "id": "write-scoped-deny-noop",
+      "env": "container",
+      "settings": {"permissions": {"deny": ["Write(taskB/**)"]}},
+      "cmd": "claude Write tool -> /workspace/taskB/from-write.txt",
+      "observe": {"evidenceMarker": "LEAK_WRITE_SCOPED がファイルに出る = Write(dir/**) deny は no-op で隣タスクに書けた"},
+      "expected": {"permission": "allow", "result": "ok"}
+    },
+    {
+      "id": "abs-anchor-deny-noop",
+      "env": "container",
+      "settings": {"permissions": {"deny": ["Edit(/workspace/taskB/**)"]}},
+      "cmd": "claude Write tool -> /workspace/taskB/from-absanchor.txt",
+      "observe": {"evidenceMarker": "LEAK_ABS_ANCHOR = 単一スラッシュ絶対 anchor は allow/deny とも無言 no-op(P12)。i-3 と先頭 / 1 文字違いで保護消失"},
+      "expected": {"permission": "allow", "result": "ok"}
+    },
+    {
+      "id": "edit-deny-blocks-write-tool",
+      "env": "container",
+      "settings": {"permissions": {"deny": ["Edit(taskB/**)"]}},
+      "cmd": "claude Write tool -> /workspace/taskB/from-editdeny.txt",
+      "observe": {"evidenceMarker": "3 回とも未作成 = working な相対 Edit(dir/**) が Write ツールをハード deny(acceptEdits 下の不作成は ask ではなく deny)"},
+      "expected": {"permission": "deny", "result": "-"}
+    },
+    {
+      "id": "edit-deny-blocks-bash-write",
+      "env": "container",
+      "settings": {"permissions": {"allow": ["Bash(*)"], "deny": ["Edit(taskB/**)"]}},
+      "cmd": "claude Bash redirect -> /workspace/taskB/from-bashredir.txt(対照: 同型を taskA へ撃つと通る)",
+      "observe": {"evidenceMarker": "taskB は未作成 / taskA 対照は作成 = 2.1.201 では path 限定 Edit deny が Bash 書込 path も捕捉(denied path のみ遮断)"},
+      "expected": {"permission": "deny", "result": "-"}
+    }
+  ],
+  "notes": "負の対照(推奨系の裏取り): 隣接リポの devcontainer-orchestrator が検討する『複数タスク/サブエージェントを共有コンテナで捌き、ディレクトリ単位の参照/書込制御でタスクを仕切る』案のうち、その仕切りを Claude Code の permission 層(deny 規則)に負わせると脆いことを示す。効くのは working な相対 Edit(taskB/**) だけ(i-3=Write ツールをハード deny・i-4=Bash 書込 path も 2.1.201 では遮断)。だが直感的な2形は無言 no-op で漏れる: i-1=Write(taskB/**) は Write ツールに no-op(P3/S9-a2)、i-2=単一スラッシュ絶対 Edit(/workspace/taskB/**) は P12 no-op(i-3 と先頭 / 1 文字違い)。さらに守れるのは『明示 deny した subtree への書込』だけで、read(S3)・MCP/hooks(S1-h/i)・local ドリフト(S3-n/S6-i)は別穴。含意: 無言で no-op に化ける境界はタスク分離の境界にならない → 分離は OS マウント層(j)へ。i-4 の Bash 捕捉は SDK 未併測=要再測。",
+  "hypothesis": "共有コンテナ内で permission 層 ACL によるタスク分離は anchor 依存かつ書込限定で fail-open(唯一効く working Edit(dir/**) 以外は無言 no-op)。堅牢なタスク分離は OS マウント層(j)に置くべき。"
+}

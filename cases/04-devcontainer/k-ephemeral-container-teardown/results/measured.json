@@ -1,0 +1,41 @@
+{
+  "id": "devcontainer/k-ephemeral-container-teardown",
+  "axis": "environment",
+  "measuredAt": "2026-07-11T16:54:35Z",
+  "model": null,
+  "claudeCodeVersion": null,
+  "platform": "darwin",
+  "envVersions": {
+    "colima": "0.10.3",
+    "docker": "29.5.2",
+    "image": "node:22-bookworm + @anthropic-ai/claude-code",
+    "vm": "Ubuntu 24.04"
+  },
+  "probes": [
+    {
+      "probeId": "env-not-carried-to-next-task",
+      "env": "container",
+      "op": "fresh container (no -e): read $LAB_TASK_SECRET",
+      "expected": {
+        "permission": "none",
+        "result": "ng"
+      },
+      "observed": "absent: 使い捨てインスタンスは前タスクの env 秘密を持ち越さない(注入しなければ空=fail-closed)",
+      "verdict": "DENIED_OS",
+      "match": true
+    },
+    {
+      "probeId": "container-write-not-carried",
+      "env": "container",
+      "op": "fresh container: cat /home/node/scratch/prev-task.txt",
+      "expected": {
+        "permission": "none",
+        "result": "ng"
+      },
+      "observed": "absent: --rm の使い捨てはコンテナ内書込(bind mount 外)を持ち越さない=fail-closed teardown",
+      "verdict": "DENIED_OS",
+      "match": true
+    }
+  ],
+  "note": "役割イメージ + タスクごと使い捨て(--rm)インスタンスは、後続タスクのコンテナに前タスクの秘密を持ち越さない(claude 非経由・機構単離)。k-1: 前タスクが -e で注入した env 秘密は、-e 無しの新インスタンスでは空(__ABSENT__)。k-2: 前タスクのコンテナ内書込(bind mount 外)は新インスタンスに残らない。=長寿命の共有コンテナ(通過した全タスクの秘密が同居し続ける集積点)より、使い捨ての方が fail-closed。env 境界の詳細は 04-h。再現: bash harness/devcontainer/run_devc_multitask.sh"
+}

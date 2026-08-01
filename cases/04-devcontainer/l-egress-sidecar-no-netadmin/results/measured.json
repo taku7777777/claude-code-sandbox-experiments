@@ -1,0 +1,53 @@
+{
+  "id": "devcontainer/l-egress-sidecar-no-netadmin",
+  "axis": "environment",
+  "measuredAt": "2026-07-11T16:54:35Z",
+  "model": null,
+  "claudeCodeVersion": null,
+  "platform": "darwin",
+  "envVersions": {
+    "colima": "0.10.3",
+    "docker": "29.5.2",
+    "image": "node:22-bookworm + @anthropic-ai/claude-code",
+    "vm": "Ubuntu 24.04"
+  },
+  "probes": [
+    {
+      "probeId": "egress-blocked-via-sidecar",
+      "env": "container",
+      "op": "work container (no NET_ADMIN) shares sidecar netns: curl example.com",
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      },
+      "observed": "blocked(HTTP=000HTTP=000): egress 制御をサイドカーに出しても default-deny は効く(work は NET_ADMIN 不要)",
+      "verdict": "DENIED_OS",
+      "match": true
+    },
+    {
+      "probeId": "firewall-immutable-from-work",
+      "env": "container",
+      "op": "work container (-u root, no CAP_NET_ADMIN): iptables -F / -A OUTPUT",
+      "expected": {
+        "permission": "allow",
+        "result": "ng"
+      },
+      "observed": "denied: work コンテナから firewall を書き換えられない(CAP_NET_ADMIN 不在)=自己の egress 遮断を無効化できない特権分離",
+      "verdict": "DENIED_OS",
+      "match": true
+    },
+    {
+      "probeId": "allowlisted-host-reachable",
+      "env": "container",
+      "op": "work container: curl api.anthropic.com (allowlisted)",
+      "expected": {
+        "permission": "allow",
+        "result": "ok"
+      },
+      "observed": "reached(HTTP=404): 許可先には到達=サイドカーは全遮断でなく allowlist(claude 本体の推論経路は生きる)",
+      "verdict": "ALLOWED",
+      "match": true
+    }
+  ],
+  "note": "egress 制御を別コンテナ(サイドカー)へ分離し、work(claude)コンテナは NET_ADMIN 無しでサイドカーの network namespace を共有する構成。l-1: 非許可 example.com は work から遮断(HTTP=000)=サイドカーの default-deny は共有 netns 全体に効く。l-2: work コンテナは -u root でも CAP_NET_ADMIN 不在で iptables を書き換えられない=自分の egress 遮断を無効化できない特権分離(claude コンテナから NET_ADMIN を剥がせる)。l-3(対照): 許可先 api.anthropic.com には到達=全遮断でなく allowlist。claude のツール経路も同じ netns 境界に掛かる(04-c と同機構)。再現: bash harness/devcontainer/run_devc_multitask.sh"
+}

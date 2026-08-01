@@ -182,14 +182,71 @@ docker run --rm --cap-add=NET_ADMIN --cap-add=NET_RAW alpine sh -c '
   手段3は**明示注入(`-e` / `containerEnv`)しない限り漏れない**。含意: env で秘密を渡すなら最小限のコンテナにだけ注入し、
   注入した env は読めるので egress allowlist(d)と併せて締める。「srt で列挙漏れ(fail-open)を倒せる」は FS 面に限る(env 面は両手段ともマスクしない。組み込みの envVars deny/マスク=S7-d〜g 相当はどちらにも無い)。
 - colima の共有マウント範囲(§0)は環境依存。CI や別ホストでは `--mount` 設定を確認。
-- **backlog**: 04-e(read-only mount の EROFS)/ 04-f(`/etc/claude-code/managed-settings.json` の焼き込み)/
+- **backlog**: ~~04-e(read-only mount の EROFS)~~ ✅**実測済み(2026-07-11 / 04-j)** / 04-f(`/etc/claude-code/managed-settings.json` の焼き込み)/
   公式 `.devcontainer` フルビルド / Linux(bubblewrap)での 03 再実測(方法・前提は
   非公開の内部アーカイブ)。
+
+---
+
+## 6. マルチタスク/サイドカー運用(限られたコンテナで複数タスクを捌く)
+
+隣接リポの devcontainer-orchestrator が検討する **「複数タスク/サブエージェントを限られたコンテナで捌く」** 運用設計を、
+本リポジトリの実測流儀で裏取りした(ランナー `harness/devcontainer/run_devc_multitask.sh`・2026-07-11)。
+**負の対照 i**(やってはいけない形)と**正解形 j/k/l** で構成:
+
+### 6.1 共有コンテナ × permission 層 ACL は fail-open(負の対照・04-i)
+
+1つのコンテナに複数タスクの worktree を同居させ、**タスク間の仕切りを Claude Code の `deny` 規則に負わせると脆い**。
+
+| 論点 | 実測 |
+|---|---|
+| 効くのは **working な相対 `Edit(taskB/**)` だけ** | Write ツールをハード deny(i-3)。**2.1.201 では Bash リダイレクトの taskB 書込も遮断**(i-4・taskA 対照で Bash 稼働=denied path のみ)。⚠️ P3-f(tool 全体 `Write(*)` deny の Bash 素通り)と規則形が異なる観測=**SDK 未併測・要再測** |
+| 直感的な2形は **無言 no-op で漏れる** | `Write(taskB/**)`=Write ツールに no-op(i-1・P3/S9-a2)/ 単一スラッシュ絶対 `Edit(/workspace/taskB/**)`=無言 no-op(i-2・P12。効く相対形と**先頭 `/` 1 文字違い**で保護消失) |
+| 守れても書込限定 | read(Read ツール迂回=S3-d)・MCP/hooks(丸ごと迂回=S1-h/i)・local ドリフト(deny 再オープン=S3-n/S6-i)は別穴 |
+
+→ **無言で no-op に化けうる境界はタスク分離の境界にならない**。分離は OS マウント層(6.2)へ。
+
+### 6.2 タスク分離は OS マウント集合に置くと fail-closed(正解形・04-j)
+
+`--dangerously-skip-permissions`(permission を丸ごと外す)下でも保たれる = 境界が**マウント**であることの証明。
+
+- **隣タスクを「マウントしない」→ 不可視**(j-1・04-a のタスク版)。read も write も存在しない。
+- **read-only(`:ro`)マウント → 書込 EROFS**(j-2・backlog だった **04-e を実測**)。ただし **ro は読める**(j-3)=
+  write 分離であって read 分離ではない(read も隠すなら非マウント)。
+- ⚠️ マウント集合は**コンテナ生成時に固定**。共有1コンテナ内でタスクごとに付け替えるのは特権を要し「共有」と
+  相性が悪い → **タスクごと使い捨て**(6.3)と組み、役割はイメージで固定する。
+
+### 6.3 役割イメージ + タスク使い捨てインスタンス(正解形・04-k)
+
+`docker run --rm` の使い捨ては、後続タスクに前タスクの秘密を**持ち越さない**(k-1=env・k-2=コンテナ内書込とも `__ABSENT__`)。
+=「役割で共有した**長寿命**コンテナ」は、通過した全タスクの env 秘密(マスクなし=03-j/04-h)・書込・`~/.claude` 認証
+(読める=04-d)が**同居し続ける集積点**になる。コンテナ生成はイメージ層共有で速く、重いのは firewall/mount の
+**ポリシー構築**(=役割ごと)。**「共有でコスト削減」より「役割テンプレート化 + タスク使い捨て」**が、
+コストをほぼ変えず fail-closed を保つ。
+
+### 6.4 egress 制御はサイドカーへ分離できる(正解形・04-l)
+
+egress 制御を**別コンテナ**へ切り出し、work(claude)コンテナは `--network container:<sidecar>` で netns を共有・
+**NET_ADMIN 無し**。
+
+- 非許可 example.com は work から遮断(l-1・`HTTP=000`)= サイドカーの default-deny が共有 netns 全体に効く。
+- work は `-u root` でも **firewall を書き換えられない**(l-2・CAP_NET_ADMIN 不在)= 自分の egress 遮断を無効化できない。
+  → **claude コンテナから NET_ADMIN を剥がせる**特権分離(自己昇格経路が1本消える。Phase 4 の TLS 終端プロキシへ発展可)。
+- 許可先 api.anthropic.com には到達(l-3)= 全遮断でなく allowlist。⚠️ サイドカー firewall は **root** で適用
+  (node では cap 不在で無言失敗=実測でハマった)。素の iptables は TLS 検査なし=domain-fronting/DNS トンネルは残余リスク。
+
+### 6.5 結論(推奨構成)
+
+**役割ごとにイメージ/権限プロファイルを固定**(サブエージェントの役割分離=1プロセスでは不可)しつつ、
+**インスタンスはタスクごと使い捨て**(k)、**タスク分離は OS マウント集合**(j)で、**egress 制御はサイドカー**(l)へ。
+**共有コンテナ内のディレクトリ ACL を Claude Code の permission 規則に負わせない**(i=無言 no-op で漏れる)。
 
 ## 対応する知識
 
 - **検証ケース**: [cases/04-devcontainer/](../cases/04-devcontainer/README.md)(a=bind mount / b=egress firewall /
   c=claude 無人実行 e2e / d=認証流出面(読める→出せない)/ g=root 拒否 / h=env 秘密の境界)。runner = `harness/devcontainer/run_devc_e2e.sh`
+- **マルチタスク/サイドカー(§6)**: i=共有コンテナ × permission ACL は脆い(負の対照)/ j=per-task マウント分離(正解形)/
+  k=使い捨てインスタンスの teardown / l=egress サイドカー(NET_ADMIN 分離)。runner = `harness/devcontainer/run_devc_multitask.sh`
 - [SANDBOX-ENVIRONMENTS.md](./SANDBOX-ENVIRONMENTS.md) — 手段3 の位置づけ / [SANDBOX-RUNTIME-FINDINGS.md](./SANDBOX-RUNTIME-FINDINGS.md) — 手段2 との比較
 
 ## 検証記録
@@ -199,3 +256,4 @@ docker run --rm --cap-add=NET_ADMIN --cap-add=NET_RAW alpine sh -c '
 | 2026-07-06 | colima 0.10.3 / Docker 29.5.2 / macOS | bind mount のホスト反映・未マウント秘密の不可視・iptables default-deny egress + allowlist を実測(機構の単離・alpine) |
 | 2026-07-06 | colima 0.10.3 / Docker 29.5.2 / node:22-bookworm + CC 2.1.201 / macOS | **claude を入れた e2e 無人実行を実測**(c/d/g)。Write=ホスト反映 / 未マウント秘密=不可視 / Bash curl 非許可ドメイン=遮断(claude はツール経路までコンテナ境界内)。root では `--dangerously-skip-permissions` 拒否=非 root 必須(g)。認証はコンテナ内で読める=egress allowlist が最終防壁(d)。macOS Keychain の資格情報が Linux コンテナで通ることを確認。不一致0 |
 | 2026-07-06 | colima 0.10.3 / Docker 29.5.2 / node:22-bookworm + CC 2.1.201 / macOS | **04-d を「読める→出せない」の実 e2e に再設計**(旧トートロジー廃止)。d1: claude の Read で `/cfg/.credentials.json` が `READ_OK`(allow×✅)。d2: firewall 下で claude の Bash curl POST → example.com が `HTTP=000` 遮断(allow×❌)。**04-h(env 秘密の境界)を新設**(03-j の手段3版・claude 非経由): `-e` 注入で番兵が読める(none×✅=leak)/ 注入しなければ `__ABSENT__`(none×❌=fail-closed)。手段3は明示注入しない限り env が空=srt の親 env 継承(素通り)と対照的。不一致0 |
+| 2026-07-11 | colima 0.10.3 / Docker 29.5.2 / node:22-bookworm + CC 2.1.201 / macOS | **マルチタスク/サイドカー運用(§6)を新設・実測**(runner=`run_devc_multitask.sh`)。**04-i**(負の対照): 共有コンテナ × permission ACL は anchor 依存・書込限定で脆い(i-1 `Write(dir/**)` no-op=LEAK / i-2 単一スラッシュ絶対 anchor no-op=LEAK / i-3 相対 `Edit(dir/**)` は Write ツールをハード deny / i-4 相対 Edit deny は Bash 書込 path も遮断・taskA 対照で Bash 稼働。i-4 は SDK 未併測=要再測)。**04-j**(正解形): 未マウント=不可視 / ro=EROFS(`--skip-permissions` でも)/ ro は読める(=**04-e の EROFS を実測**)。**04-k**: `--rm` 使い捨ては env 秘密もコンテナ内書込も持ち越さない。**04-l**: egress サイドカーで work は NET_ADMIN 無しでも遮断・firewall 書換不可(特権分離)/ 許可先は到達。i/j=claude e2e(Haiku)・k/l=claude 非経由。全 12 プローブ不一致0 |

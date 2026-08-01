@@ -50,7 +50,7 @@
 | バケツ | 手段 | 検証内容 |
 |---|---|---|
 | 03 | [sandbox-runtime](03-sandbox-runtime/README.md) | 手段2。srt がツール経路(Read/Write/Edit)も別プロセス経路(MCP/hook)も WebFetch も OS 層で塞ぐ・permission 層は不変・env は対象外(a〜j) |
-| 04 | [devcontainer](04-devcontainer/README.md) | 手段3。bind mount の fail-closed・iptables egress firewall・**claude 無人実行 e2e**(ツール経路まで境界内・非 root 必須・認証は読める→egress で出せない=d の2段構成)(a〜d,g,h) |
+| 04 | [devcontainer](04-devcontainer/README.md) | 手段3。bind mount の fail-closed・iptables egress firewall・**claude 無人実行 e2e**(ツール経路まで境界内・非 root 必須・認証は読める→egress で出せない=d の2段構成)・マルチタスク/サイドカー運用(共有コンテナ ACL の脆さ・per-task マウント分離・使い捨て teardown・egress サイドカー)(a〜d,g,h,i〜l) |
 
 総括: [docs/SANDBOX-RUNTIME-FINDINGS.md](../docs/SANDBOX-RUNTIME-FINDINGS.md) / [docs/DEVCONTAINER-FINDINGS.md](../docs/DEVCONTAINER-FINDINGS.md) / [docs/SANDBOX-ENVIRONMENTS.md](../docs/SANDBOX-ENVIRONMENTS.md)(6手段の選択)
 

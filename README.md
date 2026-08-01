@@ -70,7 +70,7 @@ cases/02-sandbox-bash/        # 手段1=組み込み Bash sandbox(S1-S9)
       README.md               # ケース個別の解説(目的/設定/手順/期待/なぜ)
       results/                # 実測結果(モダリティ別・直近実行のスナップショット)
 cases/03-sandbox-runtime/     # 手段2 srt の検証(a〜j の9ケース・実測済み macOS。run.py 対象外)
-cases/04-devcontainer/        # 手段3 dev コンテナの検証(a〜h の6ケース・実測済み colima。run.py 対象外)
+cases/04-devcontainer/        # 手段3 dev コンテナの検証(a〜l の10ケース・実測済み colima。run.py 対象外)
 # 参照 ID は短縮形(S3-d 等)のまま。run.py は番号バケツを跨いで短縮 ID で解決する
 harness/run.py                # 統合ランナー: 共通ライフサイクル + モダリティ別アダプタ
 harness/sdk/exec_case.mjs     # SDK 実行アダプタ(run.py -m sdk から呼ばれる)
